@@ -106,3 +106,9 @@ Verify that:
 2. SSH/RDP access to VM is established through bastion subnet address range
 
 ![image](https://github.com/user-attachments/assets/9cc963d3-b0ac-419d-88e2-e4cad53a2fbc)
+
+> [!Tip]
+> 
+> The error below occurs if the allowing rule is not configured in the firewall policy:
+> 
+> `Action: Deny. Reason: No rule matched. Proceeding with default action.`
