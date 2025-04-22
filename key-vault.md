@@ -75,8 +75,8 @@ system [ ~ ]$ az keyvault secret set --name VMSSHPrvKey --vault-name VMCredsKV -
 
 ### 4.1. Linux
 
-
+![image](https://github.com/user-attachments/assets/424e5678-7bfb-4b59-97d5-ec38ac367314)
 
 ### 4.2. Windows
 
-
+![image](https://github.com/user-attachments/assets/1a1eb6eb-9403-4a27-9140-1d440a9d4144)
