@@ -1,8 +1,4 @@
-## 1. Create security resource group
-
-![image](https://github.com/user-attachments/assets/43c84b75-6087-4408-8624-b670bc677a97)
-
-## 2. Create Azure key vault
+## 1. Create Azure key vault
 
 ![image](https://github.com/user-attachments/assets/e7cccf42-06a5-4f10-a917-9981d4685310)
 
@@ -20,7 +16,7 @@
 
 ![image](https://github.com/user-attachments/assets/f9a698d1-2742-4a50-95f5-31fa0835fe49)
 
-## 3. Configure key vault administrator access
+## 2. Configure key vault administrator access
 
 > [!Important]
 >
@@ -34,9 +30,9 @@
 
 ![image](https://github.com/user-attachments/assets/319cb7b1-244b-45bb-b6d4-aca4a3b2ee79)
 
-## 4. Onboard secrets
+## 3. Onboard secrets
 
-### 4.1. SSH private key for Linux VM
+### 3.1. SSH private key for Linux VM
 
 > [!Tip]
 >
@@ -67,20 +63,20 @@ system [ ~ ]$ az keyvault secret set --name VMSSHPrvKey --vault-name VMCredsKV -
 }
 ```
 
-#### 4.1.1. Create SSH key so that it can be used to create VMs in the future
+#### 3.1.1. Create SSH key so that it can be used to create VMs in the future
 
 ![image](https://github.com/user-attachments/assets/254f290e-da61-4b99-90ea-997bb679d651)
 
-### 4.2. Windows password
+### 3.2. Windows password
 
 ![image](https://github.com/user-attachments/assets/ee1057dc-046a-4e7c-8658-623965c59286)
 
-## 5. Bastion connection to VMs using key vault secrets
+## 4. Bastion connection to VMs using key vault secrets
 
-### 5.1. Linux
+### 4.1. Linux
 
 
 
-### 5.2. Windows
+### 4.2. Windows
 
 
