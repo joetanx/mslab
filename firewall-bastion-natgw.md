@@ -76,3 +76,33 @@ VNet peering can be initiated from either VNet:
 ## 6. Configure firewall policy for public VNet
 
 ![image](https://github.com/user-attachments/assets/9dac4f2e-140a-4015-be14-b827faf80230)
+
+## 7. Create VM to test outbound connectivity via NAT gateway
+
+### 7.1. Configure instance details and credentials
+
+![image](https://github.com/user-attachments/assets/2e3246d2-7c60-402b-9d87-1dbb53b922ed)
+
+### 7.2. Configure networking
+
+![image](https://github.com/user-attachments/assets/f46d3625-ef0d-450e-8552-8c4fea00ce92)
+
+![image](https://github.com/user-attachments/assets/ed8a7016-34b9-4570-84f8-98cc007c76a4)
+
+## 8. Test connection
+
+### 8.1. Check NAT gateway public IP
+
+![image](https://github.com/user-attachments/assets/c0f7af89-ef06-47ce-a869-72cd3251d2ae)
+
+### 8.2. Check bastion subnet address range
+
+![image](https://github.com/user-attachments/assets/3c3ed5c3-da5d-45cb-bc77-b9fbd3cff538)
+
+### 8.3. Connect to VM
+
+Verify that:
+1. Outbound traffic to internet uses NAT gateway
+2. SSH/RDP access to VM is established through bastion subnet address range
+
+![image](https://github.com/user-attachments/assets/9cc963d3-b0ac-419d-88e2-e4cad53a2fbc)
