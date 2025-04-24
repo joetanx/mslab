@@ -28,3 +28,92 @@ Install Sentinel solutions: left pane → Content management → Content hub
 |Windows Forwarded Events|![image](https://github.com/user-attachments/assets/fcd818b5-81bf-4574-bec9-3f5730be721c)|
 |Common Event Format|![image](https://github.com/user-attachments/assets/07f07c70-6295-48cc-bbff-e53bacd2c3fe)|
 |Syslog|![image](https://github.com/user-attachments/assets/c38e4bcc-a6b3-4845-876c-a54706a9fe26)|
+
+## 3. Ingestion
+
+Configure data connectors: left pane → Configuration → Data connectors → select the connector → Open connector page
+
+> [!Tip]
+>
+> The connector `Status` changes to `Connected` after it's configured
+>
+> The `Last Log Received` timestamp and `Data received` timeline would show if there is actually data coming in
+
+### 3.1. Windows Security Events via AMA
+
+Ref: https://learn.microsoft.com/en-us/azure/sentinel/connect-services-windows-based
+
+#### 3.1.1. Create data collection rule
+
+![image](https://github.com/user-attachments/assets/21be0540-aa92-4b56-a2f6-bd5c1870375a)
+
+Select the resources that the DCR will cover:
+
+> [!Note]
+>
+> At the end of this process, the Azure Monitor Agent will be installed on any selected machines that don't already have it installed.
+
+![image](https://github.com/user-attachments/assets/071299d0-7aec-44cb-8e9a-16369371e3f5)
+
+Select events to stream:
+
+![image](https://github.com/user-attachments/assets/ad95ea3c-979b-40e1-b1a1-f9c113efbd4b)
+
+#### 3.1.2. Results
+
+![image](https://github.com/user-attachments/assets/7b781b4a-c3aa-44ba-9550-487950600190)
+
+![image](https://github.com/user-attachments/assets/c6c90c79-ab77-40f2-ae6b-1f1d08c2ca70)
+
+### 3.2. Windows Forwarded Events
+
+#### 3.2.1. Create data collection rule
+
+![image](https://github.com/user-attachments/assets/df1df6d5-4402-4b9e-bd76-5c9a5f177f5a)
+
+Select the Windows events collector:
+
+![image](https://github.com/user-attachments/assets/4f769184-5ce8-42a6-88f8-c670aa0d4caa)
+
+Select events to stream:
+
+![image](https://github.com/user-attachments/assets/ef6aa4e4-6698-405a-bb15-c7728c1346cc)
+
+#### 3.2.2. Results
+
+![image](https://github.com/user-attachments/assets/bf248c7c-c156-40f5-9a23-6f19668aa22d)
+
+### 3.3. Syslog via AMA
+
+Ref: https://learn.microsoft.com/en-us/azure/sentinel/connect-cef-syslog-ama
+
+#### 3.3.1. Install AMA on Linux machines
+
+```sh
+curl -sLO https://github.com/Azure/Azure-Sentinel/raw/refs/heads/master/DataConnectors/Syslog/Forwarder_AMA_installer.py
+python Forwarder_AMA_installer.py
+```
+
+![image](https://github.com/user-attachments/assets/614fe767-496c-4672-b293-263fb4a6ed44)
+
+![image](https://github.com/user-attachments/assets/971c3dc3-4b47-4109-8282-3c5c200184e2)
+
+#### 3.3.2. Create data collection rule
+
+![image](https://github.com/user-attachments/assets/b8606a91-edf4-4d62-ba3a-c4fe79389c98)
+
+Select the resources that the DCR will cover:
+
+![image](https://github.com/user-attachments/assets/a0add627-3894-4021-ad4f-865f4d1e8dd3)
+
+Select log facilities and levels to collect:
+
+![image](https://github.com/user-attachments/assets/323e51f5-1f75-401d-827a-654da2ed0420)
+
+#### 3.3.3. Results
+
+![image](https://github.com/user-attachments/assets/583e9915-a5de-47d7-aec8-e990a02750dd)
+
+Check AMA status `systemctl status azuremonitor*`:
+
+![image](https://github.com/user-attachments/assets/88b4eb63-62c2-416f-9169-57663bbed1f7)
