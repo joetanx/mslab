@@ -24,13 +24,17 @@
 
 First line of defense, responsible for monitoring security alerts, filtering false positives, and escalating incidents that require deeper investigation
 
-#### Incident Responsders (+ digital forensics) (Tier 2)
+#### Incident Responsders(Tier 2)
 
 Conduct in-depth assessments of security incidents, analyze attack patterns, and implement containment and recovery strategies
 
 #### Threat Hunters (Tier 3)
 
 Most experienced analysts proactively hunt for threats, investigate complex incidents, and develop advanced detection techniques
+
+#### Digital Forensics Investigators
+
+Sometimes performed by Incident Responders (Tier 2) as part of incident investigations or tier 3 analysts for more sophisticated cases
 
 #### SOC Engineers (and SOC Architects)
 
