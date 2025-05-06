@@ -2,6 +2,8 @@
 
 ### 1.1. Key SecOps Functions
 
+> 1 Introduction to SOC Analysis → SOC Roles and Responsibilities
+
 At a high level, an SOC is responsible for three key activities: monitoring, detection, and response.
 
 These activities are interrelated and crucial to the success of the SOC’s mission.
@@ -52,25 +54,47 @@ For example, if a system is infected with ransomware, the response could include
 
 ### 1.3. SecOps team structure
 
-#### Alert Analysts (Tier 1)
+> 2 SOC Pillars → Levels of SOC Analysts
 
-First line of defense, responsible for monitoring security alerts, filtering false positives, and escalating incidents that require deeper investigation
+#### 1.3.1. Alert Analysts (Tier 1)
 
-#### Incident Responsders(Tier 2)
+- First line of defense in SOC operations.
+- Monitor and analyze security alerts from various tools (SIEM, IDS/IPS, firewalls).
+- Perform initial triage, validate alerts, and escalate genuine threats to Tier 2.
+- Maintain documentation and update incident records.
 
-Conduct in-depth assessments of security incidents, analyze attack patterns, and implement containment and recovery strategies
+#### 1.3.2. Incident Responsders(Tier 2)
 
-#### Threat Hunters (Tier 3)
+- Handle escalated security incidents from Tier 1.
+- Investigate security breaches, analyze malicious activities, and coordinate response efforts.
+- Contain and remediate threats while minimizing business impact.
+- Conduct forensic analysis and produce detailed incident reports.
+- Perform preliminary forensic analysis by reviewing logs and alerts to identify suspicious activity.
 
-Most experienced analysts proactively hunt for threats, investigate complex incidents, and develop advanced detection techniques
+#### 1.3.3. Threat Hunters (Tier 3)
 
-#### Digital Forensics Investigators
+- Handle escalated security incidents from Tier 2.
+  - Conduct in-depth forensic investigations such as file analysis, malware reverse-enginer on compromised systems to uncover attacker methodologies.
+  - Correlate forensic findings with threat intelligence to predict future attack trends.
+- Proactively search for hidden threats within the network.
+- Utilize threat intelligence and advanced analytical tools to detect anomalous behavior.
+- Develop hunting methodologies to uncover sophisticated attacks like APTs (Advanced Persistent Threats).
+- Work closely with Incident Responders and SOC Engineers to improve detection capabilities.
 
-Sometimes performed by Incident Responders (Tier 2) as part of incident investigations or tier 3 analysts for more sophisticated cases
+#### 1.3.4. SOC Engineers (and SOC Architects)
 
-#### SOC Engineers (and SOC Architects)
+- Design, implement, and maintain SOC infrastructure and security tools.
+- Ensure optimal configuration of SIEM, EDR, SOAR, and other security technologies.
+- Develop automation and playbooks for efficient security monitoring and response.
+- Continuously improve SOC performance and resilience through upgrades and optimizations.
 
-Focus on designing, implementing, and maintaining the security infrastructure that supports the SOC team
+#### 1.3.5. SOC Managers
+
+- Lead and oversee SOC operations and strategy.
+- Define policies, workflows, and security protocols.
+- Ensure alignment with regulatory requirements and cybersecurity best practices.
+- Coordinate communication between SOC and other departments (IT, legal, compliance).
+- Manage team performance, training, and resource allocation.
 
 ### 1.4. SecOps technologies
 
@@ -86,35 +110,37 @@ SOAR integrates with various security tools to automate repetitive security task
 
 #### 1.4.3. Threat Intelligence Platform (TIP)
 
-TIP enhances detection
-
 TIP integrates with SIEM and SOAR to provide contextual insights on emerging threats, helping security teams prioritize incidents based on real-world intelligence.
 
 It enhances detection and helps organizations proactively identify and mitigate threats.
 
-#### 1.4.4. Intrustion Detection and Prevention Systems (IDPS)
+#### 1.4.4. Network Security: Intrustion Detection and Prevention Systems (IDPS), Network Detection and Response (NDR) and Network Traffic Analysis (NTA)
 
-IDPS technologies monitor network and system activities to detect malicious behavior and block potential attacks. Intrusion detection systems (IDS) alert security teams, while intrusion prevention systems (IPS) actively take measures to stop threats in real time.
+Network security technologies analyze network traffic to protects the network.
 
-#### 1.4.5. Network Traffic Analysis (NTA)
+They continuously monitor network behavior to identify anomalies, such as lateral movement or command-and-control traffic.
 
-NTA tools analyze network traffic patterns to identify anomalies, malicious activities, and potential data breaches. They help detect advanced threats, including lateral movement and command-and-control communication.
+Alerts from IDPS can be fed into SIEM for further investigation.
 
-#### 1.4.6. Extended Detection and Response (XDR) - including EDR and NDR
+#### 1.4.5. Extended Detection and Response (XDR) - including EDR and NDR
 
-XDR enhances traditional endpoint detection and response (EDR) and network detection and response (NDR) by integrating data across multiple security layers. It offers advanced threat detection and automated response to improve security posture.
+XDR enhances traditional endpoint and network security by integrating data across multiple security layers.
 
-#### 1.4.7. Cloud Native Application Protection Platform (CNAPP) - including CIEM, CSPM, CWPP
+It provides broader threat visibility and automated incident response across endpoints, networks, and cloud environments.
 
-CNAPP solutions provide comprehensive security for cloud applications, integrating Cloud Infrastructure Entitlement Management (CIEM), Cloud Security Posture Management (CSPM), and Cloud Workload Protection Platform (CWPP) to secure identities, configurations, and workloads in cloud environments.
+#### 1.4.6. Cloud Native Application Protection Platform (CNAPP)
 
-#### 1.4.8. Vulnerability Management (VM)
+CNAPP provides comprehensive security for cloud workloads, integrating Cloud Infrastructure Entitlement Management (CIEM), Cloud Security Posture Management (CSPM), and Cloud Workload Protection Platform (CWPP) to improve security posture and secure identities, configurations, and workloads in cloud environments.
+
+#### 1.4.7. Vulnerability Management (VM)
 
 VM solutions continuously scan and assess assets to identify security weaknesses. They prioritize vulnerabilities based on severity and potential impact, helping organizations remediate risks before exploitation.
 
-#### 1.4.9. External Attack Surface Management (EASM)
+#### 1.4.8. External Attack Surface Management (EASM)
 
-EASM focuses on identifying and securing externally exposed assets, such as cloud services, web applications, and third-party integrations. It helps organizations understand their attack surface and mitigate risks from shadow IT and misconfigurations.
+EASM continuously scans and and secures externally exposed assets, such as cloud services, web applications, and third-party integrations.
+
+It helps security teams understand their attack surface and identify misconfigurations and exposed assets that could be exploited by attackers.
 
 ## 2. Incident Response
 
