@@ -78,15 +78,19 @@ An SOC typically employs a variety of technologies and processes to support thes
 
 #### 1.4.1. Security Information and Events Management (SIEM)
 
-SIEM platforms collect, analyze, and correlate security event data from various sources to detect potential threats. They offer real-time monitoring, forensic analysis, and alerting based on predefined rules and machine learning models.
+SIEM platform is the Central Intelligence Hub that collects, analyzes, and correlates security event data from various sources to detect potential threats. It serves as the foundation for visibility and incident detection. It provides real-time monitoring, forensic analysis, and alerting based on predefined rules and machine learning models.
 
 #### 1.4.2. Security Orchestration, Automation and Response (SOAR)
 
-SOAR solutions integrate with multiple security tools to streamline incident response, automate workflows, and enhance collaboration among security teams. They reduce response time by automating tasks such as threat containment and remediation.
+SOAR integrates with various security tools to automate repetitive security tasks or orchestrate incident response actions such as threat containment and remediation  across different tools. Its augments the security operations team performance by reducing response time and improving efficiency.
 
 #### 1.4.3. Threat Intelligence Platform (TIP)
 
-TIPs aggregate, analyze, and distribute threat intelligence feeds from various sources to help organizations proactively identify and mitigate threats. They enable security teams to assess risks and improve defenses based on real-world threat data.
+TIP enhances detection
+
+TIP integrates with SIEM and SOAR to provide contextual insights on emerging threats, helping security teams prioritize incidents based on real-world intelligence.
+
+It enhances detection and helps organizations proactively identify and mitigate threats.
 
 #### 1.4.4. Intrustion Detection and Prevention Systems (IDPS)
 
