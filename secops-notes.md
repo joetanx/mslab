@@ -158,6 +158,10 @@ It helps security teams understand their attack surface and identify misconfigur
 
 ### 2.2. Incident Response Lifecycle
 
+https://medium.com/@bhavin200/nist-incident-response-800-61-a-comprehensive-guide-to-the-four-phase-lifecycle-for-identifying-3c79b9b0a993
+
+![](https://axaxl.com/fast-fast-forward/articles/-/media/axaxl/images/fast-fast-forward/2020/cyberincidentresponsecycle_axa-xl_graphic2.png)
+
 1. Triage
 2. Investigation and analysis
 3. Containment
