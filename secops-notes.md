@@ -2,13 +2,6 @@
 
 ### 1.1. Key SecOps Functions
 
-> Besta SOC Book:
-> 
-> ```
-> 1 Introduction to SOC Analysis
-> └── SOC Roles and Responsibilities
-> ```
-
 At a high level, an SOC is responsible for three key activities: monitoring, detection, and response.
 
 These activities are interrelated and crucial to the success of the SOC’s mission.
@@ -104,13 +97,6 @@ Resources are finite and SOCs usually operate with a limited budget; this restri
 This may result in inefficiency and reduced effectiveness within the SOC.
 
 ### 1.3. SecOps team structure
-
-> Besta SOC Book:
-> 
-> ```
-> 2 SOC Pillars
-> └── Levels of SOC Analysts
-> ```
 
 #### 1.3.1. Alert Analysts (Tier 1)
 
@@ -219,22 +205,45 @@ Frameworks for analyzing cyber attack timelines:
 
 ### 2.2. Incident Response Lifecycle
 
-https://medium.com/@bhavin200/nist-incident-response-800-61-a-comprehensive-guide-to-the-four-phase-lifecycle-for-identifying-3c79b9b0a993
+NIST SP 800–61 Revision 2 provides a structured approach to developing and implementing an efficient computer security incident response program.
+
+It outlines a four-phase incident response process:
 
 ![](https://axaxl.com/fast-fast-forward/articles/-/media/axaxl/images/fast-fast-forward/2020/cyberincidentresponsecycle_axa-xl_graphic2.png)
 
-1. Triage
-2. Investigation and analysis
-3. Containment
-4. Eradiction
-5. Recovery
-6. Lessons learned
+#### 2.2.1. Phase 1: Preparation
 
-#### Post-incident analysis: learning from experience to strengthen defenses
+Preparation focuses on readiness and involves setting up the foundation for effective incident response. Organizations establish policies, train personnel, and implement security measures to detect and handle potential threats.
 
-1. Analyzing root and contributing causes
-2. Incorporating lessons into upgrades
-3. Informing strategic decision-making
+- Developing and maintaining an incident response plan (IRP)
+- Defining roles and responsibilities within the response team
+- Establishing communication protocols (internal and external)
+- Conducting regular training and simulation exercises
+- Ensuring tools, technologies, and access controls are in place
+
+#### 2.2.2. Phase 2: Detection & Analysis
+
+Once a security event occurs, swift detection and accurate analysis are crucial.
+
+- **Detection**: Identifying potential security incidents through alerts, logs, user reports, and automated monitoring systems.
+- **Triage**: Assessing the severity and impact of detected incidents, such as correlating anomalous sequences against attack behavioral profiles (TTPs), to prioritize response efforts.
+- **Investigation and Analysis**: Digital forensics to determine the nature, scope, origin, and methods of the attack. This often involves examining logs, traffic, endpoints, and indicators of compromise (IOCs).
+
+#### 2.2.3. Phase 3: Containment, Eradication & Recovery
+
+After identifying the threat, the focus shifts to neutralizing its impact and restoring normal operations.
+
+- **Containment**: Short-term and long-term measures to limit the incident’s spread and impact (e.g., isolating affected systems).
+- **Eradication**: Removing the root cause of the incident, such as malware, unauthorized access, or vulnerable configurations.
+- **Recovery**: Restoring systems and services to normal operation, while ensuring that systems are clean and monitored for signs of reinfection.
+
+#### 2.2.4. Phase 4: Post-Incident Analysis 
+
+After the incident has been resolved, reviewing lessons learned strengthens future defenses.
+
+- **Analyzing Root and Contributing Causes**: Identifying what caused the incident and any underlying weaknesses.
+- **Incorporating Lessons into Upgrades**: Using findings to update security policies, tools, procedures, and training.
+- **Informing Strategic Decision-Making**: Feeding insights into broader organizational risk management and planning.
 
 ### 2.3. Automation and Orchestration
 
