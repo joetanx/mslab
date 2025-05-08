@@ -146,15 +146,20 @@ It helps security teams understand their attack surface and identify misconfigur
 
 ### 2.1. Attack Lifecycle
 
-| Cyber Kill Chain Phase | MITRE ATT&CK Tactics |
-|---|---|
-| Reconnaissance | Reconnaissance |
-| Weaponization | Resource Development |
-| Delivery | Initial Access |
-| Exploitation | Execution |
-| Installation | Persistence,<br>Privilege Escalation |
-| Command & Control | Defense Evasion,<br>Credential Access,<br>Discovery,<br>Lateral Movement,<br>Command and Control |
-| Actions on Objectives | Collection,<br>Exfiltration,<br>Impact |
+Frameworks for analyzing cyber attack timelines:
+- **Cyber Kill Chain**: seven-step model that outlines the typical stages of a cyber attack 
+- **MITRE ATT&CK**: detailed matrix of tactics, techniques and procedures (TTP) used by adversaries
+
+| Cyber Kill Chain Phase | MITRE ATT&CK (Enterprise) Tactics | Description |
+|---|---|---|
+| Reconnaissance | Reconnaissance | The attacker learns details about the target, including its IP address, network structure, and security measures. The attacker find weaknesses from reconnaissance data that can be used in the attack. |
+| Weaponization | Resource Development | The attacker proceeds to weaponization after it has obtained enough knowledge of the victim. The attacker generates a malicious payload, such as a virus or worm, to take advantage of weaknesses found during the reconnaissance phase. |
+| Delivery | Initial Access | The malicious payload is delivered to the victim, typically using phishing techniques such as email attachment or a website exploit. |
+| Exploitation | Execution | If the delivery is successful, the payload will execute on the target and obtain access to internal systems. The attacker uses flaws in the systems establish a foothold. |
+| Installation | Persistence,<br>Privilege Escalation | After initial access is obtained, the attacker establishes persistence mechanism such as backdoors to maintain access. |
+| Command & Control | Command and Control | After a stable access is obtained, the attacker establishes remote control to compromised systems, typically via C2 and DGA techniques. The attacker would also attempt to crawl deeper into the environment to seek valuable assets. |
+|  | Defense Evasion,<br>Credential Access,<br>Discovery,<br>Lateral Movement | The attacker attempts to crawl deeper into the environment to seek valuable assets.<br>The Cyber Kill Chain does not explicitly define Lateral Movement as a separate step, it generally occurs after the initial breach when attackers seek to expand their access within the network |
+| Actions on Objectives | Collection,<br>Exfiltration,<br>Impact | The final goal where the attacker can achieve its objectives (e.g. monetary gains, reputation damage or political), typically:<br>• data theft - selling stolen data (monetary)<br>• system disruption - e.g. ransomware (monetary), denial of service (reputation damage or political)|
 
 ### 2.2. Incident Response Lifecycle
 
