@@ -245,60 +245,39 @@ After the incident has been resolved, reviewing lessons learned strengthens futu
 - **Incorporating Lessons into Upgrades**: Using findings to update security policies, tools, procedures, and training.
 - **Informing Strategic Decision-Making**: Feeding insights into broader organizational risk management and planning.
 
-### 2.3. Security Automation
-
-#### 2.3.1. Objectives in Security Automation
-
-##### 1. Operational Efficiency
-
-- **Standardization**: Playbooks establish consensus-tested standard operating procedures (SOPs) for consistent handling of generic incident categories. This reduces variation in practitioner responses over time, even with staff turnover. Documented playbooks ensure institutional knowledge stays within the SOC versus leaving with departed team members.
-- **Scalability**: With playbooks defining how automated orchestration platforms (Security orchestration, automation, and response (SOAR)) should react based on trigger conditions, a small team can manage responses to a high volume of incidents. Playbooks encoded in workflow automation engines allow near-infinite incident processing without manual human bottlenecks up to compute resource limits.
-- **Knowledge retention**: Institutional response wisdom remains captured in playbooks even as team members come and go. Playbooks help transfer tribal knowledge to new hires more reliably than manual shadowing, given consistent encodings. This boosts team resilience against turnover.
-- **Reduced workload**: Automation allows security tools to triage alerts, filter out false positives, and prioritize the most critical incidents for analysts to review. This reduces the time analysts spend sifting through irrelevant data and allows them to focus on high-priority threats. Studies have shown automation can reduce workload by 30–50%.
-
-##### 2. Agile Threat Detection and Response
-
-- **Speed**: Playbook steps allow critical containment and investigation actions to launch immediately through programmed workflows without delay from manual processes or analyst approval bottlenecks. Automated playbook steps like isolating infected hosts or disabling compromised accounts execute at computer speeds orders of magnitude faster than waiting for human direction. This rapid response is critical given that attacker dwell times inside networks continue to shrink.
-- **Efficiency**: Common incident types consuming standard analyst tasks like collecting forensic artifacts, querying threat intel feeds, or updating tracking tickets can transition to automated playbook executions, freeing up analyst bandwidth to handle more complex scenarios requiring human judgment and adaptability. Where machine consistency provides value, playbook automation maximizes the ROI of analyst creativity.
-- **Flexibility**: As threats evolve, playbooks can be updated centrally, and changes immediately propagate refined response procedures enterprise-wide through SOAR deployment. Playbook revision control and modular design accelerate keeping responses aligned to emerging attacker behaviors and infrastructure shifts.
-- **Improved threat detection**: Machine learning (ML) and artificial intelligence (AI) technologies powering automation are well suited for detecting subtle patterns and anomalies that may indicate a threat but are difficult for humans to spot manually. Automated tools continuously monitor diverse data sources, applying learned patterns to detect even stealthy threats between scanning intervals. This improves detection coverage compared to rule-based or signature-based tools alone.
-- **Faster response times**: Predefined playbooks and integrations allow automated response actions to rapidly contain threats without waiting for analyst review in some cases. Automation shortens the mean time to respond (MTTR) and contains actively exploiting threats before they can cause damage. Faster response enhances the overall security posture.
-- **Reduced human errors**: Automated tools eliminate human factors like fatigue, distraction, or lack of expertise that can lead to errors in judgment or missed threats. Properly configured automation is less prone to accidental oversights or failures to follow protocol during security incidents. This improves overall consistency and accuracy.
-
-##### 3. Compliance and Audit Readiness
-
-- **Tracking KPIs**: Automates performance metrics like Mean Time to Detect (MTTD) and Mean Time to Respond (MTTR), providing real-time insights into security effectiveness.
-- **Auditability**: Security automation ensures a complete audit trail of case management and response activities, enhancing compliance, accountability, and transparency. Detailed playbook logging tracks actions taken during incidents (who took what actions, when, and why), facilitating reviews, root cause analysis, and post-breach gap identification for process improvements and playbook remediation.
-
-#### 2.3.2. Automation Functions
-
-##### 1. Alert Management & Prioritization
-
-- **Triage and alert prioritization**: Automate initial alert processing, enrichment, scoring, duplication removal, and categorization to speed up assignation and investigation.
-- **Orchestrating alert enrichment**: Integrate threat intelligence feeds and centralized asset management databases provides invaluable context, aiding accurate security event prioritization decisions. Analysts can quickly check indicators against aggregated industry observations about associated threat groups, ongoing global campaigns, malware code overlaps, and vulnerable software versions still in use across the infrastructure. This enrichment connects the dots between previously disjointed internal activities.
-- **Escalation and notifications**: Standardize notifications to appropriate teams or individuals based on customizable rules accounting for factors like severity, categorization, and service level agreements (SLAs).
-
-##### 2. Streamline Incident Response Workflows
-
-- **Investigation and analysis**: Automate retrieval of data from EDR tools, security appliances, the SIEM, and other systems to quicken basic incident analysis so teams can focus on higher-value tasks.
-- **Response playbook support**: Connect tools and platforms to provide comprehensive data inputs and the ability to trigger response actions outlined in SOC playbooks geared toward specific threats and incidents.
-- **Automated containment**: Expedite frontline containment measures by categorizing affected device criticality, detection rule severity scores, known privilege levels already reached, and the type of data or applications impacted. Trigger containment actions including automatically disable user accounts, block suspicious IP addresses, isolate infected endpoints, roll back unauthorized system changes, disable remote access, and enact other rapid response steps according to established runbooks.
-
-##### 3. Case Management & Collaboration
-
-- **Case management and response activities documentation**: End-to-end orchestration workflows log all investigative and mitigation activities as structured case records, including timestamps, commands enacted, analyst notes explaining actions taken, interesting file attachments collected, and threat intelligence or vulnerability data referenced while working the event. Meticulously compiled incident records greatly aid subsequent caseload review for additional patterns, streamline detailed postmortem reporting for leadership, and provide measurable performance indicators around response efficiency critical for identifying budgetary and capability gaps.
-- **Smoother technical handoffs**: When escalating complex incidents from one team to another (such as an SOC team transitioning an incident to forensics for further analysis), key data can be automatically passed between each group's respective tools rather than manually.
-- **Automated ticket creation**: Automatically open tickets regarding security issues in service management platforms to streamline communication and assignment during incidents.
-
-##### 4. Threat Hunting & Investigation
-
-- **Threat hunting and identification**: Orchestrate threat intel gathering, correlation against historic data, and access to additional context from other tools to uncover advanced threats missed by preventative tools.
-- **Data enrichment for threat hunting**: Orchestrate SIEM data correlation with enriched logs from endpoints, firewalls, domain name system (DNS) tools, and proxy appliances to uncover advanced threats.
-- **Operationalize threat hunting**: SOARs provide an invaluable workflow automation backbone, allowing analysts to launch extensive hunt queries across the enterprise rather than just reacting to each alert in isolation. High-priority threat intelligence on novel attack tradecraft leaked from dark web sources or emerging sophisticated actor groups can be rapidly operationalized into enterprise-wide search, scan, and forensic procedures executed systematically across server logs, endpoint data, email stores, network traffic, and cloud infrastructure.
-
 ## 3. Security Analytics
 
-### 3.1. Analysis Techniques
+### 3.1. SOC Platform
+
+#### 3.1.1. Streamlining Workflows
+
+Streamlining security operations workflows maximizes analyst productivity by removing friction from the detection, investigation, and response processes.
+
+Incident response playbooks codify efficient workflows for common scenarios based on lessons learned. Templates outline the standard activities, data collection, communications protocols, and documentation required. For severe incidents like ransomware, exercise-honed playbooks enable smooth crisis coordination across IT, legal, public relations (PR), and executives. Playbooks benefit junior analysts by guiding appropriate responses to unfamiliar events. Reusable playbook building blocks or subroutines reduce duplication across procedures.
+
+Triage checklists arm Tier 1 analysts with consistent first-response steps for assessing severity and initiating escalation if warranted. Classifying case urgency and risk disposition upfront streamlines downstream caseload management. Lower-priority cases are batched for efficient resolution. Automated enrichment actions initiate background evidence collection.
+
+Empowering analysts to work unimpeded within their skill range is key. Access controls enforce the separation of duties, while collaboration tools share context across functions. Orchestration routines encoded into playbooks automate repetitive manual tasks. Case management platforms track assignments, statuses, and handoffs to keep workflow moving. Custom views saved queries, and dashboards filter to each role’s needs.
+
+Response platforms centralize access to internal and external intelligence to accelerate investigation. Enterprise search enables hunting across both structured and unstructured data. Graphical visualization tools speed understanding of complex relationships within cases. Integrated remediation allows a seamless transition from investigation to containment.
+
+Continuous workflow monitoring identifies bottlenecks for improvement. Comparing timelines and assignments uncovers uneven work distribution. Surfacing workflow inefficiencies provides opportunities to realign tooling, information access, automation capabilities, and staffing.
+
+#### 3.1.2. Facilitating Team Collaboration
+
+Effective collaboration maximizes the collective expertise of both junior and senior security team members. A combination of knowledge management, communication channels, and integration with IT groups is required.
+
+Centralized knowledge management makes hard-won experience persistently available. Reusable playbooks serve this purpose by capturing response procedures. Investigation summaries explain the analysis used to confirm suspicious activity. Indicator databases enumerate validated signs of compromise. Maintained in a common portal, analysts continually enrich this tribal knowledge. Integrating with popular collaboration tools improves search and contribution.
+
+Instant communication fosters real-time crowd-sourced problem-solving. Team chat applications enable quick queries to resolve uncertainties during an investigation. Virtual war rooms gather remote participants to tackle emerging threats. Security-focused social platforms tap the wisdom of the broader community. Public and private channels allow both general guidance and confidential case-specific details.
+
+Notification services relay alerts to target groups via their preferred modalities. Email and SMS provide the widest compatibility across roles and devices. Native mobile push preserves context to spur prompt response. API-based hooks extend reach to productivity software and business operations systems. Policies route notifications based on scheduling, severity, skill set, and on-call rotation.
+
+Strong connections with IT peers expand visibility and enable response. Participating in change approval boards and architecture reviews improves monitoring coverage of new assets. Dedicated IT relationship managers align needs. Integrations with Information Technology Service Management (ITSM) systems institutionalize bidirectional referral and feedback processes. Security key performance indicators (KPIs) included in IT scorecards incentivize collaboration on shared objectives like uptime, risk reduction, and regulatory compliance.
+
+The sophistication of detection technology means little without the skill of security teams guiding its use. A collaborative culture combining individual competence with shared knowledge best guards against complex and creative adversaries. Investments in priority alignment, efficient response workflows, team expertise, and IT relationships maximize outcomes. With thoughtful design, human judgment amplified by technology provides resilient protection of critical assets.
+
+### 3.2. Analysis Techniques
 
 > Besta SOC Book:
 > 
@@ -320,7 +299,52 @@ After the incident has been resolved, reviewing lessons learned strengthens futu
 > └── Best Practices for Log Retention and Archiving 
 > ```
 
-### 3.2. AIML Advanced Analytics
+#### Log Enrichment
+
+Supplementing logs with external but relevant context allows surfacing deeper connections. Common enrichment approaches integrate threat intelligence feeds to check log entries against known malicious IP addresses and domains. Asset inventory and user identity metadata attached during processing enable finely attributed analysis.
+
+Location details extracted from source IP addresses strengthen geo-focused hunting. Application logs and host data unified through log enrichment offer a cohesive view into multistage attacks rather than isolated fragments. Enriched logging becomes a high-value enrichment target in itself, aiding numerous organizational security efforts.
+
+#### Visualization (Workbooks)
+
+Interactive visualization of correlated monitoring data grants analysts a clearer operational picture. Activity heat maps overlay resource utilization and authentication trends against location aid review prioritization. Connection graphs mapping user–device–resource interactions surface outliers warranting follow-up. Behavioral profile dashboards comparing individualized patterns to an organization’s standard fingerprint help identify hijacked accounts.
+
+For instance, a visualization suddenly showing heightened cloud identity and access management (IAM) role generation and assuming raises questions of potential misconfigurations or attacks against role primitives. Quickly pinpointing volumes outside comfort levels through visualization aids in a timely response.
+
+#### Stream Analytics (Analytic Rules)
+
+Complex event processing engines correlate events like failed logins followed by privileged service exploitation attempts across distributed nodes to flag incidents early. Scaling out horizontally ensures no data is lost in transit.
+
+Analytics also detect multistage attacks by joining sessions and endpoints as streaming context windows. This near-real-time detection differs from batch analytics on stored log repositories with inherent latency.
+
+#### Multistage Analytics (Fusion)
+
+Layering analytics of varying sophistication multiplies threat detection efficacy. Initially, rules and signatures rapidly flag known malicious patterns. Heuristics then examine outputs for related yet subtle anomalies indicating compromised sources. Behavioral models further inspect oddities against learned profiles to fish out advanced persistent threats stealthily lurking beneath the standard radar.
+
+For example, while blocking ransomware network tries, added user behavior analysis spots irregular encryption events occurring from the same endpoints around that time, thus tracing the full compromise chain rather than one piece alone. A multilayered analytical approach leveraging log data comprehensively helps SOC analysts uncover clever threats that evade basic detection.
+
+#### User and Entity Behavior Analytics (UEBA)
+
+Gaining richer intelligence and understanding entity relationships and interactions unlocks detections beyond isolated events. UEBAs apply statistical modeling and ML to profile trends, establishing expected norms from organizational identity activities. Any deviations outside statistical confidence levels flag potential insider threats, compromised credentials, or policy abuse warranting review. Rather than defining strict rules vulnerable to obfuscation, UEBA authenticates bona fide “normal” through mathematical descriptions (Loshin & Bacon, 2022). Profiles factor in privileged tasks, data access patterns, locations, collaboration, and more.
+
+For example, anomalous behavior, like a developer accessing HR records late at night, warrants attention. A system administrator copying terabytes of data discrepant from their established profile appears abnormal. UEBA finds such subtle issues traditional controls miss by recognizing gradual behavioral drift rather than single violations.
+
+Key components of UEBA solutions include the following:
+- Identity-focused data collection like network/Active Directory logs, endpoint access/usage, and application usage/entitlements.
+- Statistical modeling establishing baseline trends for each profiled user or device over time as more data trains the algorithms.
+- Anomaly detection evaluating new activities against profiles to surface divergences breaking statistical norms.
+- Investigative case management centering examinations on anomalous behavioral trends correlated across activities/systems.
+- Interactive querying and visualization exploring relationships amid involved entities augmenting automations.
+- Continuous tuning as confirmed issues refine detection logic, strengthening accuracy, and automating more tasks over time.
+- Integration of threat intelligence when an anomaly correlates to known malicious infrastructure for rapid triage.
+
+Leading platforms also profile group activities to detect lateral movements spanning multiple compromised accounts. UEBA forms the connective foundation, providing deep context for all security investigations and incident response examinations.
+
+Strong entity modeling demands massive, correlated identity datasets to establish robust, statistically significant baselines. Startup phases run anomalies through backend analysis, requiring analyst review to reduce false alerts. Proper evaluation considers solution scalability, data access controls, and privacy/retention safeguards important for sensitive user communities.
+
+Hands-on testing deploys shortlisted UEBA vendors profiling organization identities, revealing capabilities addressing unique operational realities and data constraints. Success ultimately comes through continuous tuning in live production, keeping detections aligned with the business as new services emerge.
+
+### 3.3. AIML Advanced Analytics
 
 > Besta SOC Book:
 > 
@@ -336,7 +360,105 @@ After the incident has been resolved, reviewing lessons learned strengthens futu
 > └── Challenges in Data Normalization and Integration
 > ```
 
-## 4. Threat Intelligence and Threat Hunting
+#### Machine Learning Algorithms Used in Security Analytics (Juputer Notebook integration)
+
+ML algorithms have become incredibly powerful tools for security analytics in recent years. By analyzing vast amounts of security-related data, these algorithms can help detect anomalies, reduce false positives, optimize incident response processes, and much more. However, it’s important to understand the different types of ML and when each is most applicable.
+
+**Supervised learning algorithms** require labeled examples or training data to learn patterns and make predictions. Some of the most common supervised algorithms used in security include the following:
+
+- **Logistic regression** is often used for malware detection and identifying malicious URLs/domains. By analyzing known malware samples and their behaviors/attributes, logistic regression can learn to classify new files or sites as malicious or benign.
+- **Decision trees** split the data into smaller and smaller subsets based on attribute values, with each subset pointing to a decision. Decision trees are great for malware analysis, UEBA, and investigating anomalies detected by other tools.
+- **Naive Bayes** classifiers make predictions based on probability using statistical techniques like Bayes’ theorem. They are very effective for spam filtering, phishing detection, and identifying known attack patterns/indicators.
+- **Neural networks**, especially convolutional neural networks (CNNs), can analyze images, videos, and other non-text data very well. CNNs are commonly used for detecting malware based on static analysis of executable files or dynamic analysis of activity during execution.
+
+**Unsupervised learning** finds hidden patterns in unlabeled data. Common unsupervised algorithms in security analytics include the following:
+
+- **Clustering algorithms** like k-means group similar data points together based on attributes/features. This allows security teams to profile “normal” behavior and detect outliers. Clustering enables UEBA by grouping user activities over time.
+- **Dimensionality reductio**n techniques project high-dimensional data into a lower-dimensional space. This is useful for visualizing anomalies, threats, and attacks that may not otherwise be obvious. Dimensionality reduction aids investigation and hypothesis generation.
+- **Association rule learning** finds relationships between variables in large datasets that occur more frequently than expected. This type of analysis can reveal insecure configurations, unusual account usages, or file access patterns that may indicate a security issue.
+
+**Reinforcement learning** algorithms are trained through interaction, with the goal of maximizing rewards. In security, reinforcement learning has potential applications in self-learning intrusion detection system/intrusion prevention system (IDS/IPS) systems, red team tools, and investigative training simulations. However, it also brings new challenges around safety, transparency, and bias that security teams must thoughtfully consider.
+
+#### 3.3.X. Challenges of Operationalizing Predictive Models
+
+While predictive analytics show great promise, bringing predictive models into day-to-day security operations poses some challenges:
+
+- Accuracy – Early models may not predict with high confidence and accuracy, resulting in many false positives requiring investigation and follow-up. This operational overhead must be managed.
+- Thresholds – Organizations must determine risk score and likelihood thresholds for when a predictive alert warrants action. Too low risks over-remediation; too high tolerates too many issues.
+- Model drift – As environments, users, and threats evolve over time, predictive models must constantly retrain new data to retain relevance. Mechanisms ensure models reflect reality.
+- Bias – Without oversight, predictive models can inadvertently discriminate if certain groups are under or overrepresented in the training data. Continual auditing mitigates unfair outcomes.
+- Responsiveness – Processes, staffing, and tools must support nimbly investigating and remediating a higher volume of proactively predicted issues before incidents occur. These challenge resourcing.
+- Explainability – Even more than reactions, predictions require logic, factors, and certainty to be clearly explainable and justify recommended actions to skeptical analysts and leadership.
+- Validation – It can be hard to validate the impact of preventively addressing issues predicted but never actualized as incidents. Metrics must consider issues likely avoided, not just those observed.
+
+#### 3.3.X. Challenges in Data Normalization and Integration
+
+Data represents lifeblood powering analytics, yet remains one of the largest hurdles for security programs. Disparate tools historically operated independently, resulting in islands containing only fragmented views, never comprehensive on their own. Overcoming such sales demands extensive data wrangling:
+
+- Inconsistent formats – Reconciling diverse log structures, naming conventions, and metadata schemas requires careful mapping and parsing rules validated through testing.
+- Missing entity identifiers – Joining related events demands canonical IDs or attributes to resolve who/what relating activities not natively embedded requiring inference.
+- Incomplete context – Gaps exist when critical context gets omitted, truncated, or lost during transmission versus at source requiring retroactive population.
+- Outdated mappings – Field/identifier definitions change over time as platforms evolve without notifications undermining baseline mappings.
+- Proprietary fields – Vendors restrict accessing raw logs, exposing only select metadata hampering extended modeling possibilities.
+- Data quality issues – Missing, invalid, or duplicate entries undermine correlations, requiring extensive anomaly detection and cleaning.
+- Regulatory constraints – Sensitive fields pose disclosure risks necessitating masking, hashing, or removal versus direct inclusion in analytics stores.
+- Separate lifecycles – Separate tool/data TTLs complicate joins as windows drift out of synchronization over time.
+
+Data lakes centralize but do not resolve such issues requiring crossdepartmental data wrangling expertise and robust ETL/ELT tooling. Cleansing rules, extraction libraries, and model schema designs evolve iteratively to maximize usefulness. Documentation ensures future proofing through knowledge transfer over time (Smallcombe, 2021).
+Progress demands an organizational “data as a product” mindset, empowering guardian roles over technical debt. Proper data governance establishes policies guiding compliance, consent, and reasonable usage aligned to shifting risk landscapes over product lifecycles. Metrics track continuous improvements through representative examples bridging communication gaps in traditionally separated disciplines. Ultimately, the most impact comes from seeing data preparation not just as an initial hurdle but as an ongoing process refined through continuous feedback between analysts and engineers. Together, both technical and cultural changes overcome complex normalization challenges and better leverage analytics potential.
+
+## 4. Security Automation
+
+### 4.1. Objectives in Security Automation
+
+##### 4.1.1. Operational Efficiency
+
+- **Standardization**: Playbooks establish consensus-tested standard operating procedures (SOPs) for consistent handling of generic incident categories. This reduces variation in practitioner responses over time, even with staff turnover. Documented playbooks ensure institutional knowledge stays within the SOC versus leaving with departed team members.
+- **Scalability**: With playbooks defining how automated orchestration platforms (Security orchestration, automation, and response (SOAR)) should react based on trigger conditions, a small team can manage responses to a high volume of incidents. Playbooks encoded in workflow automation engines allow near-infinite incident processing without manual human bottlenecks up to compute resource limits.
+- **Knowledge retention**: Institutional response wisdom remains captured in playbooks even as team members come and go. Playbooks help transfer tribal knowledge to new hires more reliably than manual shadowing, given consistent encodings. This boosts team resilience against turnover.
+- **Reduced workload**: Automation allows security tools to triage alerts, filter out false positives, and prioritize the most critical incidents for analysts to review. This reduces the time analysts spend sifting through irrelevant data and allows them to focus on high-priority threats. Studies have shown automation can reduce workload by 30–50%.
+
+#### 4.1.2. Agile Threat Detection and Response
+
+- **Speed**: Playbook steps allow critical containment and investigation actions to launch immediately through programmed workflows without delay from manual processes or analyst approval bottlenecks. Automated playbook steps like isolating infected hosts or disabling compromised accounts execute at computer speeds orders of magnitude faster than waiting for human direction. This rapid response is critical given that attacker dwell times inside networks continue to shrink.
+- **Efficiency**: Common incident types consuming standard analyst tasks like collecting forensic artifacts, querying threat intel feeds, or updating tracking tickets can transition to automated playbook executions, freeing up analyst bandwidth to handle more complex scenarios requiring human judgment and adaptability. Where machine consistency provides value, playbook automation maximizes the ROI of analyst creativity.
+- **Flexibility**: As threats evolve, playbooks can be updated centrally, and changes immediately propagate refined response procedures enterprise-wide through SOAR deployment. Playbook revision control and modular design accelerate keeping responses aligned to emerging attacker behaviors and infrastructure shifts.
+- **Improved threat detection**: Machine learning (ML) and artificial intelligence (AI) technologies powering automation are well suited for detecting subtle patterns and anomalies that may indicate a threat but are difficult for humans to spot manually. Automated tools continuously monitor diverse data sources, applying learned patterns to detect even stealthy threats between scanning intervals. This improves detection coverage compared to rule-based or signature-based tools alone.
+- **Faster response times**: Predefined playbooks and integrations allow automated response actions to rapidly contain threats without waiting for analyst review in some cases. Automation shortens the mean time to respond (MTTR) and contains actively exploiting threats before they can cause damage. Faster response enhances the overall security posture.
+- **Reduced human errors**: Automated tools eliminate human factors like fatigue, distraction, or lack of expertise that can lead to errors in judgment or missed threats. Properly configured automation is less prone to accidental oversights or failures to follow protocol during security incidents. This improves overall consistency and accuracy.
+
+#### 4.1.3. Compliance and Audit Readiness
+
+- **Tracking KPIs**: Automates performance metrics like Mean Time to Detect (MTTD) and Mean Time to Respond (MTTR), providing real-time insights into security effectiveness.
+- **Auditability**: Security automation ensures a complete audit trail of case management and response activities, enhancing compliance, accountability, and transparency. Detailed playbook logging tracks actions taken during incidents (who took what actions, when, and why), facilitating reviews, root cause analysis, and post-breach gap identification for process improvements and playbook remediation.
+
+### 4.2. Automation Functions
+
+#### 4.2.1. Alert Management & Prioritization
+
+- **Triage and alert prioritization**: Automate initial alert processing, enrichment, scoring, duplication removal, and categorization to speed up assignation and investigation.
+- **Orchestrating alert enrichment**: Integrate threat intelligence feeds and centralized asset management databases provides invaluable context, aiding accurate security event prioritization decisions. Analysts can quickly check indicators against aggregated industry observations about associated threat groups, ongoing global campaigns, malware code overlaps, and vulnerable software versions still in use across the infrastructure. This enrichment connects the dots between previously disjointed internal activities.
+- **Escalation and notifications**: Standardize notifications to appropriate teams or individuals based on customizable rules accounting for factors like severity, categorization, and service level agreements (SLAs).
+
+#### 4.2.2. Streamline Incident Response Workflows
+
+- **Investigation and analysis**: Automate retrieval of data from EDR tools, security appliances, the SIEM, and other systems to quicken basic incident analysis so teams can focus on higher-value tasks.
+- **Response playbook support**: Connect tools and platforms to provide comprehensive data inputs and the ability to trigger response actions outlined in SOC playbooks geared toward specific threats and incidents.
+- **Automated containment**: Expedite frontline containment measures by categorizing affected device criticality, detection rule severity scores, known privilege levels already reached, and the type of data or applications impacted. Trigger containment actions including automatically disable user accounts, block suspicious IP addresses, isolate infected endpoints, roll back unauthorized system changes, disable remote access, and enact other rapid response steps according to established runbooks.
+
+#### 4.2.3. Case Management & Collaboration
+
+- **Case management and response activities documentation**: End-to-end orchestration workflows log all investigative and mitigation activities as structured case records, including timestamps, commands enacted, analyst notes explaining actions taken, interesting file attachments collected, and threat intelligence or vulnerability data referenced while working the event. Meticulously compiled incident records greatly aid subsequent caseload review for additional patterns, streamline detailed postmortem reporting for leadership, and provide measurable performance indicators around response efficiency critical for identifying budgetary and capability gaps.
+- **Smoother technical handoffs**: When escalating complex incidents from one team to another (such as an SOC team transitioning an incident to forensics for further analysis), key data can be automatically passed between each group's respective tools rather than manually.
+- **Automated ticket creation**: Automatically open tickets regarding security issues in service management platforms to streamline communication and assignment during incidents.
+
+#### 4.2.4. Threat Hunting & Investigation
+
+- **Threat hunting and identification**: Orchestrate threat intel gathering, correlation against historic data, and access to additional context from other tools to uncover advanced threats missed by preventative tools.
+- **Data enrichment for threat hunting**: Orchestrate SIEM data correlation with enriched logs from endpoints, firewalls, domain name system (DNS) tools, and proxy appliances to uncover advanced threats.
+- **Operationalize threat hunting**: SOARs provide an invaluable workflow automation backbone, allowing analysts to launch extensive hunt queries across the enterprise rather than just reacting to each alert in isolation. High-priority threat intelligence on novel attack tradecraft leaked from dark web sources or emerging sophisticated actor groups can be rapidly operationalized into enterprise-wide search, scan, and forensic procedures executed systematically across server logs, endpoint data, email stores, network traffic, and cloud infrastructure.
+
+## 5. Threat Intelligence and Threat Hunting
 
 > Besta SOC Book:
 > 
@@ -357,7 +479,7 @@ After the incident has been resolved, reviewing lessons learned strengthens futu
 - Hunting with intelligence-derived context
 - Adapting defenses with threat intelligence
 
-## 5. SOC Engineering
+## 6. SOC Engineering
 
 > Besta SOC Book:
 > 
@@ -397,11 +519,11 @@ After the incident has been resolved, reviewing lessons learned strengthens futu
 >     └── Analyst Workflows
 > ```
 
-### 5.1. SOC and mulit-tenant architecture
+### 6.1. SOC and mulit-tenant architecture
 
-### 5.2. Capacity and data retention planning
+### 6.2. Capacity and data retention planning
 
-## 6. Performance Metrics (10. SOC Metrics and Performance Measurement)
+## 7. Performance Metrics (10. SOC Metrics and Performance Measurement)
 
 > Besta SOC Book:
 > 
