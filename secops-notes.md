@@ -299,31 +299,31 @@ The sophistication of detection technology means little without the skill of sec
 > └── Best Practices for Log Retention and Archiving 
 > ```
 
-#### Log Enrichment
+#### 3.2.1. Log Enrichment
 
 Supplementing logs with external but relevant context allows surfacing deeper connections. Common enrichment approaches integrate threat intelligence feeds to check log entries against known malicious IP addresses and domains. Asset inventory and user identity metadata attached during processing enable finely attributed analysis.
 
 Location details extracted from source IP addresses strengthen geo-focused hunting. Application logs and host data unified through log enrichment offer a cohesive view into multistage attacks rather than isolated fragments. Enriched logging becomes a high-value enrichment target in itself, aiding numerous organizational security efforts.
 
-#### Visualization (Workbooks)
+#### 3.2.2. Visualization (Workbooks)
 
 Interactive visualization of correlated monitoring data grants analysts a clearer operational picture. Activity heat maps overlay resource utilization and authentication trends against location aid review prioritization. Connection graphs mapping user–device–resource interactions surface outliers warranting follow-up. Behavioral profile dashboards comparing individualized patterns to an organization's standard fingerprint help identify hijacked accounts.
 
 For instance, a visualization suddenly showing heightened cloud identity and access management (IAM) role generation and assuming raises questions of potential misconfigurations or attacks against role primitives. Quickly pinpointing volumes outside comfort levels through visualization aids in a timely response.
 
-#### Stream Analytics (Analytic Rules)
+#### 3.2.3. Stream Analytics (Analytic Rules)
 
 Complex event processing engines correlate events like failed logins followed by privileged service exploitation attempts across distributed nodes to flag incidents early. Scaling out horizontally ensures no data is lost in transit.
 
 Analytics also detect multistage attacks by joining sessions and endpoints as streaming context windows. This near-real-time detection differs from batch analytics on stored log repositories with inherent latency.
 
-#### Multistage Analytics (Fusion)
+#### 3.2.4. Multistage Analytics (Fusion)
 
 Layering analytics of varying sophistication multiplies threat detection efficacy. Initially, rules and signatures rapidly flag known malicious patterns. Heuristics then examine outputs for related yet subtle anomalies indicating compromised sources. Behavioral models further inspect oddities against learned profiles to fish out advanced persistent threats stealthily lurking beneath the standard radar.
 
 For example, while blocking ransomware network tries, added user behavior analysis spots irregular encryption events occurring from the same endpoints around that time, thus tracing the full compromise chain rather than one piece alone. A multilayered analytical approach leveraging log data comprehensively helps SOC analysts uncover clever threats that evade basic detection.
 
-#### User and Entity Behavior Analytics (UEBA)
+#### 3.2.5. User and Entity Behavior Analytics (UEBA)
 
 Gaining richer intelligence and understanding entity relationships and interactions unlocks detections beyond isolated events. UEBAs apply statistical modeling and ML to profile trends, establishing expected norms from organizational identity activities. Any deviations outside statistical confidence levels flag potential insider threats, compromised credentials, or policy abuse warranting review. Rather than defining strict rules vulnerable to obfuscation, UEBA authenticates bona fide "normal" through mathematical descriptions (Loshin & Bacon, 2022). Profiles factor in privileged tasks, data access patterns, locations, collaboration, and more.
 
@@ -360,7 +360,7 @@ Hands-on testing deploys shortlisted UEBA vendors profiling organization identit
 > └── Challenges in Data Normalization and Integration
 > ```
 
-#### Machine Learning Algorithms Used in Security Analytics (Juputer Notebook integration)
+#### 3.3.1. Machine Learning Algorithms Used in Security Analytics
 
 ML algorithms have become incredibly powerful tools for security analytics in recent years. By analyzing vast amounts of security-related data, these algorithms can help detect anomalies, reduce false positives, optimize incident response processes, and much more. However, it's important to understand the different types of ML and when each is most applicable.
 
@@ -379,7 +379,7 @@ ML algorithms have become incredibly powerful tools for security analytics in re
 
 **Reinforcement learning** algorithms are trained through interaction, with the goal of maximizing rewards. In security, reinforcement learning has potential applications in self-learning intrusion detection system/intrusion prevention system (IDS/IPS) systems, red team tools, and investigative training simulations. However, it also brings new challenges around safety, transparency, and bias that security teams must thoughtfully consider.
 
-#### 3.3.X. Challenges of Operationalizing Predictive Models
+#### 3.3.2. Challenges of Operationalizing Predictive Models
 
 While predictive analytics show great promise, bringing predictive models into day-to-day security operations poses some challenges:
 
@@ -391,7 +391,7 @@ While predictive analytics show great promise, bringing predictive models into d
 - Explainability – Even more than reactions, predictions require logic, factors, and certainty to be clearly explainable and justify recommended actions to skeptical analysts and leadership.
 - Validation – It can be hard to validate the impact of preventively addressing issues predicted but never actualized as incidents. Metrics must consider issues likely avoided, not just those observed.
 
-#### 3.3.X. Challenges in Data Normalization and Integration
+#### 3.3.3. Challenges in Data Normalization and Integration
 
 Data represents lifeblood powering analytics, yet remains one of the largest hurdles for security programs. Disparate tools historically operated independently, resulting in islands containing only fragmented views, never comprehensive on their own. Overcoming such sales demands extensive data wrangling:
 
@@ -404,8 +404,11 @@ Data represents lifeblood powering analytics, yet remains one of the largest hur
 - Regulatory constraints – Sensitive fields pose disclosure risks necessitating masking, hashing, or removal versus direct inclusion in analytics stores.
 - Separate lifecycles – Separate tool/data TTLs complicate joins as windows drift out of synchronization over time.
 
-Data lakes centralize but do not resolve such issues requiring crossdepartmental data wrangling expertise and robust ETL/ELT tooling. Cleansing rules, extraction libraries, and model schema designs evolve iteratively to maximize usefulness. Documentation ensures future proofing through knowledge transfer over time (Smallcombe, 2021).
-Progress demands an organizational "data as a product" mindset, empowering guardian roles over technical debt. Proper data governance establishes policies guiding compliance, consent, and reasonable usage aligned to shifting risk landscapes over product lifecycles. Metrics track continuous improvements through representative examples bridging communication gaps in traditionally separated disciplines. Ultimately, the most impact comes from seeing data preparation not just as an initial hurdle but as an ongoing process refined through continuous feedback between analysts and engineers. Together, both technical and cultural changes overcome complex normalization challenges and better leverage analytics potential.
+Data lakes centralize but do not resolve such issues requiring cross departmental data wrangling expertise and robust ETL/ELT tooling. Cleansing rules, extraction libraries, and model schema designs evolve iteratively to maximize usefulness. Documentation ensures future proofing through knowledge transfer over time (Smallcombe, 2021).
+
+Progress demands an organizational "data as a product" mindset, empowering guardian roles over technical debt. Proper data governance establishes policies guiding compliance, consent, and reasonable usage aligned to shifting risk landscapes over product lifecycles. Metrics track continuous improvements through representative examples bridging communication gaps in traditionally separated disciplines.
+
+Ultimately, the most impact comes from seeing data preparation not just as an initial hurdle but as an ongoing process refined through continuous feedback between analysts and engineers. Together, both technical and cultural changes overcome complex normalization challenges and better leverage analytics potential.
 
 ## 4. Security Automation
 
