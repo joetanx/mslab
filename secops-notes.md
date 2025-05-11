@@ -257,7 +257,7 @@ Incident response playbooks codify efficient workflows for common scenarios base
 
 Triage checklists arm Tier 1 analysts with consistent first-response steps for assessing severity and initiating escalation if warranted. Classifying case urgency and risk disposition upfront streamlines downstream caseload management. Lower-priority cases are batched for efficient resolution. Automated enrichment actions initiate background evidence collection.
 
-Empowering analysts to work unimpeded within their skill range is key. Access controls enforce the separation of duties, while collaboration tools share context across functions. Orchestration routines encoded into playbooks automate repetitive manual tasks. Case management platforms track assignments, statuses, and handoffs to keep workflow moving. Custom views saved queries, and dashboards filter to each role’s needs.
+Empowering analysts to work unimpeded within their skill range is key. Access controls enforce the separation of duties, while collaboration tools share context across functions. Orchestration routines encoded into playbooks automate repetitive manual tasks. Case management platforms track assignments, statuses, and handoffs to keep workflow moving. Custom views saved queries, and dashboards filter to each role's needs.
 
 Response platforms centralize access to internal and external intelligence to accelerate investigation. Enterprise search enables hunting across both structured and unstructured data. Graphical visualization tools speed understanding of complex relationships within cases. Integrated remediation allows a seamless transition from investigation to containment.
 
@@ -307,7 +307,7 @@ Location details extracted from source IP addresses strengthen geo-focused hunti
 
 #### Visualization (Workbooks)
 
-Interactive visualization of correlated monitoring data grants analysts a clearer operational picture. Activity heat maps overlay resource utilization and authentication trends against location aid review prioritization. Connection graphs mapping user–device–resource interactions surface outliers warranting follow-up. Behavioral profile dashboards comparing individualized patterns to an organization’s standard fingerprint help identify hijacked accounts.
+Interactive visualization of correlated monitoring data grants analysts a clearer operational picture. Activity heat maps overlay resource utilization and authentication trends against location aid review prioritization. Connection graphs mapping user–device–resource interactions surface outliers warranting follow-up. Behavioral profile dashboards comparing individualized patterns to an organization's standard fingerprint help identify hijacked accounts.
 
 For instance, a visualization suddenly showing heightened cloud identity and access management (IAM) role generation and assuming raises questions of potential misconfigurations or attacks against role primitives. Quickly pinpointing volumes outside comfort levels through visualization aids in a timely response.
 
@@ -325,7 +325,7 @@ For example, while blocking ransomware network tries, added user behavior analys
 
 #### User and Entity Behavior Analytics (UEBA)
 
-Gaining richer intelligence and understanding entity relationships and interactions unlocks detections beyond isolated events. UEBAs apply statistical modeling and ML to profile trends, establishing expected norms from organizational identity activities. Any deviations outside statistical confidence levels flag potential insider threats, compromised credentials, or policy abuse warranting review. Rather than defining strict rules vulnerable to obfuscation, UEBA authenticates bona fide “normal” through mathematical descriptions (Loshin & Bacon, 2022). Profiles factor in privileged tasks, data access patterns, locations, collaboration, and more.
+Gaining richer intelligence and understanding entity relationships and interactions unlocks detections beyond isolated events. UEBAs apply statistical modeling and ML to profile trends, establishing expected norms from organizational identity activities. Any deviations outside statistical confidence levels flag potential insider threats, compromised credentials, or policy abuse warranting review. Rather than defining strict rules vulnerable to obfuscation, UEBA authenticates bona fide "normal" through mathematical descriptions (Loshin & Bacon, 2022). Profiles factor in privileged tasks, data access patterns, locations, collaboration, and more.
 
 For example, anomalous behavior, like a developer accessing HR records late at night, warrants attention. A system administrator copying terabytes of data discrepant from their established profile appears abnormal. UEBA finds such subtle issues traditional controls miss by recognizing gradual behavioral drift rather than single violations.
 
@@ -362,18 +362,18 @@ Hands-on testing deploys shortlisted UEBA vendors profiling organization identit
 
 #### Machine Learning Algorithms Used in Security Analytics (Juputer Notebook integration)
 
-ML algorithms have become incredibly powerful tools for security analytics in recent years. By analyzing vast amounts of security-related data, these algorithms can help detect anomalies, reduce false positives, optimize incident response processes, and much more. However, it’s important to understand the different types of ML and when each is most applicable.
+ML algorithms have become incredibly powerful tools for security analytics in recent years. By analyzing vast amounts of security-related data, these algorithms can help detect anomalies, reduce false positives, optimize incident response processes, and much more. However, it's important to understand the different types of ML and when each is most applicable.
 
 **Supervised learning algorithms** require labeled examples or training data to learn patterns and make predictions. Some of the most common supervised algorithms used in security include the following:
 
 - **Logistic regression** is often used for malware detection and identifying malicious URLs/domains. By analyzing known malware samples and their behaviors/attributes, logistic regression can learn to classify new files or sites as malicious or benign.
 - **Decision trees** split the data into smaller and smaller subsets based on attribute values, with each subset pointing to a decision. Decision trees are great for malware analysis, UEBA, and investigating anomalies detected by other tools.
-- **Naive Bayes** classifiers make predictions based on probability using statistical techniques like Bayes’ theorem. They are very effective for spam filtering, phishing detection, and identifying known attack patterns/indicators.
+- **Naive Bayes** classifiers make predictions based on probability using statistical techniques like Bayes' theorem. They are very effective for spam filtering, phishing detection, and identifying known attack patterns/indicators.
 - **Neural networks**, especially convolutional neural networks (CNNs), can analyze images, videos, and other non-text data very well. CNNs are commonly used for detecting malware based on static analysis of executable files or dynamic analysis of activity during execution.
 
 **Unsupervised learning** finds hidden patterns in unlabeled data. Common unsupervised algorithms in security analytics include the following:
 
-- **Clustering algorithms** like k-means group similar data points together based on attributes/features. This allows security teams to profile “normal” behavior and detect outliers. Clustering enables UEBA by grouping user activities over time.
+- **Clustering algorithms** like k-means group similar data points together based on attributes/features. This allows security teams to profile "normal" behavior and detect outliers. Clustering enables UEBA by grouping user activities over time.
 - **Dimensionality reductio**n techniques project high-dimensional data into a lower-dimensional space. This is useful for visualizing anomalies, threats, and attacks that may not otherwise be obvious. Dimensionality reduction aids investigation and hypothesis generation.
 - **Association rule learning** finds relationships between variables in large datasets that occur more frequently than expected. This type of analysis can reveal insecure configurations, unusual account usages, or file access patterns that may indicate a security issue.
 
@@ -405,7 +405,7 @@ Data represents lifeblood powering analytics, yet remains one of the largest hur
 - Separate lifecycles – Separate tool/data TTLs complicate joins as windows drift out of synchronization over time.
 
 Data lakes centralize but do not resolve such issues requiring crossdepartmental data wrangling expertise and robust ETL/ELT tooling. Cleansing rules, extraction libraries, and model schema designs evolve iteratively to maximize usefulness. Documentation ensures future proofing through knowledge transfer over time (Smallcombe, 2021).
-Progress demands an organizational “data as a product” mindset, empowering guardian roles over technical debt. Proper data governance establishes policies guiding compliance, consent, and reasonable usage aligned to shifting risk landscapes over product lifecycles. Metrics track continuous improvements through representative examples bridging communication gaps in traditionally separated disciplines. Ultimately, the most impact comes from seeing data preparation not just as an initial hurdle but as an ongoing process refined through continuous feedback between analysts and engineers. Together, both technical and cultural changes overcome complex normalization challenges and better leverage analytics potential.
+Progress demands an organizational "data as a product" mindset, empowering guardian roles over technical debt. Proper data governance establishes policies guiding compliance, consent, and reasonable usage aligned to shifting risk landscapes over product lifecycles. Metrics track continuous improvements through representative examples bridging communication gaps in traditionally separated disciplines. Ultimately, the most impact comes from seeing data preparation not just as an initial hurdle but as an ongoing process refined through continuous feedback between analysts and engineers. Together, both technical and cultural changes overcome complex normalization challenges and better leverage analytics potential.
 
 ## 4. Security Automation
 
