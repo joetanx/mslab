@@ -116,7 +116,7 @@ This may result in inefficiency and reduced effectiveness within the SOC.
 #### 1.3.3. Threat Hunters (Tier 3)
 
 - Handle escalated security incidents from Tier 2.
-  - Conduct in-depth forensic investigations such as file analysis, malware reverse-enginer on compromised systems to uncover attacker methodologies.
+  - Conduct in-depth forensic investigations such as file analysis, malware reverse-engineer on compromised systems to uncover attacker methodologies.
   - Correlate forensic findings with threat intelligence to predict future attack trends.
 - Proactively search for hidden threats within the network.
 - Utilize threat intelligence and advanced analytical tools to detect anomalous behavior.
