@@ -105,7 +105,7 @@ This may result in inefficiency and reduced effectiveness within the SOC.
 - Perform initial triage, validate alerts, and escalate genuine threats to Tier 2.
 - Maintain documentation and update incident records.
 
-#### 1.3.2. Incident Responsders(Tier 2)
+#### 1.3.2. Incident Responders (Tier 2)
 
 - Handle escalated security incidents from Tier 1.
 - Investigate security breaches, analyze malicious activities, and coordinate response efforts.
