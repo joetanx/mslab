@@ -403,7 +403,28 @@ Tools:
 - Azure Synapse or Microsoft Fabric for deeper analytics or BI integration.
 - Custom Sentinel workbooks can integrate federated queries visually.
 
-## 6. Sentinel
+## 6. Performance Metrics (10. SOC Metrics and Performance Measurement)
+
+> Besta SOC Book:
+> 
+> ```
+> 10 SOC Metrics and Performance Measurement
+> ├── Core Areas for SOC Metrics
+> │   ├── Threat Detection Effectiveness
+> │   ├── Incident Investigation Efficiency
+> │   └── Incident Response Effectiveness
+> └── Metrics for Evaluating Incident Response Effectiveness
+>     ├── Detection Speed
+>     └── Response Speed
+> ```
+
+- Reduced mean time to detect threats signals enhanced vigilance in identifying malicious post-compromise activities faster amid the noise.
+- A lower mean time to respond denotes improved prioritization and promptness in initiating investigations when novel alerts sound.
+- Faster mean time to contain verifies upgraded protocols blocking wider adversarial spread after initial confirmations.
+- Higher true positive rates over false positives indicate properly tuned analytics with minimized alarm fatigue.
+- Wider containment automation coverage supplemented by human effort was still essential.
+
+## 7. Sentinel
 
 ### **1. Data Connectors**
 Sentinel supports **data ingestion** from multiple sources:
@@ -485,23 +506,38 @@ Microsoft Sentinel is **constantly evolving**:
 - **Integration with Microsoft Defender**: Expands security coverage.
 - **Community-Driven Enhancements**: Benefits from user feedback and industry trends.
 
-## 7. Performance Metrics (10. SOC Metrics and Performance Measurement)
+## 8. Advanced Security Information Model
 
-> Besta SOC Book:
-> 
-> ```
-> 10 SOC Metrics and Performance Measurement
-> ├── Core Areas for SOC Metrics
-> │   ├── Threat Detection Effectiveness
-> │   ├── Incident Investigation Efficiency
-> │   └── Incident Response Effectiveness
-> └── Metrics for Evaluating Incident Response Effectiveness
->     ├── Detection Speed
->     └── Response Speed
-> ```
+https://learn.microsoft.com/en-us/azure/sentinel/normalization
 
-- Reduced mean time to detect threats signals enhanced vigilance in identifying malicious post-compromise activities faster amid the noise.
-- A lower mean time to respond denotes improved prioritization and promptness in initiating investigations when novel alerts sound.
-- Faster mean time to contain verifies upgraded protocols blocking wider adversarial spread after initial confirmations.
-- Higher true positive rates over false positives indicate properly tuned analytics with minimized alarm fatigue.
-- Wider containment automation coverage supplemented by human effort was still essential.
+### 8.1. Query time parsers
+
+ASIM uses query time parsers to map existing data to the normalized schemas using [KQL functions](https://learn.microsoft.com/en-us/kusto/query/functions/user-defined-functions). Many ASIM parsers are available out of the box with Microsoft Sentinel. More parsers, and versions of the built-in parsers that can be modified can be deployed from the [Microsoft Sentinel GitHub repository](https://aka.ms/AzSentinelASim).
+
+For more information, see [ASIM parsers](https://learn.microsoft.com/en-us/azure/sentinel/normalization-parsers-overview).
+
+### 8.2. Ingest time normalization
+
+Query time parsers have many advantages:
+- They do not require the data to be modified, thus preserving the source format.
+- Since they do not modify the data, but rather presents a view of the data, they are easy to develop. Developing, testing and fixing a parser can all be done on existing data. Moreover, parsers can be fixed when an issue is discovered and the fix will apply to existing data.
+
+On the other hand, while ASIM parsers are optimized, query time parsing can slow down queries, especially on large data sets. To resolve this, Microsoft Sentinel complements query time parsing with ingest time parsing. Using ingest transformation the events are normalized to normalized table, accelerating queries that use normalized data.
+
+Currently, ASIM supports the following native normalized tables as a destination for ingest time normalization:
+
+- [ASimAuditEventLogs](https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/asimauditeventlogs) for the [Audit Event](https://learn.microsoft.com/en-us/azure/sentinel/normalization-schema-audit) schema.
+- ASimAuthenticationEventLogs for the [Authentication](https://learn.microsoft.com/en-us/azure/sentinel/normalization-schema-authentication) schema.
+- [ASimDnsActivityLogs](https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/asimdnsactivitylogs) for the [DNS](https://learn.microsoft.com/en-us/azure/sentinel/normalization-schema-dns) schema.
+- [ASimNetworkSessionLogs](https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/asimnetworksessionlogs) for the [Network Session](https://learn.microsoft.com/en-us/azure/sentinel/normalization-schema-network) schema
+- [ASimWebSessionLogs](https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/asimwebsessionlogs) for the [Web Session](https://learn.microsoft.com/en-us/azure/sentinel/normalization-schema-web) schema.
+
+For more information, see [Ingest Time Normalization](https://learn.microsoft.com/en-us/azure/sentinel/normalization-ingest-time).
+
+### 7.3. ASIM and the Open Source Security Events Metadata
+
+ASIM aligns with the [Open Source Security Events Metadata (OSSEM)](https://ossemproject.com/intro.html) common information model, allowing for predictable entities correlation across normalized tables.
+
+OSSEM is a community-led project that focuses primarily on the documentation and standardization of security event logs from diverse data sources and operating systems. The project also provides a Common Information Model (CIM) that can be used for data engineers during data normalization procedures to allow security analysts to query and analyze data across diverse data sources.
+
+For more information, see the [OSSEM reference documentation](https://ossemproject.com/cdm/guidelines/entity_structure.html).
