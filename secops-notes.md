@@ -425,55 +425,55 @@ Tools:
 
 ## 7. Sentinel
 
-### **1. Data Connectors**
+### 1. Data Connectors
 Sentinel supports **data ingestion** from multiple sources:
 - **Built-in Connectors**: Integrates with Microsoft services like Defender, Entra ID, and third-party solutions.
 - **Custom Connectors**: Allows ingestion via APIs, Syslog, or Common Event Format (CEF).
 - **Multi-Cloud Support**: Collects data from **AWS, Google Cloud, and on-prem environments**.
 
-### **2. Analytics Rules**
+### 2. Analytics Rules
 Microsoft Sentinel provides various types of analytics rules to detect threats efficiently:
 - **Scheduled Analytics Rules**: Run queries at predefined intervals to identify security threats.
 - **Near-Real-Time (NRT) Rules**: Execute queries every minute for rapid detection.
 - **Fusion Rules**: Use machine learning to correlate multiple signals and detect sophisticated multistage attacks.
 
-### **3. Workbooks**
+### 3. Workbooks
 Workbooks provide **interactive dashboards** for security monitoring:
 - **Custom Dashboards**: Create tailored visualizations for security insights.
 - **Prebuilt Templates**: Use ready-made dashboards for common security scenarios.
 - **Data Exploration**: Analyze security data using **KQL queries**.
 
-### **4. Threat Intelligence**
+### 4. Threat Intelligence
 Microsoft Sentinel integrates **threat intelligence** for proactive security:
 - **Threat Intelligence Platform**: Ingests feeds from various sources.
 - **STIX/TAXII Support**: Enables structured threat intelligence integration.
 - **Indicator of Compromise (IoC) Matching**: Correlates IoCs with ingested logs.
 
-### **5. Advanced Hunting**
+### 5. Advanced Hunting
 Security teams can perform **deep investigations** using Sentinel’s hunting capabilities:
 - **KQL Query Language**: Enables powerful queries for threat analysis.
 - **Entity-Based Investigation**: Connects related alerts and logs for contextual analysis.
 - **Live Response**: Allows direct interaction with endpoints for forensic analysis.
 
-### **6. Incident Management**
+### 6. Incident Management
 Incident management in Sentinel helps security teams respond effectively:
 - **Incident Creation**: Automatically groups related alerts into incidents for streamlined investigation.
 - **Incident Investigation**: Provides a graphical view of alerts, entities, and logs for deeper analysis.
 - **Incident Response**: Supports automation through playbooks and manual actions.
 
-### **7. Security Automation**
+### 7. Security Automation
 Sentinel enables **automated security responses**:
 - **Playbooks**: Automates responses using **Azure Logic Apps**.
 - **SOAR Capabilities**: Enables automated threat mitigation workflows.
 - **Custom Automation Rules**: Defines triggers for specific security actions.
 
-### **8. Notebooks**
+### 8. Notebooks
 Notebooks enable **advanced threat hunting** and investigation:
 - **Jupyter Notebooks Integration**: Perform deep forensic analysis using Python.
 - **Machine Learning Capabilities**: Apply AI-driven analytics for threat detection.
 - **Data Visualization**: Generate graphs and reports for security insights.
 
-### **9. Security Copilot Integration**
+### 9. Security Copilot Integration
 Microsoft **Security Copilot** is an AI-powered assistant designed to enhance security operations by providing **incident summaries, threat intelligence, and automation capabilities**. It integrates with **Microsoft Sentinel** to streamline security workflows and improve threat detection.
 - **Incident Summaries**: Uses AI to generate concise reports on security incidents, helping analysts quickly understand threats.
 - **Natural Language to KQL**: Converts plain language queries into **Kusto Query Language (KQL)** for advanced threat hunting.
@@ -481,25 +481,25 @@ Microsoft **Security Copilot** is an AI-powered assistant designed to enhance se
 - **Security Copilot Agents**: AI-driven agents automate security tasks, such as phishing triage and vulnerability remediation.
 - **Multi-Tenant Support**: Enables managed security service providers (MSSPs) to use Copilot across customer environments.
 
-### **10. Multi-Workspace & Multi-Tenant Support**
+### 10. Multi-Workspace & Multi-Tenant Support
 Sentinel allows organizations to manage **multiple environments**:
 - **Unified Security Operations**: Provides a single-pane view across multiple workspaces.
 - **Cross-Tenant Visibility**: Enables security monitoring across different tenants.
 - **Centralized Incident Management**: Streamlines security operations for large enterprises.
 
-### **11. Customization & Extensibility**
+### 11. Customization & Extensibility
 Sentinel offers **flexibility** for security teams:
 - **Custom Detection Rules**: Define tailored analytics rules.
 - **Custom Dashboards & Reports**: Build personalized security views.
 - **API Integration**: Extend Sentinel’s capabilities with third-party tools.
 
-### **12. Cost Optimization**
+### 12. Cost Optimization
 Sentinel provides **cost-effective security operations**:
 - **Pay-As-You-Go Pricing**: Flexible billing based on data ingestion.
 - **Commitment Tiers**: Offers discounts for predictable workloads.
 - **Cost Management Tools**: Helps optimize security spending.
 
-### **13. Continuous Updates & Enhancements**
+### 13. Continuous Updates & Enhancements
 Microsoft Sentinel is **constantly evolving**:
 - **Regular Feature Updates**: New capabilities are added frequently.
 - **Integration with Microsoft Defender**: Expands security coverage.
@@ -533,7 +533,7 @@ Currently, ASIM supports the following native normalized tables as a destination
 
 For more information, see [Ingest Time Normalization](https://learn.microsoft.com/en-us/azure/sentinel/normalization-ingest-time).
 
-### 7.3. ASIM and the Open Source Security Events Metadata
+### 8.3. ASIM and the Open Source Security Events Metadata
 
 ASIM aligns with the [Open Source Security Events Metadata (OSSEM)](https://ossemproject.com/intro.html) common information model, allowing for predictable entities correlation across normalized tables.
 
