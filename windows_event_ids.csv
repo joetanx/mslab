@@ -1,0 +1,144 @@
+EventID,Activity,Reference
+1,1 - Process creation,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+299,299 - Token issued,https://www.manageengine.com/products/active-directory-audit/kb/windows-event-log-id-list.html
+300,,
+324,,
+340,,
+403,403 - Caller identity,https://www.manageengine.com/products/active-directory-audit/kb/windows-event-log-id-list.html
+404,,
+410,410 - Extranet lockout,https://www.manageengine.com/products/active-directory-audit/kb/windows-event-log-id-list.html
+411,411 - Extranet lockout,https://www.manageengine.com/products/active-directory-audit/kb/windows-event-log-id-list.html
+412,412 - AD FS token issued,https://www.manageengine.com/products/active-directory-audit/kb/windows-event-log-id-list.html
+413,,
+431,,
+500,500 - Issued identity,https://www.manageengine.com/products/active-directory-audit/kb/windows-event-log-id-list.html
+501,501 - Caller identity,https://www.manageengine.com/products/active-directory-audit/kb/windows-event-log-id-list.html
+1100,1100 - The event logging service has shut down,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+1102,1102 - The audit log was cleared,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+1107,,
+1108,1108 - The event logging service encountered an error,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4608,4608 - Windows is starting up,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4610,4610 - An authentication package has been loaded by the Local Security Authority,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4611,4611 - A trusted logon process has been registered with the Local Security Authority,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4614,4614 - A notification package has been loaded by the Security Account Manager.,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4622,4622 - A security package has been loaded by the Local Security Authority.,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4624,4624 - An account was successfully logged on,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4625,4625 - An account failed to log on,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4634,4634 - An account was logged off,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4647,4647 - User initiated logoff,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4648,4648 - A logon was attempted using explicit credentials,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4649,4649 - A replay attack was detected,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4657,4657 - A registry value was modified,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4661,4661 - A handle to an object was requested,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4662,4662 - An operation was performed on an object,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4663,4663 - An attempt was made to access an object,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4665,4665 - An attempt was made to create an application client context.,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4666,4666 - An application attempted an operation,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4667,4667 - An application client context was deleted,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4670,4670 - Permissions on an object were changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4672,4672 - Special privileges assigned to new logon,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4673,4673 - A privileged service was called,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4674,4674 - An operation was attempted on a privileged object,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4675,4675 - SIDs were filtered,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4688,4688 - A new process has been created,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4689,4689 - A process has exited,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4697,4697 - A service was installed in the system,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4700,4700 - A scheduled task was enabled,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4702,4702 - A scheduled task was updated,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4704,4704 - A user right was assigned,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4705,4705 - A user right was removed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4716,4716 - Trusted domain information was modified,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4717,4717 - System security access was granted to an account,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4718,4718 - System security access was removed from an account,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4719,4719 - System audit policy was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4720,4720 - A user account was created,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4722,4722 - A user account was enabled,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4723,4723 - An attempt was made to change an account's password,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4724,4724 - An attempt was made to reset an accounts password,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4725,4725 - A user account was disabled,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4726,4726 - A user account was deleted,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4727,4727 - A security-enabled global group was created,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4728,4728 - A member was added to a security-enabled global group,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4729,4729 - A member was removed from a security-enabled global group,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4732,4732 - A member was added to a security-enabled local group,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4733,4733 - A member was removed from a security-enabled local group,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4735,4735 - A security-enabled local group was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4737,4737 - A security-enabled global group was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4738,4738 - A user account was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4739,4739 - Domain Policy was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4740,4740 - A user account was locked out,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4742,4742 - A computer account was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4744,4744 - A security-disabled local group was created,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4745,4745 - A security-disabled local group was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4746,4746 - A member was added to a security-disabled local group,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4750,4750 - A security-disabled global group was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4751,4751 - A member was added to a security-disabled global group,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4752,4752 - A member was removed from a security-disabled global group,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4754,4754 - A security-enabled universal group was created,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4755,4755 - A security-enabled universal group was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4756,4756 - A member was added to a security-enabled universal group,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4757,4757 - A member was removed from a security-enabled universal group,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4760,4760 - A security-disabled universal group was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4761,4761 - A member was added to a security-disabled universal group,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4762,4762 - A member was removed from a security-disabled universal group,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4764,4764 - A groups type was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4767,4767 - A user account was unlocked,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4768,4768 - A Kerberos authentication ticket (TGT) was requested,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4771,4771 - Kerberos pre-authentication failed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4774,4774 - An account was mapped for logon,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4778,4778 - A session was reconnected to a Window Station,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4779,4779 - A session was disconnected from a Window Station,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4781,4781 - The name of an account was changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4793,4793 - The Password Policy Checking API was called,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4797,4797 - An attempt was made to query the existence of a blank password for an account,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4798,4798 - A user's local group membership was enumerated.,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4799,4799 - A security-enabled local group membership was enumerated,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4800,4800 - The workstation was locked,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4801,4801 - The workstation was unlocked,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4802,4802 - The screen saver was invoked,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4803,4803 - The screen saver was dismissed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4825,"4825 - A user was denied the access to Remote Desktop. By default, users are allowed to connect only if they are members of the Remote Desktop Users group or Administrators group",https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4826,4826 - Boot Configuration Data loaded,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4870,4870 - Certificate Services revoked a certificate,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4886,4886 - Certificate Services received a certificate request,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4887,4887 - Certificate Services approved a certificate request and issued a certificate,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4888,4888 - Certificate Services denied a certificate request,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4893,4893 - Certificate Services archived a key,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4898,4898 - Certificate Services loaded a template,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4902,4902 - The Per-user audit policy table was created,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4904,4904 - An attempt was made to register a security event source,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4905,4905 - An attempt was made to unregister a security event source,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4907,4907 - Auditing settings on object were changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4931,4931 - An Active Directory replica destination naming context was modified,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4932,4932 - Synchronization of a replica of an Active Directory naming context has begun,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4933,4933 - Synchronization of a replica of an Active Directory naming context has ended,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4946,4946 - A change has been made to Windows Firewall exception list. A rule was added,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4948,4948 - A change has been made to Windows Firewall exception list. A rule was deleted,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4956,4956 - Windows Firewall has changed the active profile,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+4985,4985 - The state of a transaction has changed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+5024,5024 - The Windows Firewall Service has started successfully,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+5033,5033 - The Windows Firewall Driver has started successfully,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+5059,5059 - Key migration operation,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+5136,5136 - A directory service object was modified,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+5137,5137 - A directory service object was created,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+5140,5140 - A network share object was accessed,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+5145,5145 - A network share object was checked to see whether client can be granted desired access,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+5632,5632 - A request was made to authenticate to a wireless network,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+6144,6144 - Security policy in the group policy objects has been applied successfully,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+6145,6145 - One or more errors occured while processing security policy in the group policy objects,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+6272,6272 - Network Policy Server granted access to a user,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+6273,6273 - Network Policy Server denied access to a user,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+6278,6278 - Network Policy Server granted full access to a user because the host met the defined health policy,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+6416,6416 - A new external device was recognized by the system.,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+6423,6423 - The installation of this device is forbidden by system policy,https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+6424,"6424 - The installation of this device was allowed, after having previously been forbidden by policy",https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/default.aspx
+8001,8001 - The AppLocker policy was applied successfully to this computer,https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/using-event-viewer-with-applocker
+8002,8002 - *<File name> * was allowed to run,https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/using-event-viewer-with-applocker
+8003,8003 - *<File name> * was allowed to run but would have been prevented from running if the AppLocker policy were enforced,https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/using-event-viewer-with-applocker
+8004,8004 - *<File name> * was prevented from running,https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/using-event-viewer-with-applocker
+8005,8005 - *<File name> * was allowed to run,https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/using-event-viewer-with-applocker
+8006,8006 - *<File name> * was allowed to run but would have been prevented from running if the AppLocker policy were enforced,https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/using-event-viewer-with-applocker
+8007,8007 - *<File name> * was prevented from running,https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/using-event-viewer-with-applocker
+8222,8222 - Shadow copy has been created,
+26401,,
+30004,,
