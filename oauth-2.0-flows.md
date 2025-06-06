@@ -38,10 +38,11 @@ sequenceDiagram
   D->>B:Access token and refresh token
   B->>E:Request resource with access token
   E->>B:Response
-  note over A,E: Access token has validity period
-  B->>D:Request new token with refresh token<br>just before expiry
-  D->>B:New access token and new refresh token
-  B->>E:Request resource with new access token
+  loop Refresh access token
+    B->>D:Request new access token with<br>refresh token before expiry
+    D->>B:New access token and new refresh token
+    B->>E:Request resource with new access token
+  end
 ```
 
 Ref: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow
@@ -76,10 +77,11 @@ sequenceDiagram
   D->>B:Access token and refresh token
   B->>E:Request resource with access token
   E->>B:Response
-  note over A,E: Access token has validity period
-  B->>D:Request new token with refresh token<br>just before expiry
-  D->>B:New access token and new refresh token
-  B->>E:Request resource with new access token
+  loop Refresh access token
+    B->>D:Request new access token with<br>refresh token before expiry
+    D->>B:New access token and new refresh token
+    B->>E:Request resource with new access token
+  end
 ```
 
 Ref: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow
