@@ -1,3 +1,23 @@
+## 1. Setup Entra Identity for demo application
+
+### 1.1. Create app registration
+
+> [!Note]
+>
+> Take note of the `Application (client) ID` and `Directory (tenant) ID`; these will be required later.
+
+![image](https://github.com/user-attachments/assets/27f1a9eb-ec49-441a-b640-14eeca068906)
+
+### 1.2. Create client secret
+
+> [!Important]
+>
+> The client secret is displayed **only once**, copy and store it securely right after creation
+>
+> There is no way to retrieve the client secret if it's lost, it will need to be deleted and create a new one
+
+![image](https://github.com/user-attachments/assets/ff2b9cbe-7e95-4941-acf3-715478de4eb7)
+
 ## 1. Client Credentials Flow
 
 ```mermaid
