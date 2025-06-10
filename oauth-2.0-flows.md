@@ -73,7 +73,7 @@ Ref: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-co
 
 > [!Note]
 >
-> Client credentials are also required by the Microsoft identity platform for confidential web apps
+> Application credentials are also required by the Microsoft identity platform for confidential web apps
 
 ## 3. Authorization Code Flow with Proof Key for Code Exchange (PKCE)
 
@@ -108,4 +108,4 @@ Ref: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-co
 
 > [!Note]
 >
-> Client credentials are also required by the Microsoft identity platform for confidential web apps
+> Application credentials are also required by the Microsoft identity platform for confidential web apps
