@@ -1,6 +1,38 @@
-## 1. Setup Entra Identity for demo application
+## 1. Open ID with Entra identity
 
-### 1.1. Create app registration
+### 1.1. Endpoints for Entra identity
+
+Entra identity endpoints are scoped by `tenant ID` and the details are listed in the OIDC well-known configuration:
+
+```
+https://login.microsoftonline.com/$tenant/v2.0/.well-known/openid-configuration
+```
+
+The OAuth2 endpoints are in the format:
+
+```pwsh
+https://login.microsoftonline.com/$tenant/oauth2/v2.0/{token,authorize,devicecode,logout}
+```
+
+An endpoint can be referenced by the OIDC well-known configuration, e.g.:
+
+```pwsh
+$openid = Invoke-RestMethod https://login.microsoftonline.com/$tenant/v2.0/.well-known/openid-configuration
+$token = Invoke-RestMethod $openid.token_endpoint -Method Post -Body $body
+```
+
+Or simply using the URI directly, since the endpoints format would likely never change:
+
+|Endpoint|URI|
+|---|---|
+|`token_endpoint`|`https://login.microsoftonline.com/$tenant/oauth2/v2.0/token`|
+|`authorization_endpoint`|`https://login.microsoftonline.com/$tenant/oauth2/v2.0/authorize`|
+|`device_authorization_endpoint`|`https://login.microsoftonline.com/$tenant/oauth2/v2.0/devicecode`|
+|`end_session_endpoint`|`https://login.microsoftonline.com/$tenant/oauth2/v2.0/logout`|
+
+### 1.2. Setup Entra Identity for demo application
+
+#### 1.2.1. Create app registration
 
 > [!Note]
 >
@@ -8,7 +40,7 @@
 
 ![image](https://github.com/user-attachments/assets/27f1a9eb-ec49-441a-b640-14eeca068906)
 
-### 1.2. Create client secret
+#### 1.2.2. Create client secret
 
 > [!Important]
 >
@@ -18,7 +50,7 @@
 
 ![image](https://github.com/user-attachments/assets/ff2b9cbe-7e95-4941-acf3-715478de4eb7)
 
-## 1. Client Credentials Flow
+## 2. Client Credentials Flow
 
 ```mermaid
 sequenceDiagram
@@ -40,7 +72,7 @@ Application credentials can be:
 1. `client_secret`: symmetric shared secret
 2. `client_assertion`: a JWT signed by the client certificate that is registered as credentials for the application; the token endpoint uses the registered client certificate to validate the JWT
 
-## 2. Authorization Code Flow
+## 3. Authorization Code Flow
 
 ```mermaid
 sequenceDiagram
@@ -75,7 +107,7 @@ Ref: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-co
 >
 > Application credentials are also required by the Microsoft identity platform for confidential web apps
 
-## 3. Authorization Code Flow with Proof Key for Code Exchange (PKCE)
+## 4. Authorization Code Flow with Proof Key for Code Exchange (PKCE)
 
 ```mermaid
 sequenceDiagram
