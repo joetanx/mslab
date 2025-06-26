@@ -46,7 +46,13 @@ Permissions can be granted to the application by role assignment to the applicat
 >
 > Take note of the `Application (client) ID` and `Directory (tenant) ID`; these will be required later.
 
-![image](https://github.com/user-attachments/assets/27f1a9eb-ec49-441a-b640-14eeca068906)
+![image](https://github.com/user-attachments/assets/7a8906ef-dc6e-444d-95a7-481896e4f36d)
+
+> [!Note]
+>
+> Redirect URI is required for authorization code flow
+>
+> ![image](https://github.com/user-attachments/assets/7850590a-9204-49ef-a699-c5e46bf2817c)
 
 #### 1.2.2. Create client secret
 
@@ -56,7 +62,7 @@ Permissions can be granted to the application by role assignment to the applicat
 >
 > There is no way to retrieve the client secret if it's lost, it will need to be deleted and create a new one
 
-![image](https://github.com/user-attachments/assets/ff2b9cbe-7e95-4941-acf3-715478de4eb7)
+![image](https://github.com/user-attachments/assets/d3eacb03-b9cb-4a32-a61e-2806a99ca810)
 
 #### 1.2.3. Add role assignment for the demo application to access the target resource
 
@@ -66,11 +72,11 @@ Log Analytics Workspace is shown in this example to illustrate a simple read acc
 
 Target resource → Access Control (IAM) → Add role assignment:
 
-![image](https://github.com/user-attachments/assets/741b538b-1445-4f43-a3c7-6d7cb7158a19)
+![image](https://github.com/user-attachments/assets/fc0fc064-976b-436a-a2d0-186679e8c7cd)
 
 Select the required role (permissions) for the application, `Reader` is sufficient to demonstrate a simple read:
 
-![image](https://github.com/user-attachments/assets/78f3d79b-1670-4c84-a6b7-e858d3e2622f)
+![image](https://github.com/user-attachments/assets/e5b7bf29-3f0a-4083-8daa-2d2ef3e757d0)
 
 Select the demo application:
 
@@ -80,7 +86,7 @@ Select the demo application:
 >
 > By default, Microsoft Entra applications aren't displayed in the available options. Search for the application by name to find it.
 
-![image](https://github.com/user-attachments/assets/c99774f0-ca3c-4ed0-a2a1-0cddbf6ce61c)
+![image](https://github.com/user-attachments/assets/6bf805a4-5ddc-4981-95c0-8df95c32e8ac)
 
 > [!Tip]
 >
@@ -96,6 +102,10 @@ Select the demo application:
 > ```
 
 ## 2. Client Credentials Flow
+
+Ref: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow
+
+### 2.1. Flow sequence diagram
 
 ```mermaid
 sequenceDiagram
@@ -117,13 +127,13 @@ Application credentials can be:
 1. `client_secret`: symmetric shared secret
 2. `client_assertion`: a JWT signed by the client certificate that is registered as credentials for the application; the token endpoint uses the registered client certificate to validate the JWT
 
-### 2.1. PowerShell Example
+### 2.2. PowerShell Example
 
 > [!Tip]
 >
 > There is a write-up about using PowerShell and cURL for API requests [here](https://github.com/joetanx/setup/blob/main/web-request-notes.md)
 
-#### 2.1.1. Retrieve access token from token endpoint
+#### 2.2.1. Retrieve access token from token endpoint
 
 The parameters required to [get a token](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow#get-a-token) from Entra identity token endpoint:
 
@@ -170,7 +180,7 @@ token_type expires_in ext_expires_in access_token
 Bearer           3599           3599 <access-token-jwt>
 ```
 
-#### 2.1.2. Access target resource with access token
+#### 2.2.2. Access target resource with access token
 
 Azure resources expect access token in the `Authorization` header in the format of: `Bearer: <access-token-jwt>`
 
@@ -203,6 +213,16 @@ value : {@{properties=; location=southeastasia; tags=; id=/subscriptions/d199f75
 
 ## 3. Authorization Code Flow
 
+Ref: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow
+
+### 3.1. Flow sequence diagram
+
+> [!Note]
+>
+> Application credentials are also required by the Microsoft identity platform for confidential web apps
+
+#### 3.1.1. Authorization Code Flow
+
 ```mermaid
 sequenceDiagram
   actor A as User
@@ -226,17 +246,11 @@ sequenceDiagram
   end
 ```
 
-Ref: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow
-
 > [!Note]
 >
 > PKCE (below) is recommended for all application types, both public and confidential clients, and required by the Microsoft identity platform for single page apps using the authorization code flow.
 
-> [!Note]
->
-> Application credentials are also required by the Microsoft identity platform for confidential web apps
-
-## 4. Authorization Code Flow with Proof Key for Code Exchange (PKCE)
+#### 3.1.2. Authorization Code Flow with Proof Key for Code Exchange (PKCE)
 
 ```mermaid
 sequenceDiagram
@@ -264,9 +278,3 @@ sequenceDiagram
     B->>E:Request resource with new access token
   end
 ```
-
-Ref: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow
-
-> [!Note]
->
-> Application credentials are also required by the Microsoft identity platform for confidential web apps
