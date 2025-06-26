@@ -324,6 +324,13 @@ Access token acquired:
 
 ![image](https://github.com/user-attachments/assets/d6eb0e66-0493-4d91-bff8-20165fe9319f)
 
+> [!Tip]
+>
+> The authorization flow of request to authorization endpoint, redirect to user sign-in, and request to token endpoint is captured in the Postman console:
+>
+> ![image](https://github.com/user-attachments/assets/f24a9001-d8ce-4a29-ac56-7e145c214f42)
+
+
 Select _Use Token_ and the _Authorization_ header is automatically added with the access token:
 
 > This is similar to the PowerShell example of:
