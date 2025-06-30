@@ -248,14 +248,14 @@ After the incident has been resolved, reviewing lessons learned strengthens futu
 
 Build a mature SOC pipeline that evolves from basic detection to intelligent, adaptive defense
 
-### 3.1. Capture Threats with Analytic Rules
+### 3.1. Capture Threats with Detection Rules
 
-Start by identifying known threats using analytic rules
+Start by identifying known threats using detection rules
 - Use complex event processing to correlate signals like failed logins and privilege escalations
 - Horizontal scalability ensures complete coverage across distributed nodes
 - Enables near-real-time alerting vs batch processing delays
 
-#### 3.2. Multistage Analytics for Attack Chains
+### 3.2. Multistage Analytics for Attack Chains
 
 Use layered analytics to detect multi-stage, stealthy attacks
 - Combine rule-based, heuristic, and behavioral detection
@@ -272,7 +272,7 @@ Use dashboards and visualizations to highlight anomalies
 
 ### 3.4. Threat Intelligence for Deeper Context
 
-- **Enhancing Detection Accuracy**: Threat intelligence integrates known malicious indicators—such as suspicious IP addresses, domains, or attack signatures—into security analytics. This helps analytics tools immediately recognize potential threats instead of relying solely on anomaly detection.
+- **Enhancing Detection Accuracy**: Threat intelligence integrates known malicious indicators - such as suspicious IP addresses, domains, or attack signatures - into security analytics. This helps analytics tools immediately recognize potential threats instead of relying solely on anomaly detection.
 - **Providing Context for Investigations**: Enriching logs with threat intelligence increases situational awareness and reveals whether an observed behavior is linked to known attack campaigns, helping analysts prioritize cases efficiently. Threat intelligence can also help to reveal tactics, techniques, and procedures (TTPs) associated with threat actors, aiding in identifying multistage attacks.
 - **Enabling Proactive Defense**: Rather than reacting to threats after they emerge, organizations can use intelligence-driven security analytics to anticipate risks. Organizations can use threat data to hunt for threats in the environment or adapt defense mechanisms to improve security analytics methodologies and defense strategies,
 
@@ -296,7 +296,7 @@ ML models on security data for deeper insights and pattern discovery
 
 ### 4.1. Objectives in Security Automation
 
-##### 4.1.1. Operational Efficiency
+#### 4.1.1. Operational Efficiency
 
 - **Standardization**: Playbooks establish consensus-tested standard operating procedures (SOPs) for consistent handling of generic incident categories. This reduces variation in practitioner responses over time, even with staff turnover. Documented playbooks ensure institutional knowledge stays within the SOC versus leaving with departed team members.
 - **Scalability**: With playbooks defining how automated orchestration platforms (Security orchestration, automation, and response (SOAR)) should react based on trigger conditions, a small team can manage responses to a high volume of incidents. Playbooks encoded in workflow automation engines allow near-infinite incident processing without manual human bottlenecks up to compute resource limits.
@@ -402,7 +402,7 @@ Tools:
 - Azure Synapse or Microsoft Fabric for deeper analytics or BI integration.
 - Custom Sentinel workbooks can integrate federated queries visually.
 
-## 6. Performance Metrics (10. SOC Metrics and Performance Measurement)
+## 6. Performance Metrics
 
 > Besta SOC Book:
 > 
@@ -425,55 +425,55 @@ Tools:
 
 ## 7. Sentinel
 
-### 1. Data Connectors
+### 7.1. Data Connectors
 Sentinel supports **data ingestion** from multiple sources:
 - **Built-in Connectors**: Integrates with Microsoft services like Defender, Entra ID, and third-party solutions.
 - **Custom Connectors**: Allows ingestion via APIs, Syslog, or Common Event Format (CEF).
 - **Multi-Cloud Support**: Collects data from **AWS, Google Cloud, and on-prem environments**.
 
-### 2. Analytics Rules
+### 7.2. Analytics Rules
 Microsoft Sentinel provides various types of analytics rules to detect threats efficiently:
 - **Scheduled Analytics Rules**: Run queries at predefined intervals to identify security threats.
 - **Near-Real-Time (NRT) Rules**: Execute queries every minute for rapid detection.
 - **Fusion Rules**: Use machine learning to correlate multiple signals and detect sophisticated multistage attacks.
 
-### 3. Workbooks
+### 7.3. Workbooks
 Workbooks provide **interactive dashboards** for security monitoring:
 - **Custom Dashboards**: Create tailored visualizations for security insights.
 - **Prebuilt Templates**: Use ready-made dashboards for common security scenarios.
 - **Data Exploration**: Analyze security data using **KQL queries**.
 
-### 4. Threat Intelligence
+### 7.4. Threat Intelligence
 Microsoft Sentinel integrates **threat intelligence** for proactive security:
 - **Threat Intelligence Platform**: Ingests feeds from various sources.
 - **STIX/TAXII Support**: Enables structured threat intelligence integration.
 - **Indicator of Compromise (IoC) Matching**: Correlates IoCs with ingested logs.
 
-### 5. Advanced Hunting
+### 7.5. Advanced Hunting
 Security teams can perform **deep investigations** using Sentinel’s hunting capabilities:
 - **KQL Query Language**: Enables powerful queries for threat analysis.
 - **Entity-Based Investigation**: Connects related alerts and logs for contextual analysis.
 - **Live Response**: Allows direct interaction with endpoints for forensic analysis.
 
-### 6. Incident Management
+### 7.6. Incident Management
 Incident management in Sentinel helps security teams respond effectively:
 - **Incident Creation**: Automatically groups related alerts into incidents for streamlined investigation.
 - **Incident Investigation**: Provides a graphical view of alerts, entities, and logs for deeper analysis.
 - **Incident Response**: Supports automation through playbooks and manual actions.
 
-### 7. Security Automation
+### 7.7. Security Automation
 Sentinel enables **automated security responses**:
 - **Playbooks**: Automates responses using **Azure Logic Apps**.
 - **SOAR Capabilities**: Enables automated threat mitigation workflows.
 - **Custom Automation Rules**: Defines triggers for specific security actions.
 
-### 8. Notebooks
+### 7.8. Notebooks
 Notebooks enable **advanced threat hunting** and investigation:
 - **Jupyter Notebooks Integration**: Perform deep forensic analysis using Python.
 - **Machine Learning Capabilities**: Apply AI-driven analytics for threat detection.
 - **Data Visualization**: Generate graphs and reports for security insights.
 
-### 9. Security Copilot Integration
+### 7.9. Security Copilot Integration
 Microsoft **Security Copilot** is an AI-powered assistant designed to enhance security operations by providing **incident summaries, threat intelligence, and automation capabilities**. It integrates with **Microsoft Sentinel** to streamline security workflows and improve threat detection.
 - **Incident Summaries**: Uses AI to generate concise reports on security incidents, helping analysts quickly understand threats.
 - **Natural Language to KQL**: Converts plain language queries into **Kusto Query Language (KQL)** for advanced threat hunting.
@@ -481,25 +481,25 @@ Microsoft **Security Copilot** is an AI-powered assistant designed to enhance se
 - **Security Copilot Agents**: AI-driven agents automate security tasks, such as phishing triage and vulnerability remediation.
 - **Multi-Tenant Support**: Enables managed security service providers (MSSPs) to use Copilot across customer environments.
 
-### 10. Multi-Workspace & Multi-Tenant Support
+### 7.10. Multi-Workspace & Multi-Tenant Support
 Sentinel allows organizations to manage **multiple environments**:
 - **Unified Security Operations**: Provides a single-pane view across multiple workspaces.
 - **Cross-Tenant Visibility**: Enables security monitoring across different tenants.
 - **Centralized Incident Management**: Streamlines security operations for large enterprises.
 
-### 11. Customization & Extensibility
+### 7.11. Customization & Extensibility
 Sentinel offers **flexibility** for security teams:
 - **Custom Detection Rules**: Define tailored analytics rules.
 - **Custom Dashboards & Reports**: Build personalized security views.
 - **API Integration**: Extend Sentinel’s capabilities with third-party tools.
 
-### 12. Cost Optimization
+### 7.12. Cost Optimization
 Sentinel provides **cost-effective security operations**:
 - **Pay-As-You-Go Pricing**: Flexible billing based on data ingestion.
 - **Commitment Tiers**: Offers discounts for predictable workloads.
 - **Cost Management Tools**: Helps optimize security spending.
 
-### 13. Continuous Updates & Enhancements
+### 7.13. Continuous Updates & Enhancements
 Microsoft Sentinel is **constantly evolving**:
 - **Regular Feature Updates**: New capabilities are added frequently.
 - **Integration with Microsoft Defender**: Expands security coverage.
