@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "capacityName": {
+      "type": "string",
+      "metadata": {
+        "description": "This name will be displayed in the Security Copilot portal and Azure portal. Make sure it is unique and identifiable. Changing names can be difficult."
+      }
+    },
+    "location": {
+      "defaultValue": "australiaeast",
+      "type": "string",
+      "metadata": {
+        "description": "Capacity region. This is where data related to the capacity is stored. Not customer data."
+      }
+    },
+    "numberOfUnits": {
+      "defaultValue": 1,
+      "type": "int",
+      "metadata": {
+        "description": "Security compute units per hour. You'll be able to increase or decrease the number of units at any time."
+      }
+    },
+    "crossGeoCompute": {
+      "defaultValue": "Allowed",
+      "type": "string",
+      "metadata": {
+        "description": "If this location is busy, allow Copilot to evaluate prompts anywhere in the world (recommended for optimal performance)."
+      }
+    },
+    "geo": {
+      "defaultValue": "ANZ",
+      "type": "string",
+      "metadata": {
+        "description": "Prompt evaluation location. This selection will affect where your prompts are evaluated and how your usage is priced."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.SecurityCopilot/capacities",
+      "apiVersion": "2024-11-01-preview",
+      "name": "[parameters('capacityName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "numberOfUnits": "[parameters('numberOfUnits')]",
+        "crossGeoCompute": "[parameters('crossGeoCompute')]",
+        "geo": "[parameters('geo')]"
+      }
+    }
+  ]
+}
