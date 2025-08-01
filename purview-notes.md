@@ -20,7 +20,7 @@ Sensitive Information Types (SITs) are predefined or custom templates in Microso
 - **Customizable**: You can define your own sensitive information types tailored to your specific business needs.
 - **Detection**: When data is scanned by Purview, the system can automatically identify sensitive information types within your data.
 
-## 2. Data Loss Prevention (DLP
+## 2. Data Loss Prevention (DLP)
 
 Data Loss Prevention (DLP) is a security feature that helps prevent sensitive information from being accidentally shared or exposed. Purview provides DLP tools to protect your data by identifying potential risks and blocking or restricting actions.
 
@@ -30,7 +30,7 @@ Data Loss Prevention (DLP) is a security feature that helps prevent sensitive in
 - **Notifications**: Alerts and notifications can be set up to inform administrators about potential violations.
 - **Integration**: DLP can be integrated with Microsoft 365 apps, SharePoint, Teams, OneDrive, etc., ensuring that sensitive data isn't shared or accessed inappropriately.
 
-## 3. Information Protection (Sensitivity Labels
+## 3. Information Protection (Sensitivity Labels)
 
 Sensitivity Labels allow you to classify and protect data based on its sensitivity level. You can assign labels to files, emails, or other data types, which apply security controls like encryption, watermarking, or access restrictions.
 
@@ -44,7 +44,7 @@ Sensitivity Labels allow you to classify and protect data based on its sensitivi
 - **Manual Labeling**: Users manually apply sensitivity labels to documents and emails based on the perceived sensitivity level (e.g., Confidential, Highly Confidential). This approach gives users control but can be prone to human error.
 - **Automatic Labeling**: This is a policy-driven approach where sensitivity labels are automatically applied based on predefined conditions, such as the presence of sensitive information types (e.g., credit card numbers or personal identifiers). For example, if a document contains a credit card number, a "Confidential" label can be automatically applied.
 
-## 4. Data Lifecycle Management (Retention Labels
+## 4. Data Lifecycle Management (Retention Labels)
 
 Retention Labels manage how long data is kept and what happens to it when it is no longer needed. Retention labels can be applied to documents, emails, and other records to ensure compliance with regulations by retaining data for a specified time period or deleting it after a certain duration.
 
@@ -54,9 +54,9 @@ Retention Labels manage how long data is kept and what happens to it when it is 
 - **Disposition**: Automatically delete or move data to lower-cost storage after a certain retention period.
 - **Legal Holds**: Prevent deletion of specific records if they are under legal investigation or litigation.
 
-## 5. Insider Risk Management
+## 5. Insider Risk Management (IRM)
 
-Insider Risk Management (IRM) helps detect and mitigate risks posed by insiders (employees, contractors, etc.) who might inadvertently or maliciously expose data. The goal is to protect against threats without compromising user privacy.
+IRM helps detect and mitigate risks posed by insiders (employees, contractors, etc.) who might inadvertently or maliciously expose data. The goal is to protect against threats without compromising user privacy.
 
 ### 5.1. Key Features
 
