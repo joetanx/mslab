@@ -223,6 +223,27 @@ Start-Process cd.retail.LN\SMSSETUP\BIN\X64\prereqchk.exe /AdminUI
 Start-Process cd.retail.LN\splash.hta
 ```
 
-<img width="721" height="583" alt="image" src="https://github.com/user-attachments/assets/d5fefc25-5660-445f-b239-858759ea4711" />
+![](https://github.com/user-attachments/assets/d5fefc25-5660-445f-b239-858759ea4711)
 
-<img width="737" height="562" alt="image" src="https://github.com/user-attachments/assets/283bfa04-4b5e-40a2-b376-001dec71bab1" />
+![](https://github.com/user-attachments/assets/d49040a4-a705-43ed-b3c6-f7fd4483109d)
+
+![](https://github.com/user-attachments/assets/0bcf14bc-cb51-44d4-ad76-c83148d1cf49)
+
+![](https://github.com/user-attachments/assets/1f6d0e81-3cb6-4d1e-b949-fb6bf94c0017)
+
+![](https://github.com/user-attachments/assets/c53e0e7d-d47d-4ccf-97b2-622c8254f065)
+
+![](https://github.com/user-attachments/assets/25715e07-0817-4dc5-902f-5f185dd14675)
+
+![](https://github.com/user-attachments/assets/c17800f7-5923-454c-90ee-7db2b5d7f757)
+
+![](https://github.com/user-attachments/assets/41b92906-d972-4017-9795-31da8c6ddfe7)
+
+![](https://github.com/user-attachments/assets/d3680388-5e64-47d5-9c12-1a1a7ad4c641)
+
+![](https://github.com/user-attachments/assets/ebcc4aaa-df0a-4284-8a00-473b9d3402c8)
+
+![](https://github.com/user-attachments/assets/87c13175-9eba-41b7-aead-7293fe3d0777)
+
+![](https://github.com/user-attachments/assets/2d8928a9-1efc-426a-a2b9-172f93292342)
+
