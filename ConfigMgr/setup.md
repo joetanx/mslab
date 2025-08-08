@@ -140,7 +140,7 @@ Place the file on drives that ConfigManager should not install on
 ### 3.3. Install roles
 
 ```cmd
-Install-WindowsFeature NET-Framework-Features,NET-Framework-Core,NET-HTTP-Activation,NET-Non-HTTP-Activ,NET-Framework-45-Features,NET-Framework-45-Core,NET-Framework-45-ASPNET,NET-WCF-Services45,NET-WCF-HTTP-Activation45,NET-WCF-TCP-PortSharing45,Web-Server,Web-WebServer,Web-ISAPI-Ext,Web-Windows-Auth,Web-Asp-Net,Web-Asp-Net45,Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,Web-WMI,BITS,BITS-IIS-Ext,RDC -IncludeManagementTools
+Install-WindowsFeature NET-Framework-Features,NET-Framework-Core,NET-HTTP-Activation,NET-Non-HTTP-Activ,NET-Framework-45-Features,NET-Framework-45-Core,NET-Framework-45-ASPNET,NET-WCF-Services45,NET-WCF-HTTP-Activation45,NET-WCF-TCP-PortSharing45,Web-Server,Web-WebServer,Web-ISAPI-Ext,Web-Windows-Auth,Web-Asp-Net,Web-Asp-Net45,Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,Web-WMI,BITS,BITS-IIS-Ext,RDC,UpdateServices -IncludeManagementTools
 ```
 
 ### 3.4. install windows ADK and windows PE add-on for windows ADK
@@ -163,6 +163,12 @@ https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install
 ![](https://github.com/user-attachments/assets/ac444a43-0297-464d-a2d2-9c65ea7a0107)
 
 ![](https://github.com/user-attachments/assets/5d4ec707-9c66-43f5-bdfb-bdf0ec19cb08)
+
+### 3.5. Certificate binding for HTTPS
+
+IIS Manager → Default Web Site → Bindings... → Add... → Type: `https` → select SSL certificate that has SAN for the ConfigMgr management and distribution point FQDNs
+
+![](https://github.com/user-attachments/assets/591c8e2f-bdf5-44ab-b849-6f2842370c76)
 
 ## 4. Prepare SQL Server
 
@@ -247,7 +253,26 @@ Start-Process cd.retail.LN\splash.hta
 
 ![](https://github.com/user-attachments/assets/ebcc4aaa-df0a-4284-8a00-473b9d3402c8)
 
-![](https://github.com/user-attachments/assets/87c13175-9eba-41b7-aead-7293fe3d0777)
+![](https://github.com/user-attachments/assets/6b171708-1c3a-426d-9ef8-b734d354b853)
 
 ![](https://github.com/user-attachments/assets/2d8928a9-1efc-426a-a2b9-172f93292342)
 
+![](https://github.com/user-attachments/assets/339e346d-1b8e-4d62-8021-8813b9eb3d38)
+
+![](https://github.com/user-attachments/assets/eb29241b-fb6a-447e-be4a-aa57dd133d2c)
+
+![](https://github.com/user-attachments/assets/cb83b11b-654b-4c7d-bb64-f1e1e8015ac8)
+
+![](https://github.com/user-attachments/assets/9a7b5ccd-c635-4b51-8441-a1d4baa89bd5)
+
+![](https://github.com/user-attachments/assets/a8f276fe-5d5d-4c8a-9a5d-861580a9e544)
+
+![](https://github.com/user-attachments/assets/f220c84a-5821-405c-9902-3ce526fbc0a9)
+
+![](https://github.com/user-attachments/assets/50c4c0f4-c107-419d-a2a3-23247fe9a4cb)
+
+The warnings are fine for a lab setup, the details to resolve them are:
+- [SQL Server Native Client](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#sql-server-native-client)
+- [SQL Server security mode](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#sql-server-security-mode)
+- [Configuration for SQL Server memory usage](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#configuration-for-sql-server-memory-usage)
+- [SQL Server process memory allocation](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#sql-server-process-memory-allocation)
