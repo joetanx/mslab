@@ -1,4 +1,5 @@
 Ref:
+- https://www.systemcenterdudes.com/complete-sccm-installation-guide-and-configuration/
 - https://www.youtube.com/watch?v=hub1Lm7oVy8
 - https://www.youtube.com/@microsoftendpointmanager-s5074/search?query=endpoint%20protection
 
@@ -16,29 +17,7 @@ https://www.microsoft.com/en-us/evalcenter/download-microsoft-endpoint-configura
 
 ## 2. Prepare Active Directory
 
-### 2.1. Prepare system management container
-
-ADSI Edit → Connect to... → `Default naming context` → `CN=System` folder → New → Object → container → value: `System Management`
-
-![](https://github.com/user-attachments/assets/cb1dd7e9-0cca-4ad8-945b-6ceaa87f6ef6)
-
-![](https://github.com/user-attachments/assets/5ae9381a-3ec8-4416-a035-f269c98984c2)
-
-![](https://github.com/user-attachments/assets/8dad4d9a-700d-4f2d-8df7-9c432bfbeab5)
-
-### 2.2. Grant permissions on system management container to ConfigMgr
-
-Right-click on created `System Management` container → Properties → Security → Advanced → Add
-
-![](https://github.com/user-attachments/assets/1b948550-7304-4379-82ac-e928cadcaba3)
-
-Select a principal → Object Types → check Computers → select site servers → Full control
-
-(Note: Applies to: `This object and all descendant objects`)
-
-![](https://github.com/user-attachments/assets/fc336fec-3628-4a12-9ca3-679109c235a0)
-
-### 2.2. Create service accounts in ADUC
+### 2.1. Create service accounts in ADUC
 
 #### Users
 
@@ -63,9 +42,31 @@ Password options:
 
 #### Add ConfigMgr administrators and site servers group to `Administrators` group
 
-![](https://github.com/user-attachments/assets/bb96237d-766f-400d-9d07-a1405c79341e)
+![](https://github.com/user-attachments/assets/39e0317e-8ace-44f5-98cc-9c38b31928fa)
 
-### 2.3. Extend AD schema
+### 2.2. Prepare system management container
+
+ADSI Edit → Connect to... → `Default naming context` → `CN=System` folder → New → Object → container → value: `System Management`
+
+![](https://github.com/user-attachments/assets/cb1dd7e9-0cca-4ad8-945b-6ceaa87f6ef6)
+
+![](https://github.com/user-attachments/assets/5ae9381a-3ec8-4416-a035-f269c98984c2)
+
+![](https://github.com/user-attachments/assets/8dad4d9a-700d-4f2d-8df7-9c432bfbeab5)
+
+### 2.3. Grant permissions on system management container to ConfigMgr
+
+Right-click on created `System Management` container → Properties → Security → Advanced → Add
+
+![](https://github.com/user-attachments/assets/1b948550-7304-4379-82ac-e928cadcaba3)
+
+Select a principal → Object Types → check Computers → select site servers → Full control
+
+(Note: Applies to: `This object and all descendant objects`)
+
+![](https://github.com/user-attachments/assets/c381b1b4-75e8-4962-86f1-ce740a0b3b6c)
+
+### 2.4. Extend AD schema
 
 ```pwsh
 PS C:\Users\Administrator> Start-Process cd.retail.LN\SMSSETUP\BIN\X64\extadsch.exe
