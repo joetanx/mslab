@@ -4,32 +4,41 @@ Ref:
 
 ## 1. Retrieve and extract ConfigMgr installation files
 
+https://www.microsoft.com/en-us/evalcenter/download-microsoft-endpoint-configuration-manager
 
+![](https://github.com/user-attachments/assets/9dbc867b-b246-4466-ae08-47d94489762d)
 
-## 2. Prepare SQL Server
+![](https://github.com/user-attachments/assets/d4f3ae2d-014b-47cc-8826-baac46ae5e2b)
 
-### 2.1. Install SQL data engine add ConfigMgrAdmins to SQL server administrators
+![](https://github.com/user-attachments/assets/a5e269f8-58ad-4ad6-8d7e-dda90f2f08e0)
 
-### 2.2. Install SSMS
+![](https://github.com/user-attachments/assets/eda4f970-1297-4279-a2a0-30a096b080b1)
 
-https://learn.microsoft.com/en-us/ssms/release-history#release-dates-and-build-numbers
+## 2. Prepare Active Directory
 
-### 2.3. Install SQL reporting services
-https://www.microsoft.com/en-us/download/details.aspx?id=104502
+### 2.1. Prepare system management container
 
-### 2.4. configure SPN for SQL server
-setspn -a MSSQLSvc/mssql.lab.vx:1433 MSSQLSvc
-setspn -a MSSQLSvc/mssql.lab.vx:MICROLAB MSSQLSvc
+ADSI Edit → Connect to... → `Default naming context` → `CN=System` folder → New → Object → container → value: `System Management`
 
-## 3. Prepare Active Directory
+![](https://github.com/user-attachments/assets/cb1dd7e9-0cca-4ad8-945b-6ceaa87f6ef6)
 
-### 3.1. Create system management container
+![](https://github.com/user-attachments/assets/5ae9381a-3ec8-4416-a035-f269c98984c2)
 
-ADSI edit → Connect to... → Default naming context → `CN=System` folder → New → Object → container → value: `System Management`
-right-click created `System Management` container → Properties → Security → add → Object Types \ Computers → select site servers → Full control
-Advanced → Edit added site server → change `Applies to`: `This object and all descendant objects`
+![](https://github.com/user-attachments/assets/8dad4d9a-700d-4f2d-8df7-9c432bfbeab5)
 
-### 3.2. Create service accounts in ADUC
+### 2.2. Grant permissions on system management container to ConfigMgr
+
+Right-click on created `System Management` container → Properties → Security → Advanced → Add
+
+![](https://github.com/user-attachments/assets/1b948550-7304-4379-82ac-e928cadcaba3)
+
+Select a principal → Object Types → check Computers → select site servers → Full control
+
+(Note: Applies to: `This object and all descendant objects`)
+
+![](https://github.com/user-attachments/assets/fc336fec-3628-4a12-9ca3-679109c235a0)
+
+### 2.2. Create service accounts in ADUC
 - users:
   - SQL reporting account (e.g. ConfigMgrSQLReporting)
   - domain join account (e.g. ConfigMgrDomainJoin)
@@ -40,16 +49,16 @@ Advanced → Edit added site server → change `Applies to`: `This object and al
   - ConfigMgrAdmins
   - ConfigMgrSiteServers
 
-### 3.3. extend AD schema
+### 2.3. extend AD schema
 
 ```
 Start-Process cd.retail.LN\SMSSETUP\BIN\X64\extadsch.exe
 Get-Content C:\ExtADSch.log
 ```
 
-## 4. Configure ConfigMgr prerequisites
+## 3. Configure ConfigMgr prerequisites
 
-### 4.1. configure firewall
+### 3.1. configure firewall
 
 ```cmd
 @echo ---- SQL Server Ports ----
@@ -77,19 +86,19 @@ netsh advfirewall firewall add rule name="SQL Browser" dir=in action=allow proto
 netsh advfirewall firewall add rule name="ICMP Allow incoming V4 echo request" protocol=icmpv4:8,any dir=in action=allow
 ```
 
-### 4.2. Prevent ConfigManager from installing on unintended drives
+### 3.2. Prevent ConfigManager from installing on unintended drives
 
 Create an empty no_sms_on_drive.sms file
 
 Place the file on drives that ConfigManager should not install on
 
-### 4.3. install roles
+### 3.3. install roles
 
 ```cmd
 powershell -NoProfile Install-WindowsFeature NET-Framework-Features,NET-Framework-Core,NET-HTTP-Activation,NET-Non-HTTP-Activ,NET-Framework-45-Features,NET-Framework-45-Core,NET-Framework-45-ASPNET,NET-WCF-Services45,NET-WCF-HTTP-Activation45,NET-WCF-TCP-PortSharing45,Web-Server,Web-WebServer,Web-ISAPI-Ext,Web-Windows-Auth,Web-Asp-Net,Web-Asp-Net45,Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,Web-WMI,BITS,BITS-IIS-Ext,RDC -IncludeManagementTools
 ```
 
-### 4.4. install windows ADK and windows PE add-on for windows ADK
+### 3.4. install windows ADK and windows PE add-on for windows ADK
 
 https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install
 
@@ -97,6 +106,29 @@ windows ADK:
 
 - Deployment Tools
 - User State Migration Tool (USMT)
+
+## 4. Prepare SQL Server
+
+### 4.1. Install SQL data engine add ConfigMgrAdmins to SQL server administrators
+
+### 4.2. Install SSMS
+
+https://learn.microsoft.com/en-us/ssms/release-history#release-dates-and-build-numbers
+
+![](https://github.com/user-attachments/assets/bb3c1352-ce27-4fc4-adda-9b361617cfb8)
+
+![](https://github.com/user-attachments/assets/5029fa40-ea9f-45d3-8190-ed181d4b7b1c)
+
+### 4.3. Install SQL reporting services
+
+https://www.microsoft.com/en-us/download/details.aspx?id=104502
+
+### 4.4. configure SPN for SQL server
+
+```cmd
+setspn -a MSSQLSvc/mssql.lab.vx:1433 MSSQLSvc
+setspn -a MSSQLSvc/mssql.lab.vx:MICROLAB MSSQLSvc
+```
 
 ## 5. Install ConfigMgr
 
