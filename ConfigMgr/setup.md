@@ -65,7 +65,7 @@ Password options:
 
 ![](https://github.com/user-attachments/assets/bb96237d-766f-400d-9d07-a1405c79341e)
 
-### 2.3. extend AD schema
+### 2.3. Extend AD schema
 
 ```pwsh
 PS C:\Users\Administrator> Start-Process cd.retail.LN\SMSSETUP\BIN\X64\extadsch.exe
@@ -103,7 +103,7 @@ PS C:\Users\Administrator> Get-Content C:\ExtADSch.log
 
 ## 3. Configure ConfigMgr prerequisites
 
-### 3.1. configure firewall
+### 3.1. Configure firewall
 
 ```cmd
 @echo ---- SQL Server Ports ----
@@ -137,20 +137,32 @@ Create an empty no_sms_on_drive.sms file
 
 Place the file on drives that ConfigManager should not install on
 
-### 3.3. install roles
+### 3.3. Install roles
 
 ```cmd
-powershell -NoProfile Install-WindowsFeature NET-Framework-Features,NET-Framework-Core,NET-HTTP-Activation,NET-Non-HTTP-Activ,NET-Framework-45-Features,NET-Framework-45-Core,NET-Framework-45-ASPNET,NET-WCF-Services45,NET-WCF-HTTP-Activation45,NET-WCF-TCP-PortSharing45,Web-Server,Web-WebServer,Web-ISAPI-Ext,Web-Windows-Auth,Web-Asp-Net,Web-Asp-Net45,Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,Web-WMI,BITS,BITS-IIS-Ext,RDC -IncludeManagementTools
+Install-WindowsFeature NET-Framework-Features,NET-Framework-Core,NET-HTTP-Activation,NET-Non-HTTP-Activ,NET-Framework-45-Features,NET-Framework-45-Core,NET-Framework-45-ASPNET,NET-WCF-Services45,NET-WCF-HTTP-Activation45,NET-WCF-TCP-PortSharing45,Web-Server,Web-WebServer,Web-ISAPI-Ext,Web-Windows-Auth,Web-Asp-Net,Web-Asp-Net45,Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,Web-WMI,BITS,BITS-IIS-Ext,RDC -IncludeManagementTools
 ```
 
 ### 3.4. install windows ADK and windows PE add-on for windows ADK
 
 https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install
 
-windows ADK:
+![](https://github.com/user-attachments/assets/7ae328bb-21a6-46a2-a2b4-eaaa6b392846)
+
+#### Windows ADK
+
+![](https://github.com/user-attachments/assets/bdb8448e-d67e-40b5-aa71-2685d54d6812)
 
 - Deployment Tools
 - User State Migration Tool (USMT)
+
+![](https://github.com/user-attachments/assets/ce46257e-e091-4bd5-aeb2-4531f35b9630)
+
+#### Windows PE add-on for the Windows ADK
+
+![](https://github.com/user-attachments/assets/ac444a43-0297-464d-a2d2-9c65ea7a0107)
+
+![](https://github.com/user-attachments/assets/5d4ec707-9c66-43f5-bdfb-bdf0ec19cb08)
 
 ## 4. Prepare SQL Server
 
@@ -174,6 +186,10 @@ https://learn.microsoft.com/en-us/ssms/release-history#release-dates-and-build-n
 
 https://www.microsoft.com/en-us/download/details.aspx?id=104502
 
+![](https://github.com/user-attachments/assets/d85316ce-e5f9-4a8e-bbc4-3e1cd7ffb393)
+
+![](https://github.com/user-attachments/assets/6c2279ab-9ce4-46bf-94ce-2e7114f0fac0)
+
 ### 4.4. configure SPN for SQL server
 
 ```cmd
@@ -181,13 +197,32 @@ setspn -a MSSQLSvc/mssql.lab.vx:1433 MSSQLSvc
 setspn -a MSSQLSvc/mssql.lab.vx:MICROLAB MSSQLSvc
 ```
 
+### 4.5. Install ODBC Driver for SQL Server
+
+https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server
+
+![](https://github.com/user-attachments/assets/4550f908-fe72-4d27-8255-da0d4b7e43a5)
+
+Test that the ODBC Driver for SQL Server exists when selecting ODBC data source
+
+![](https://github.com/user-attachments/assets/34a955b0-add8-429e-a91b-478ba713bbc7)
+
 ## 5. Install ConfigMgr
 
 ### 5.1. verify prerequisites
 
 ```
 Start-Process cd.retail.LN\SMSSETUP\BIN\X64\prereqchk.exe /AdminUI
-Get-Content C:\ExtADSch.log
 ```
 
+![](https://github.com/user-attachments/assets/7a43e2df-181e-4c94-8840-6b68af914463)
+
 ### 5.2. Install ConfigMgr
+
+```
+Start-Process cd.retail.LN\splash.hta
+```
+
+<img width="721" height="583" alt="image" src="https://github.com/user-attachments/assets/d5fefc25-5660-445f-b239-858759ea4711" />
+
+<img width="737" height="562" alt="image" src="https://github.com/user-attachments/assets/283bfa04-4b5e-40a2-b376-001dec71bab1" />
