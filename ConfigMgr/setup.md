@@ -188,11 +188,7 @@ https://learn.microsoft.com/en-us/ssms/release-history#release-dates-and-build-n
 
 ![](https://github.com/user-attachments/assets/5029fa40-ea9f-45d3-8190-ed181d4b7b1c)
 
-### 4.3. Create ConfigMgr database
-
-![](https://github.com/user-attachments/assets/73149e28-ef12-422c-a968-6a931c3e4906)
-
-### 4.4. Install SQL reporting services
+### 4.3. Install SQL reporting services
 
 https://www.microsoft.com/en-us/download/details.aspx?id=104502
 
@@ -200,14 +196,14 @@ https://www.microsoft.com/en-us/download/details.aspx?id=104502
 
 ![](https://github.com/user-attachments/assets/6c2279ab-9ce4-46bf-94ce-2e7114f0fac0)
 
-### 4.5. configure SPN for SQL server
+### 4.4. configure SPN for SQL server
 
 ```cmd
 setspn -a MSSQLSvc/mssql.lab.vx:1433 MSSQLSvc
 setspn -a MSSQLSvc/mssql.lab.vx:MICROLAB MSSQLSvc
 ```
 
-### 4.6. Install ODBC Driver for SQL Server
+### 4.5. Install ODBC Driver for SQL Server
 
 https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server
 
@@ -276,3 +272,5 @@ The warnings are fine for a lab setup, the details to resolve them are:
 - [SQL Server security mode](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#sql-server-security-mode)
 - [Configuration for SQL Server memory usage](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#configuration-for-sql-server-memory-usage)
 - [SQL Server process memory allocation](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#sql-server-process-memory-allocation)
+
+![](https://github.com/user-attachments/assets/d194574f-f660-4d2b-a523-512c07fd1f68)
