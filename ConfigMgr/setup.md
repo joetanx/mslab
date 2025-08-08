@@ -39,21 +39,66 @@ Select a principal → Object Types → check Computers → select site servers 
 ![](https://github.com/user-attachments/assets/fc336fec-3628-4a12-9ca3-679109c235a0)
 
 ### 2.2. Create service accounts in ADUC
-- users:
-  - SQL reporting account (e.g. ConfigMgrSQLReporting)
-  - domain join account (e.g. ConfigMgrDomainJoin)
-  - network access account (e.g. ConfigMgrNetworkAccess)
-  - client push account (e.g. ConfigMgrClientPush)
-- password options: `User cannot change password`, `Password never expires`
-- groups:
-  - ConfigMgrAdmins
-  - ConfigMgrSiteServers
+
+#### Users
+
+Password options:
+- User cannot change password
+- Password never expires
+
+|Account|Example name|
+|---|---|
+|SQL service account|`MSSQLSvc`|
+|SQL reporting account|`ConfigMgrSQLReporting`|
+|domain join account|`ConfigMgrDomainJoin`|
+|network access account|`ConfigMgrNetworkAccess`|
+|client push account|`ConfigMgrClientPush`|
+
+#### Groups
+
+|Account|Example name|
+|---|---|
+|Configuration Manager administrators|`ConfigMgrAdmins`|
+|Configuration Manager site servers|`ConfigMgrSiteServers`|
+
+#### Add ConfigMgr administrators and site servers group to `Administrators` group
+
+![](https://github.com/user-attachments/assets/bb96237d-766f-400d-9d07-a1405c79341e)
 
 ### 2.3. extend AD schema
 
-```
-Start-Process cd.retail.LN\SMSSETUP\BIN\X64\extadsch.exe
-Get-Content C:\ExtADSch.log
+```pwsh
+PS C:\Users\Administrator> Start-Process cd.retail.LN\SMSSETUP\BIN\X64\extadsch.exe
+PS C:\Users\Administrator> Get-Content C:\ExtADSch.log
+
+
+<08-08-2025 13:18:29> Modifying Active Directory Schema - with SMS extensions.
+﻿<08-08-2025 13:18:29> DS Root:CN=Schema,CN=Configuration,DC=lab,DC=vx
+﻿<08-08-2025 13:18:29> Defined attribute cn=MS-SMS-Site-Code.
+﻿<08-08-2025 13:18:29> Defined attribute cn=mS-SMS-Assignment-Site-Code.
+﻿<08-08-2025 13:18:29> Defined attribute cn=MS-SMS-Site-Boundaries.
+﻿<08-08-2025 13:18:29> Defined attribute cn=MS-SMS-Roaming-Boundaries.
+﻿<08-08-2025 13:18:29> Defined attribute cn=MS-SMS-Default-MP.
+﻿<08-08-2025 13:18:29> Defined attribute cn=mS-SMS-Device-Management-Point.
+﻿<08-08-2025 13:18:29> Defined attribute cn=MS-SMS-MP-Name.
+﻿<08-08-2025 13:18:29> Defined attribute cn=MS-SMS-MP-Address.
+﻿<08-08-2025 13:18:29> Defined attribute cn=mS-SMS-Health-State.
+﻿<08-08-2025 13:18:29> Defined attribute cn=mS-SMS-Source-Forest.
+﻿<08-08-2025 13:18:29> Defined attribute cn=MS-SMS-Ranged-IP-Low.
+﻿<08-08-2025 13:18:29> Defined attribute cn=MS-SMS-Ranged-IP-High.
+﻿<08-08-2025 13:18:29> Defined attribute cn=mS-SMS-Version.
+﻿<08-08-2025 13:18:29> Defined attribute cn=mS-SMS-Capabilities.
+﻿<08-08-2025 13:18:29> Defined class cn=MS-SMS-Management-Point.
+﻿<08-08-2025 13:18:29> Defined class cn=MS-SMS-Server-Locator-Point.
+﻿<08-08-2025 13:18:29> Defined class cn=MS-SMS-Site.
+﻿<08-08-2025 13:18:29> Defined class cn=MS-SMS-Roaming-Boundary-Range.
+﻿<08-08-2025 13:18:30> Successfully extended the Active Directory schema.
+
+﻿<08-08-2025 13:18:30> Please refer to the ConfigMgr documentation for instructions on the manual
+﻿<08-08-2025 13:18:30> configuration of access rights in active directory which may still
+﻿<08-08-2025 13:18:30> need to be performed.  (Although the AD schema has now be extended,
+﻿<08-08-2025 13:18:30> AD must be configured to allow each ConfigMgr Site security rights to
+﻿<08-08-2025 13:18:30> publish in each of their domains.)
 ```
 
 ## 3. Configure ConfigMgr prerequisites
@@ -110,6 +155,12 @@ windows ADK:
 ## 4. Prepare SQL Server
 
 ### 4.1. Install SQL data engine add ConfigMgrAdmins to SQL server administrators
+
+![](https://github.com/user-attachments/assets/2c30ffc9-0d74-4ecd-9307-479b867f5aa8)
+
+![](https://github.com/user-attachments/assets/00093c32-3a20-48be-8ca5-db0958d0105d)
+
+![](https://github.com/user-attachments/assets/cddcf160-8ab6-4bf8-8445-9540f522eb56)
 
 ### 4.2. Install SSMS
 
