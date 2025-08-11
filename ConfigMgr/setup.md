@@ -320,8 +320,20 @@ The update will take some time and it would look like the machine is idling at t
 
 ![](https://github.com/user-attachments/assets/0db3d54a-ada9-49e6-b300-1530c718bc49)
 
-The `SMS_EXECUTIVE` service will be stopped and disabled after some time as part of the upgrade, and the ConfigMgr console will disconnect
+The `SMS_EXECUTIVE` service will be stopped and disabled after some time as part of the update, and the ConfigMgr console will disconnect
 
 ![](https://github.com/user-attachments/assets/06ee8154-4389-4a4a-8b63-dcc7ebda5091)
 
 Monitor the `C:\Program Files\Microsoft Configuration Manager\Logs\CMUpdate.log` file for upgrade progress
+
+#### 5.4.3. Update ConfigMgr console
+
+![](https://github.com/user-attachments/assets/27c4a1b0-47ee-4b10-8c5a-769aca910067)
+
+#### 5.4.4. Update complete
+
+- Microsoft Configuration Manager Version: 2503
+- Console Version: 5.2503.1083.1000
+- Site Version: 5.0.9135.1000
+
+![](https://github.com/user-attachments/assets/e48960f6-daf1-4872-b553-af9225979aef)
