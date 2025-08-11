@@ -308,8 +308,12 @@ Check for updates, select the desired update, then `Run prerequisite check` foll
 
 Check status of the update installation: ConfigMgr console → Monitoring → Updates and Servicing Status → Show Status
 
-(or check `C:\Program Files\Microsoft Configuration Manager\Logs\CMUpdate.log` file)
-
 ![](https://github.com/user-attachments/assets/bdb1718c-6f53-4285-84c7-7713c46ece3f)
 
 ![](https://github.com/user-attachments/assets/70682128-af3f-4133-b4f8-124fd3e07f4d)
+
+The update will take some time and it would look like the machine is idling at times, click on the step to see more task details:
+
+![](https://github.com/user-attachments/assets/0db3d54a-ada9-49e6-b300-1530c718bc49)
+
+More detailed logs are in the `C:\Program Files\Microsoft Configuration Manager\Logs\CMUpdate.log` file
