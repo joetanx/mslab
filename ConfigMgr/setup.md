@@ -286,6 +286,8 @@ After the installation "core setup has completed" several backup tasks are runni
 
 ### 5.4. Update ConfigMgr
 
+#### 5.4.1. Initiate update
+
 ConfigMgr console → Administration → Updates and Servicing
 
 Check for updates, select the desired update, then `Run prerequisite check` followed by `Install Update pack`
@@ -306,6 +308,8 @@ Check for updates, select the desired update, then `Run prerequisite check` foll
 
 ![](https://github.com/user-attachments/assets/8df915b1-d75a-4488-a68c-d481fc8ceb3f)
 
+#### 5.4.2. Monitor update progress
+
 Check status of the update installation: ConfigMgr console → Monitoring → Updates and Servicing Status → Show Status
 
 ![](https://github.com/user-attachments/assets/bdb1718c-6f53-4285-84c7-7713c46ece3f)
@@ -316,4 +320,8 @@ The update will take some time and it would look like the machine is idling at t
 
 ![](https://github.com/user-attachments/assets/0db3d54a-ada9-49e6-b300-1530c718bc49)
 
-More detailed logs are in the `C:\Program Files\Microsoft Configuration Manager\Logs\CMUpdate.log` file
+The `SMS_EXECUTIVE` service will be stopped and disabled after some time as part of the upgrade, and the ConfigMgr console will disconnect
+
+![](https://github.com/user-attachments/assets/06ee8154-4389-4a4a-8b63-dcc7ebda5091)
+
+Monitor the `C:\Program Files\Microsoft Configuration Manager\Logs\CMUpdate.log` file for upgrade progress
