@@ -274,4 +274,34 @@ The warnings are fine for a lab setup, the details to resolve them are:
 - [Configuration for SQL Server memory usage](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#configuration-for-sql-server-memory-usage)
 - [SQL Server process memory allocation](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#sql-server-process-memory-allocation)
 
+### 5.3. Wait for component setup to complete
+
+After the installation "core setup has completed" several backup tasks are running to install other components such as management point
+
 ![](https://github.com/user-attachments/assets/d194574f-f660-4d2b-a523-512c07fd1f68)
+
+> [!Tip]
+>
+> It can take up to 1 hour for all setup to finish and the machine may look like it is idling at times
+
+### 5.4. Update ConfigMgr
+
+ConfigMgr console → Administration → Updates and Servicing
+
+Check for updates, select the desired update, then `Run prerequisite check` followed by `Install Update pack`
+
+![](https://github.com/user-attachments/assets/2c837c1c-b787-4bde-9b67-99647baeffe8)
+
+![](https://github.com/user-attachments/assets/c1363463-f4a6-4253-98be-698759a05765)
+
+![](https://github.com/user-attachments/assets/fe9d8104-3670-4b1e-8426-883c8d76d5fc)
+
+![](https://github.com/user-attachments/assets/82506fe4-1154-4f9f-9a06-c6f7f885837a)
+
+![](https://github.com/user-attachments/assets/353866e8-3a3a-4f1c-9c99-a70276f40e82)
+
+![](https://github.com/user-attachments/assets/b40c2331-1d97-400f-8fc5-e4e7b17a176c)
+
+![](https://github.com/user-attachments/assets/2c17f9c8-89fb-4b91-aa7a-a2865d706a36)
+
+![](https://github.com/user-attachments/assets/8df915b1-d75a-4488-a68c-d481fc8ceb3f)
