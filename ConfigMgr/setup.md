@@ -305,3 +305,11 @@ Check for updates, select the desired update, then `Run prerequisite check` foll
 ![](https://github.com/user-attachments/assets/2c17f9c8-89fb-4b91-aa7a-a2865d706a36)
 
 ![](https://github.com/user-attachments/assets/8df915b1-d75a-4488-a68c-d481fc8ceb3f)
+
+Check status of the update installation: ConfigMgr console → Monitoring → Updates and Servicing Status → Show Status
+
+(or check `C:\Program Files\Microsoft Configuration Manager\Logs\CMUpdate.log` file)
+
+![](https://github.com/user-attachments/assets/bdb1718c-6f53-4285-84c7-7713c46ece3f)
+
+![](https://github.com/user-attachments/assets/70682128-af3f-4133-b4f8-124fd3e07f4d)
