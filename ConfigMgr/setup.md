@@ -216,7 +216,7 @@ Test that the ODBC Driver for SQL Server exists when selecting ODBC data source
 
 ## 5. Install ConfigMgr
 
-### 5.1. verify prerequisites
+### 5.1. Verify prerequisites
 
 ```
 Start-Process cd.retail.LN\SMSSETUP\BIN\X64\prereqchk.exe /AdminUI
@@ -274,19 +274,27 @@ The warnings are fine for a lab setup, the details to resolve them are:
 - [Configuration for SQL Server memory usage](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#configuration-for-sql-server-memory-usage)
 - [SQL Server process memory allocation](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#sql-server-process-memory-allocation)
 
-### 5.3. Wait for component setup to complete
-
-After the installation "core setup has completed" several backup tasks are running to install other components such as management point
+The setup wizard takes about 25 mins before it can exit, with a few items still running:
 
 ![](https://github.com/user-attachments/assets/d194574f-f660-4d2b-a523-512c07fd1f68)
 
 > [!Tip]
 >
+> Do not exit the setup wizard window, the status of each component setup is still being updated in the wizard
+>
 > It can take up to 1 hour for all setup to finish and the machine may look like it is idling at times
+>
+> When the setup is fully completed, all components have the ✅ completion icon
+>
+> ![](https://github.com/user-attachments/assets/0a840a05-c5ce-414c-8bd1-4d0b6172bc20)
 
-### 5.4. Update ConfigMgr
+### 5.3. Update ConfigMgr
 
-#### 5.4.1. Initiate update
+> [!Tip]
+>
+> Service connection point is required for updates to work
+
+#### 5.3.1. Initiate update
 
 ConfigMgr console → Administration → Updates and Servicing
 
@@ -308,7 +316,7 @@ Check for updates, select the desired update, then `Run prerequisite check` foll
 
 ![](https://github.com/user-attachments/assets/8df915b1-d75a-4488-a68c-d481fc8ceb3f)
 
-#### 5.4.2. Monitor update progress
+#### 5.3.2. Monitor update progress
 
 Check status of the update installation: ConfigMgr console → Monitoring → Updates and Servicing Status → Show Status
 
@@ -326,14 +334,50 @@ The `SMS_EXECUTIVE` service will be stopped and disabled after some time as part
 
 Monitor the `C:\Program Files\Microsoft Configuration Manager\Logs\CMUpdate.log` file for upgrade progress
 
-#### 5.4.3. Update ConfigMgr console
+#### 5.3.3. Update ConfigMgr console
 
 ![](https://github.com/user-attachments/assets/27c4a1b0-47ee-4b10-8c5a-769aca910067)
 
-#### 5.4.4. Update complete
+#### 5.3.4. Update complete
 
 - Microsoft Configuration Manager Version: 2503
 - Console Version: 5.2503.1083.1000
 - Site Version: 5.0.9135.1000
 
 ![](https://github.com/user-attachments/assets/e48960f6-daf1-4872-b553-af9225979aef)
+
+## 6. Prepare Active Directory boundary for client installation
+
+### 6.1. Configure Active Directory forest discovery
+
+ConfigMgr console → Administration → Hierachy Configuration → Discovery Methods
+
+![](https://github.com/user-attachments/assets/fff3ac6c-dc1e-4c85-89ee-c14a5819f96e)
+
+![](https://github.com/user-attachments/assets/d7376225-b21c-4624-a345-ad6bf52d014b)
+
+### 6.2. Verify boundary created from discovery
+
+ConfigMgr console → Administration → Hierachy Configuration → Boundaries
+
+![](https://github.com/user-attachments/assets/457593d2-8e62-424c-bc09-e43279d9436f)
+
+### 6.3. Create boundary group to associate boundary and site server
+
+ConfigMgr console → Administration → Hierachy Configuration → Boundary Groups → Create Boundary Group
+
+![](https://github.com/user-attachments/assets/edc40cdf-cb2a-4b50-991d-a3f8fc9c234d)
+
+General → Boundaries → Add... → select the Active Directory boundary:
+
+![](https://github.com/user-attachments/assets/e7745143-eb57-447f-9c96-40b34fb0ab4c)
+
+![](https://github.com/user-attachments/assets/92f0ffcb-e6cc-4d33-868b-2b1a7293d322)
+
+References → Select site system servers → Add... → select the site system:
+
+![](https://github.com/user-attachments/assets/b3bef1a9-7a95-48b9-a329-52068f2247ed)
+
+![](https://github.com/user-attachments/assets/393cc69e-ea19-40f6-bc2c-d74f565100de)
+
+![](https://github.com/user-attachments/assets/12798d4c-0c02-4172-b7fa-4ee2813732c9)
