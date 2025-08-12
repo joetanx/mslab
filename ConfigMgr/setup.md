@@ -376,7 +376,7 @@ General → Boundaries → Add... → select the Active Directory boundary:
 
 References → Select site system servers → Add... → select the site system:
 
-![](https://github.com/user-attachments/assets/b3bef1a9-7a95-48b9-a329-52068f2247ed)
+![](https://github.com/user-attachments/assets/c0afd6c1-884e-4378-a61f-31c1d268b3cf)
 
 ![](https://github.com/user-attachments/assets/393cc69e-ea19-40f6-bc2c-d74f565100de)
 
