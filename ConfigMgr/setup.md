@@ -35,14 +35,14 @@ Password options:
 
 #### Groups
 
-|Account|Example name|
-|---|---|
-|Configuration Manager administrators|`ConfigMgrAdmins`|
-|Configuration Manager site servers|`ConfigMgrSiteServers`|
+|Account|Example name|Members|
+|---|---|---|
+|Configuration Manager administrators|`ConfigMgrAdmins`|Add users that would be administrators of ConfigMgr servers|
+|Configuration Manager site servers|`ConfigMgrSiteServers`|Add the ConfigMgr servers|
 
-#### Add ConfigMgr administrators and site servers group to `Administrators` group
+#### Add ConfigMgr administrators and site servers group to `Administrators` group on the ConfigMgr server
 
-![](https://github.com/user-attachments/assets/39e0317e-8ace-44f5-98cc-9c38b31928fa)
+![](https://github.com/user-attachments/assets/60620efe-7643-4759-bb35-f8a27649724d)
 
 ### 2.2. Prepare system management container
 
@@ -107,29 +107,12 @@ PS C:\Users\Administrator> Get-Content C:\ExtADSch.log
 ### 3.1. Configure firewall
 
 ```cmd
-@echo ---- SQL Server Ports ----
-@echo Enabling SQL Server default instance port 1433
-netsh advfirewall firewall add rule name="SQL Server" dir=in action=allow protocol=TCP localport=1433
-@echo Enabling Dedicated Admin Connection port 1434
-netsh advfirewall firewall add rule name="SQL Admin Connection" dir=in action=allow protocol=TCP localport=1434
-@echo Enabling conventional SQL Server Service Broker port 4022
-netsh advfirewall firewall add rule name="SQL Service Broker" dir=in action=allow protocol=TCP localport=49022
-@echo Enabling Transact-SQL Debugger/RPC port 135
-netsh advfirewall firewall add rule name="SQL Debugger/RPC" dir=in action=allow protocol=TCP localport=135
-@echo ---- Analysis Services Ports ----
-@echo Enabling SSAS Default Instance port 2383
-netsh advfirewall firewall add rule name="Analysis Services" dir=in action=allow protocol=TCP localport=2383
-@echo Enabling SQL Server Browser Service port 2382
-netsh advfirewall firewall add rule name="SQL Browser" dir=in action=allow protocol=TCP localport=2382
-@echo ---- Misc Applications ----
-@echo Enabling HTTP port 80
-netsh advfirewall firewall add rule name="HTTP" dir=in action=allow protocol=TCP localport=80
-@echo Enabling SSL port 443
-netsh advfirewall firewall add rule name="SSL" dir=in action=allow protocol=TCP localport=443
-@echo Enabling port for SQL Server Browser Service's 'Browse' Button
-netsh advfirewall firewall add rule name="SQL Browser" dir=in action=allow protocol=TCP localport=1434
-@echo Allowing Ping command
-netsh advfirewall firewall add rule name="ICMP Allow incoming V4 echo request" protocol=icmpv4:8,any dir=in action=allow
+netsh advfirewall firewall add rule name="SQL Server" dir=in action=allow program="%ProgramFiles%\Microsoft SQL Server\MSSQL16.MICROLAB\MSSQL\Binn\sqlservr.exe" enable=yes
+netsh advfirewall firewall add rule name="SQL Server Browser" dir=in action=allow program="%ProgramFiles% (x86)\Microsoft SQL Server\90\Shared\sqlbrowser.exe" enable=yes
+netsh advfirewall firewall add rule name="SQL Misc" dir=in action=allow protocol=TCP localport=2382,2383,4022
+netsh advfirewall firewall set rule name="World Wide Web Services (HTTPS Traffic-In)" new enable=yes
+netsh advfirewall firewall set rule name="World Wide Web Services (HTTP Traffic-In)" new enable=yes
+netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=Yes
 ```
 
 ### 3.2. Prevent ConfigManager from installing on unintended drives
@@ -169,7 +152,7 @@ https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install
 
 IIS Manager → Default Web Site → Bindings... → Add... → Type: `https` → select SSL certificate that has SAN for the ConfigMgr management and distribution point FQDNs
 
-![](https://github.com/user-attachments/assets/591c8e2f-bdf5-44ab-b849-6f2842370c76)
+![](https://github.com/user-attachments/assets/6e4d5c93-192a-4db7-9dbe-0539411fe297)
 
 ## 4. Prepare SQL Server
 
@@ -201,7 +184,7 @@ https://www.microsoft.com/en-us/download/details.aspx?id=104502
 
 ```cmd
 setspn -a MSSQLSvc/mssql.lab.vx:1433 MSSQLSvc
-setspn -a MSSQLSvc/mssql.lab.vx:MICROLAB MSSQLSvc
+setspn -a MSSQLSvc/mssql.lab.vx:ConfigMgr MSSQLSvc
 ```
 
 ### 4.5. Install ODBC Driver for SQL Server
@@ -234,39 +217,53 @@ Start-Process cd.retail.LN\splash.hta
 
 ![](https://github.com/user-attachments/assets/d49040a4-a705-43ed-b3c6-f7fd4483109d)
 
+Install a new standalone primary site:
+
 ![](https://github.com/user-attachments/assets/0bcf14bc-cb51-44d4-ad76-c83148d1cf49)
 
 ![](https://github.com/user-attachments/assets/1f6d0e81-3cb6-4d1e-b949-fb6bf94c0017)
 
 ![](https://github.com/user-attachments/assets/c53e0e7d-d47d-4ccf-97b2-622c8254f065)
 
-![](https://github.com/user-attachments/assets/25715e07-0817-4dc5-902f-5f185dd14675)
+Setup ConfigMgr prerequisite files:
+
+![](https://github.com/user-attachments/assets/86117513-6666-4dbd-a096-a257366945b4)
 
 ![](https://github.com/user-attachments/assets/c17800f7-5923-454c-90ee-7db2b5d7f757)
 
 ![](https://github.com/user-attachments/assets/41b92906-d972-4017-9795-31da8c6ddfe7)
 
+Configure ConfigMgr site settings:
+
 ![](https://github.com/user-attachments/assets/d3680388-5e64-47d5-9c12-1a1a7ad4c641)
 
 ![](https://github.com/user-attachments/assets/ebcc4aaa-df0a-4284-8a00-473b9d3402c8)
 
-![](https://github.com/user-attachments/assets/6b171708-1c3a-426d-9ef8-b734d354b853)
+Configure SQL Server connection:
 
-![](https://github.com/user-attachments/assets/2d8928a9-1efc-426a-a2b9-172f93292342)
+![](https://github.com/user-attachments/assets/ca0b67f8-ed10-4136-83c2-70abf4277dd4)
 
-![](https://github.com/user-attachments/assets/339e346d-1b8e-4d62-8021-8813b9eb3d38)
+![](https://github.com/user-attachments/assets/28dfcd45-90a9-4c04-8ed9-e1e7cac8199f)
+
+Configure SMS provider:
+
+![](https://github.com/user-attachments/assets/99b430cc-3560-4a53-a0be-5b7dfcba2465)
 
 ![](https://github.com/user-attachments/assets/eb29241b-fb6a-447e-be4a-aa57dd133d2c)
 
-![](https://github.com/user-attachments/assets/cb83b11b-654b-4c7d-bb64-f1e1e8015ac8)
+Configure management point and distribution point:
+
+![](https://github.com/user-attachments/assets/188dbe4f-3859-4045-9ec8-c149f6536652)
 
 ![](https://github.com/user-attachments/assets/9a7b5ccd-c635-4b51-8441-a1d4baa89bd5)
 
-![](https://github.com/user-attachments/assets/a8f276fe-5d5d-4c8a-9a5d-861580a9e544)
+Configure service connection point:
+
+![](https://github.com/user-attachments/assets/d5f4e24e-a94c-434d-8842-ceecbc0567e6)
 
 ![](https://github.com/user-attachments/assets/f220c84a-5821-405c-9902-3ce526fbc0a9)
 
-![](https://github.com/user-attachments/assets/50c4c0f4-c107-419d-a2a3-23247fe9a4cb)
+![](https://github.com/user-attachments/assets/7c7a3f92-c667-4799-9119-be4aa4e59dfe)
 
 The warnings are fine for a lab setup, the details to resolve them are:
 - [SQL Server Native Client](https://learn.microsoft.com/en-us/intune/configmgr/core/servers/deploy/install/list-of-prerequisite-checks#sql-server-native-client)
