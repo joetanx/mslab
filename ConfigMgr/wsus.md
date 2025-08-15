@@ -29,3 +29,7 @@ Finish setup:
 ![](https://github.com/user-attachments/assets/2269322d-2956-436c-9be0-7086cc9c091e)
 
 ![](https://github.com/user-attachments/assets/9856054b-308c-4983-8901-f284f6bbc510)
+
+`C:\Program Files\Update Services\AdministrationSnapin\wsus.msc`:
+
+![](https://github.com/user-attachments/assets/309b9f75-1816-4601-816d-7b1465c8bc9b)
