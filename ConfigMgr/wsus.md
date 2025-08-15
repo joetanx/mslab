@@ -1,22 +1,30 @@
+Connect to SQL Server, WSUS uses the machine identity to connect
+
 ![](https://github.com/user-attachments/assets/50bb7f8e-1c8d-42e3-92b9-2fc129e655e1)
 
 ![](https://github.com/user-attachments/assets/d0060499-d35c-47c5-8d1e-23dfc2a98d8e)
 
 ![](https://github.com/user-attachments/assets/bddc4e92-fead-45de-851f-12fff520d379)
 
+Select synchronization options:
+
 ![](https://github.com/user-attachments/assets/37717212-dbd9-4ebc-9de4-38e6c033b228)
 
 ![](https://github.com/user-attachments/assets/108e7186-803b-4bbf-a0d5-f7482195ecb9)
 
-![](https://github.com/user-attachments/assets/726dd27a-f140-4786-b785-8f5140bf0e7d)
+Connect to upstream update source, it takes about 15-20 mins for the connection to complete:
 
-It takes about 15-20 mins for the connection to complete:
+![](https://github.com/user-attachments/assets/726dd27a-f140-4786-b785-8f5140bf0e7d)
 
 ![](https://github.com/user-attachments/assets/f856fe25-39cb-4ea9-aac0-86772f2ce739)
 
-![](https://github.com/user-attachments/assets/c0689f2e-2224-4f18-808c-642e49da14be)
+Select the desired updates:
+
+![](https://github.com/user-attachments/assets/7a29f350-79df-4c68-ba43-2335df0abba7)
 
 ![](https://github.com/user-attachments/assets/facd45e4-183b-4028-b5c1-bbf675178896)
+
+Finish setup:
 
 ![](https://github.com/user-attachments/assets/2269322d-2956-436c-9be0-7086cc9c091e)
 
