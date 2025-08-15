@@ -33,3 +33,7 @@ Finish setup:
 `C:\Program Files\Update Services\AdministrationSnapin\wsus.msc`:
 
 ![](https://github.com/user-attachments/assets/309b9f75-1816-4601-816d-7b1465c8bc9b)
+
+Depending on the selected updates, it can take 2 hours or more to complete synchronization
+
+![](https://github.com/user-attachments/assets/a3762878-6ffd-4d68-b5e3-f7916fed3b1e)
