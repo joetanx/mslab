@@ -53,3 +53,11 @@ Monitor the `C:\Program Files\Microsoft Configuration Manager\Logs\CMUpdate.log`
 - Site Version: 5.0.9135.1000
 
 ![](https://github.com/user-attachments/assets/e48960f6-daf1-4872-b553-af9225979aef)
+
+### 5. Troubleshooting installation
+
+The ConfigMgr update logs is at `C:\Program Files\Microsoft Configuration Manager\Logs\CMUpdate.log`
+
+The ConfigMgr trace tool at `C:\Program Files\Microsoft Configuration Manager\tools\cmtrace.exe` makes tracing ConfigMgr logs easier
+
+![](https://github.com/user-attachments/assets/bfde51b8-334f-49fa-9053-073fb24175df)
