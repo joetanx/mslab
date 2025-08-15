@@ -297,7 +297,7 @@ ConfigMgr console → Administration → Updates and Servicing
 
 Check for updates, select the desired update, then `Run prerequisite check` followed by `Install Update pack`
 
-![](https://github.com/user-attachments/assets/2c837c1c-b787-4bde-9b67-99647baeffe8)
+![](https://github.com/user-attachments/assets/fd98dad8-9b47-4b87-9b7f-5acf32c686cb)
 
 ![](https://github.com/user-attachments/assets/c1363463-f4a6-4253-98be-698759a05765)
 
@@ -317,7 +317,7 @@ Check for updates, select the desired update, then `Run prerequisite check` foll
 
 Check status of the update installation: ConfigMgr console → Monitoring → Updates and Servicing Status → Show Status
 
-![](https://github.com/user-attachments/assets/bdb1718c-6f53-4285-84c7-7713c46ece3f)
+![](https://github.com/user-attachments/assets/b63e17d0-7733-4b5d-ad1c-a49729b68f99)
 
 ![](https://github.com/user-attachments/assets/70682128-af3f-4133-b4f8-124fd3e07f4d)
 
@@ -333,7 +333,7 @@ Monitor the `C:\Program Files\Microsoft Configuration Manager\Logs\CMUpdate.log`
 
 #### 5.3.3. Update ConfigMgr console
 
-![](https://github.com/user-attachments/assets/27c4a1b0-47ee-4b10-8c5a-769aca910067)
+![](https://github.com/user-attachments/assets/8ed826ed-8efa-4905-ac89-7375a038c181)
 
 #### 5.3.4. Update complete
 
