@@ -284,3 +284,13 @@ The setup wizard takes about 25 mins before it can exit, with a few items still 
 > When the setup is fully completed, all components have the ✅ completion icon
 >
 > ![](https://github.com/user-attachments/assets/0a840a05-c5ce-414c-8bd1-4d0b6172bc20)
+
+### 6. Troubleshooting installation
+
+The setup logs are in `C:\Program Files\Microsoft Configuration Manager\Logs`
+
+The ConfigMgr trace tool at `C:\Program Files\Microsoft Configuration Manager\tools\cmtrace.exe` makes tracing ConfigMgr logs easier
+
+Example: management point setup log `MPSetup.log`:
+
+![](https://github.com/user-attachments/assets/b914360f-f6d6-44e1-a2e0-64263b5a99f2)
