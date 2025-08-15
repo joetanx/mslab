@@ -47,3 +47,13 @@ Finish setup:
 ![](https://github.com/user-attachments/assets/a885040b-4df1-466f-bcbb-0be8395d4939)
 
 ![](https://github.com/user-attachments/assets/5db22afe-e5d6-475b-abe0-8fc3387d22cf)
+
+Verify installation status in logs:
+
+`C:\Program Files\Microsoft Configuration Manager\Logs\SUPSetup.log`
+
+![](https://github.com/user-attachments/assets/b23cc7b3-9311-4a01-8ee9-26596831bc93)
+
+> [!Tip]
+>
+> The ConfigMgr trace tool at `C:\Program Files\Microsoft Configuration Manager\tools\cmtrace.exe` makes tracing ConfigMgr logs easier
