@@ -1,3 +1,5 @@
+## 1. Setup SUP site system role
+
 ConfigMgr console → Administration → Site Configuration → Servers and Site System roles
 
 ![](https://github.com/user-attachments/assets/4b2ad0de-e524-4210-b399-37ebf13f89c6)
@@ -48,12 +50,22 @@ Finish setup:
 
 ![](https://github.com/user-attachments/assets/5db22afe-e5d6-475b-abe0-8fc3387d22cf)
 
-Verify installation status in logs:
+## 2. Verify installation status
 
-`C:\Program Files\Microsoft Configuration Manager\Logs\SUPSetup.log`
-
-![](https://github.com/user-attachments/assets/b23cc7b3-9311-4a01-8ee9-26596831bc93)
+The ConfigMgr logs are at: `C:\Program Files\Microsoft Configuration Manager\Logs`
 
 > [!Tip]
 >
 > The ConfigMgr trace tool at `C:\Program Files\Microsoft Configuration Manager\tools\cmtrace.exe` makes tracing ConfigMgr logs easier
+
+Status of site system role installation: `SUPSetup.log`:
+
+![](https://github.com/user-attachments/assets/b23cc7b3-9311-4a01-8ee9-26596831bc93)
+
+Status of site server connection to WSUS: `WCM.log`:
+
+![](https://github.com/user-attachments/assets/74699c95-55a8-48b4-a99a-5762317cbd72)
+
+Status of site server configuration, database connectivity and health of the WSUS server of the site: `WSUSCtrl.log`:
+
+![](https://github.com/user-attachments/assets/9c150ca0-f622-4942-88ad-cbd154310922)
