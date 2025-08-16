@@ -1,4 +1,6 @@
-## 1. Setup endpoint protection site system role
+Ref: https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-protection-configure
+
+## 1. Setup EPP site system role
 
 ConfigMgr console → Administration → Site Configuration → Servers and Site System roles
 
@@ -12,7 +14,7 @@ Configure proxy settings:
 
 ![](https://github.com/user-attachments/assets/82ac5522-6251-444e-b2b9-317547b0e584)
 
-Configure endpoint protection:
+Configure endpoint protection point:
 
 ![](https://github.com/user-attachments/assets/c1a76015-bc73-4519-9e60-5d373f04253d)
 
@@ -26,7 +28,7 @@ Configure endpoint protection:
 
 ![](https://github.com/user-attachments/assets/fbdf1191-3d38-4a0e-836e-fc6c7cb644ad)
 
-## 2. Verify installation status
+### 1.1. Verify installation status
 
 The ConfigMgr logs are at: `C:\Program Files\Microsoft Configuration Manager\Logs`
 
