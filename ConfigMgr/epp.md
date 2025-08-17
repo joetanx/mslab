@@ -2,6 +2,8 @@ Ref: https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpo
 
 ## 1. Setup EPP site system role
 
+https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-protection-site-role
+
 ConfigMgr console → Administration → Site Configuration → Servers and Site System roles
 
 ![](https://github.com/user-attachments/assets/3c36a1cb-2a8d-46e4-8b19-41a755d397da)
@@ -40,7 +42,9 @@ Status of site system role installation: `EPSetup.log`:
 
 ![](https://github.com/user-attachments/assets/6ae604f3-19da-471a-94a5-bffa369085b3)
 
-## 2. Setup alerts for endpoint protection
+## 2. Configure alerts for endpoint protection
+
+https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-configure-alerts
 
 ConfigMgr console → Assets and Compliance → Device Collections → Select device collection → Properties
 
@@ -74,3 +78,50 @@ Configure the details for each alert:
 |Repeated malware detection|![](https://github.com/user-attachments/assets/37acf6e8-5c99-4c74-b45d-e9be71b58eb5)|
 |Multiple malware detection|![](https://github.com/user-attachments/assets/fc6721bc-7004-4416-b902-b49f1fa86cf1)|
 |Collection membership|![](https://github.com/user-attachments/assets/bc08005a-069a-44c8-8c73-c8c416b54688)|
+
+## 3. Configure antimalware policies for endpoint protection
+
+https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-antimalware-policies
+
+Antimalware policies specify how Endpoint Protection protects devices from malware and other threats
+
+|Setting|Details|
+|---|---|
+|Scheduled scans|![](https://github.com/user-attachments/assets/27fa2386-5519-4b63-b663-af05bd0f227b)|
+|Scan settings|![](https://github.com/user-attachments/assets/551566bf-8885-4b9d-8d69-cd235575525d)|
+|Default actions|![](https://github.com/user-attachments/assets/15be32ef-d274-4542-bd10-1842bed38d9c)|
+|Real-time protection|![](https://github.com/user-attachments/assets/567669af-ed89-4a41-8699-764f9d66a130)|
+|Exclusion settings|![](https://github.com/user-attachments/assets/016c56b1-e07f-40e4-b8a2-93a257be0511)|
+|Advanced|![](https://github.com/user-attachments/assets/221ab8e5-9ded-48a3-b075-4179fa851730)|
+|Threat overrides|![](https://github.com/user-attachments/assets/76a99f81-4769-4cc4-9a86-57e580d6dad2)|
+|Cloud Protection Service|![](https://github.com/user-attachments/assets/2263f52a-36f2-4b41-b453-0b7ca873aab3)|
+
+### 3.1. Configure definition updates for endpoint protection
+
+https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-definition-updates
+
+ConfigMgr console → Assets and Compliance → Endpoint Protection → Antimalware Policies → Default Client Antimalware Policy or Create Antimalware Policy
+
+![](https://github.com/user-attachments/assets/09dfbad8-472f-47cd-a771-cae0174cc5d4)
+
+Security Intelligence updates → Set Source
+
+> Definition updates was renamed to Security Intelligence updates from ConfigMgr 1902
+
+![](https://github.com/user-attachments/assets/4d9aede9-40ef-43e7-a3c4-37a807275f5e)
+
+![](https://github.com/user-attachments/assets/370129e1-e352-4844-8c78-dbabe54838d4)
+
+|Setting|Description|
+|---|---|
+|[Updates distributed from Configuration Manager](https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-definitions-configmgr)|This method uses Configuration Manager software updates to deliver definition and engine updates to computers in your hierarchy.|
+|[Updates distributed from Windows Server Update Services (WSUS)](https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-definitions-wsus)|This method uses your WSUS infrastructure to deliver definition and engine updates to computers.|
+|[Updates distributed from Microsoft Update](https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-definitions-microsoft-updates)|This method allows computers to connect directly to Microsoft Update in order to download definition and engine updates. This method can be useful for computers that are not often connected to the business network.|
+|Updates distributed from Microsoft Malware Protection Center|This method will download definition updates from the Microsoft Malware Protection Center.|
+|[Updates from UNC file shares](https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-definitions-network)|With this method, you can save the latest definition and engine updates to a share on the network. Clients can then access the network to install the updates.|
+
+## 4. Configure client settings for endpoint protection
+
+https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-protection-configure-client
+
+
