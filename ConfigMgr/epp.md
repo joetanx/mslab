@@ -189,10 +189,26 @@ Edit the Default Client Settings or Create Custom Client Device Settings
 >
 > ![](https://github.com/user-attachments/assets/9054b899-e61b-4ff3-aa9e-a1c662ba1a3b)
 
-## 6. Client-side view
+## 6. Endpoint protection in action
+
+### 6.1. Windows Security status
 
 If everything is configured correctly, the Defender Antivirus engine is updated by ConfigMgr and the effective policy is shown under Windows Security → Settings → About
 
 |Before|After|
 |---|---|
 |![](https://github.com/user-attachments/assets/8b6f12fd-b262-439b-8c18-99c5401aebd2)|![](https://github.com/user-attachments/assets/79c3852e-a2f6-44a6-acbe-8df1ae69c858)|
+
+### 6.2. Malware detection
+
+Testing a meterpreter payload and PowerShell Reverse shell script across 2 machines, the malware is mitigated and recorded in protection history of each machine:
+
+![](https://github.com/user-attachments/assets/4ee7b4fd-4372-40cc-81df-ac44074a578a)
+
+Each event is alerted in ConfigMgr as defined in the "malware detection" alert rule:
+
+![](https://github.com/user-attachments/assets/40cccffb-6d51-4924-b0de-b1e8febd08d1)
+
+And the events across the machines are collated as defined in the "malware outbreak" alert rule:
+
+![](https://github.com/user-attachments/assets/820da304-7ccc-41ed-960e-c38a8e4ae2e3)
