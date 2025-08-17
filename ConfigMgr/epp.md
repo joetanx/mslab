@@ -85,6 +85,22 @@ https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-a
 
 Antimalware policies specify how Endpoint Protection protects devices from malware and other threats
 
+ConfigMgr console → Assets and Compliance → Endpoint Protection → Antimalware Policies
+
+![](https://github.com/user-attachments/assets/09dfbad8-472f-47cd-a771-cae0174cc5d4)
+
+Edit the Default Client Antimalware Policy or Create Antimalware Policy
+
+> [!Tip]
+>
+> Create antimalware policies to control specific settings and deploy to specified device collections
+>
+> ![](https://github.com/user-attachments/assets/13ba085c-6b64-4a89-9ced-8a8916626d4b)
+>
+> ![](https://github.com/user-attachments/assets/d00f6c7b-79c9-4499-9342-c40a233d4d5c)
+>
+> ![](https://github.com/user-attachments/assets/691815a2-5c35-4740-a116-3c563ceca53e)
+
 |Setting|Details|
 |---|---|
 |Scheduled scans|![](https://github.com/user-attachments/assets/27fa2386-5519-4b63-b663-af05bd0f227b)|
@@ -99,10 +115,6 @@ Antimalware policies specify how Endpoint Protection protects devices from malwa
 ### 3.1. Configure definition updates for endpoint protection
 
 https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-definition-updates
-
-ConfigMgr console → Assets and Compliance → Endpoint Protection → Antimalware Policies → Default Client Antimalware Policy or Create Antimalware Policy
-
-![](https://github.com/user-attachments/assets/09dfbad8-472f-47cd-a771-cae0174cc5d4)
 
 Security Intelligence updates → Set Source
 
