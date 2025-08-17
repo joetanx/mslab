@@ -110,7 +110,7 @@ Security Intelligence updates → Set Source
 
 ![](https://github.com/user-attachments/assets/4d9aede9-40ef-43e7-a3c4-37a807275f5e)
 
-![](https://github.com/user-attachments/assets/370129e1-e352-4844-8c78-dbabe54838d4)
+![](https://github.com/user-attachments/assets/c294fe27-5c4f-4169-b3c9-d898b9297031)
 
 |Setting|Description|
 |---|---|
