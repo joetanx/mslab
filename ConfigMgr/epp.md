@@ -105,6 +105,8 @@ ConfigMgr console → Software Library → Software Updates → All Software Upd
 
 ![](https://github.com/user-attachments/assets/9709c4d2-b593-4eb8-a143-5d576fe38493)
 
+![](https://github.com/user-attachments/assets/eb513f59-2b30-4e0c-8192-116ccd32902a)
+
 ## 4. Configure antimalware policies for endpoint protection
 
 https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-antimalware-policies
@@ -186,3 +188,11 @@ Edit the Default Client Settings or Create Custom Client Device Settings
 > ![](https://github.com/user-attachments/assets/f996a614-a37f-4915-b240-f2e66bbc7e97)
 >
 > ![](https://github.com/user-attachments/assets/9054b899-e61b-4ff3-aa9e-a1c662ba1a3b)
+
+## 6. Client-side view
+
+If everything is configured correctly, the Defender Antivirus engine is updated by ConfigMgr and the effective policy is shown under Windows Security → Settings → About
+
+|Before|After|
+|---|---|
+|![](https://github.com/user-attachments/assets/8b6f12fd-b262-439b-8c18-99c5401aebd2)|![](https://github.com/user-attachments/assets/79c3852e-a2f6-44a6-acbe-8df1ae69c858)|
