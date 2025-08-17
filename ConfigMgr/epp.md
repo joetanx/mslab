@@ -54,3 +54,23 @@ ConfigMgr console → Assets and Compliance → Device Collections → Select de
 >
 > ![](https://github.com/user-attachments/assets/b7cbbdce-05f9-477a-806a-5ac7c92ce4d6)
 
+Alerts → Add...
+
+![](https://github.com/user-attachments/assets/860a9443-fd81-4a88-a102-1ab1fcad16dc)
+
+Select the desired events to alert for:
+
+![](https://github.com/user-attachments/assets/12e74c9c-eae4-4993-a421-75955d96a106)
+
+Configure the details for each alert:
+
+|Alert|Details|
+|---|---|
+|Client check|![](https://github.com/user-attachments/assets/6f875826-500d-4422-a374-75836d1e16d9)|
+|Client remediation|![](https://github.com/user-attachments/assets/19200db9-2c93-4820-969a-a3787aef807c)|
+|Client activity|![](https://github.com/user-attachments/assets/f8cbd38f-d259-4344-af6d-b2be55c9ee53)|
+|Malware detection|![](https://github.com/user-attachments/assets/0d77a9ad-3378-49e7-af07-7a41473659b3)|
+|Malware outbreak|![](https://github.com/user-attachments/assets/7b62caf1-02a3-49d2-a8f1-a6314b2bb868)|
+|Repeated malware detection|![](https://github.com/user-attachments/assets/37acf6e8-5c99-4c74-b45d-e9be71b58eb5)|
+|Multiple malware detection|![](https://github.com/user-attachments/assets/fc6721bc-7004-4416-b902-b49f1fa86cf1)|
+|Collection membership|![](https://github.com/user-attachments/assets/bc08005a-069a-44c8-8c73-c8c416b54688)|
