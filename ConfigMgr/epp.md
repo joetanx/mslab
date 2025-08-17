@@ -136,4 +136,27 @@ Security Intelligence updates → Set Source
 
 https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-protection-configure-client
 
+ConfigMgr console → Administration → Client Seetings
 
+Edit the Default Client Settings or Create Custom Client Device Settings
+
+|Setting|Value|
+|---|---|
+|Manage Endpoint Protection client on client computers|Yes|
+|Microsoft Defender for Endpoint client on Windows Server 2012 R2 and Windows Server 2016 [More information](https://learn.microsoft.com/en-us/defender-endpoint/onboard-server#functionality-in-the-modern-unified-solution-for-windows-server-2016-and-windows-server-2012-r2)|MDE client (recommended)|
+
+> [!Note]
+>
+> "Manage Endpoint Protection client on client computers" is grayed out if endpoint protection site system role is not installed
+
+![](https://github.com/user-attachments/assets/b15f0a73-d4cb-485f-bdc3-101aa5292611)
+
+> [!Tip]
+>
+> Create custom client device settings to control specific settings and deploy to specified device collections
+>
+> ![](https://github.com/user-attachments/assets/1679cbc1-856f-4c94-8d31-132b1e575ef1)
+>
+> ![](https://github.com/user-attachments/assets/f996a614-a37f-4915-b240-f2e66bbc7e97)
+>
+> ![](https://github.com/user-attachments/assets/9054b899-e61b-4ff3-aa9e-a1c662ba1a3b)
