@@ -101,6 +101,10 @@ Products tab → Check "System Center Endpoint Protection", "Microsoft Defender 
 
 ![](https://github.com/user-attachments/assets/0b40566c-e99b-41c3-aeeb-1ea5ffadbba9)
 
+ConfigMgr console → Software Library → Software Updates → All Software Updates → Synchronize Software Updates
+
+![](https://github.com/user-attachments/assets/9709c4d2-b593-4eb8-a143-5d576fe38493)
+
 ## 4. Configure antimalware policies for endpoint protection
 
 https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-antimalware-policies
