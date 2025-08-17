@@ -5,3 +5,4 @@
 |Update Configuration Manager|https://github.com/joetanx/mslab/blob/main/ConfigMgr/update.md|
 |Create Active Directory boundary for client installation|https://github.com/joetanx/mslab/blob/main/ConfigMgr/boundary.md|
 |Setup software update point (SUP)|https://github.com/joetanx/mslab/blob/main/ConfigMgr/sup.md|
+|Setup endpoint protection|https://github.com/joetanx/mslab/blob/main/ConfigMgr/epp.md|
