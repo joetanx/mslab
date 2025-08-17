@@ -79,7 +79,29 @@ Configure the details for each alert:
 |Multiple malware detection|![](https://github.com/user-attachments/assets/fc6721bc-7004-4416-b902-b49f1fa86cf1)|
 |Collection membership|![](https://github.com/user-attachments/assets/bc08005a-069a-44c8-8c73-c8c416b54688)|
 
-## 3. Configure antimalware policies for endpoint protection
+## 3. Setup ConfigMgr to deliver definition updates
+
+https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-definitions-configmgr
+
+ConfigMgr console → Administration → Site Configuration → Sites → Select site → Right-click → Configure Site Components → Software Update Point
+
+![](https://github.com/user-attachments/assets/825a7332-e543-4ff2-bfbe-897068567961)
+
+Classifications tab → Check "Definition Updates":
+
+![](https://github.com/user-attachments/assets/b980fe6c-f0b2-41f7-a766-ff876fd30708)
+
+Products tab → Check "System Center Endpoint Protection", "Microsoft Defender Antivirus" and "Microsoft Defender for Endpoint":
+
+> [!Tip]
+>
+> "System Center Endpoint Protection" is under "Forefront" but not "System Center" because it was "Forefront Endpoint Protection" previously
+
+![](https://github.com/user-attachments/assets/891a6f8d-e9d6-4ecd-ae74-2f7c1b83e56a)
+
+![](https://github.com/user-attachments/assets/0b40566c-e99b-41c3-aeeb-1ea5ffadbba9)
+
+## 4. Configure antimalware policies for endpoint protection
 
 https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-antimalware-policies
 
@@ -112,7 +134,7 @@ Edit the Default Client Antimalware Policy or Create Antimalware Policy
 |Threat overrides|![](https://github.com/user-attachments/assets/76a99f81-4769-4cc4-9a86-57e580d6dad2)|
 |Cloud Protection Service|![](https://github.com/user-attachments/assets/2263f52a-36f2-4b41-b453-0b7ca873aab3)|
 
-### 3.1. Configure definition updates for endpoint protection
+### 4.1. Configure definition updates for endpoint protection
 
 https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-definition-updates
 
@@ -132,7 +154,7 @@ Security Intelligence updates → Set Source
 |Updates distributed from Microsoft Malware Protection Center|This method will download definition updates from the Microsoft Malware Protection Center.|
 |[Updates from UNC file shares](https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-definitions-network)|With this method, you can save the latest definition and engine updates to a share on the network. Clients can then access the network to install the updates.|
 
-## 4. Configure client settings for endpoint protection
+## 5. Configure client settings for endpoint protection
 
 https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-protection-configure-client
 
