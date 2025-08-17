@@ -39,3 +39,18 @@ The ConfigMgr logs are at: `C:\Program Files\Microsoft Configuration Manager\Log
 Status of site system role installation: `EPSetup.log`:
 
 ![](https://github.com/user-attachments/assets/6ae604f3-19da-471a-94a5-bffa369085b3)
+
+## 2. Setup alerts for endpoint protection
+
+ConfigMgr console → Assets and Compliance → Device Collections → Select device collection → Properties
+
+![](https://github.com/user-attachments/assets/9b2c616d-9591-40bd-82f6-0d6228a7d6f9)
+
+> [!Tip]
+>
+> Right-click and select Show Members to see the devices in the device collection
+>
+> ![](https://github.com/user-attachments/assets/69c596fd-a5cf-4dcb-be03-ad26090cc13a)
+>
+> ![](https://github.com/user-attachments/assets/b7cbbdce-05f9-477a-806a-5ac7c92ce4d6)
+
