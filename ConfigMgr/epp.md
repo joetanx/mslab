@@ -115,7 +115,7 @@ Antimalware policies specify how Endpoint Protection protects devices from malwa
 
 ConfigMgr console → Assets and Compliance → Endpoint Protection → Antimalware Policies
 
-![](https://github.com/user-attachments/assets/09dfbad8-472f-47cd-a771-cae0174cc5d4)
+![](https://github.com/user-attachments/assets/b0cf2ce8-3f32-4a4e-90c9-a99f6808df57)
 
 Edit the Default Client Antimalware Policy or Create Antimalware Policy
 
@@ -212,3 +212,77 @@ Each event is alerted in ConfigMgr as defined in the "malware detection" alert r
 And the events across the machines are collated as defined in the "malware outbreak" alert rule:
 
 ![](https://github.com/user-attachments/assets/820da304-7ccc-41ed-960e-c38a8e4ae2e3)
+
+## 7. Other endpoint protection policies
+
+ConfigMgr console → Assets and Compliance → Endpoint Protection
+
+![](https://github.com/user-attachments/assets/aeaa1f08-24e8-475d-92b2-59e04fc22bfc)
+
+### 7.1. Windows Defender Firewall
+
+![](https://github.com/user-attachments/assets/5069792c-e85f-48ed-8ccc-9c3ad691fa84)
+
+![](https://github.com/user-attachments/assets/3a512f64-57fe-40c1-8210-ad582f4ef965)
+
+### 7.2. Microsoft Defender for Endpoint
+
+![](https://github.com/user-attachments/assets/da157e77-5ae3-4b45-bedd-f3dec24d39e8)
+
+![](https://github.com/user-attachments/assets/6ca65e15-8527-4eae-b77a-df74e29e36c5)
+
+`GatewayWindowsDefenderATPOnboardingPackage.zip` → `WindowsDefenderATP.onboarding`
+
+![](https://github.com/user-attachments/assets/f88f6bcc-1bbe-4b58-b459-26fb258dd64d)
+
+![](https://github.com/user-attachments/assets/4d218c57-a755-407e-b57c-c0ea37066dc5)
+
+### 7.3. Exploit Guard
+
+![](https://github.com/user-attachments/assets/cb789d29-6e95-4f85-967f-3cde44b84066)
+
+#### 7.3.1. Attack Surface Reduction
+
+![](https://github.com/user-attachments/assets/334bc727-2a4b-4a57-a9a9-94494e2bb73e)
+
+#### 7.3.2. Controlled Folder Access
+
+![](https://github.com/user-attachments/assets/e2cc4162-0ecf-4ddc-a4ec-6b1d08e9a00a)
+
+![](https://github.com/user-attachments/assets/db971523-030a-4876-b73b-8a22de00a7be)
+
+![](https://github.com/user-attachments/assets/a0568f28-057a-488e-8289-dd63f093aaa1)
+
+#### 7.3.3. Exploit Protection
+
+![](https://github.com/user-attachments/assets/e9b5777b-53fb-40fe-bd6f-5430d5febc51)
+
+![](https://github.com/user-attachments/assets/f06a04d9-f4d2-4210-8f00-4cb65aa1ccdc)
+
+![](https://github.com/user-attachments/assets/44ba3642-a942-4495-b6c5-3bd91f34f6af)
+
+![](https://github.com/user-attachments/assets/cbbc319a-2dee-4407-a1b9-897124081692)
+
+#### 7.3.4. Network Protection
+
+![](https://github.com/user-attachments/assets/12063d91-d6c9-4bc4-b27e-a567bd246da0)
+
+### 7.4. Microsoft Defender Application Guard
+
+![](https://github.com/user-attachments/assets/72762a63-6260-48de-b2cf-c2af06ca5d56)
+
+![](https://github.com/user-attachments/assets/c880dee8-d386-4e72-a84b-2b9df0189f1c)
+
+![](https://github.com/user-attachments/assets/288276db-dc83-46d8-9b99-18feaa6daff7)
+
+![](https://github.com/user-attachments/assets/856a09bc-7f08-401c-827c-c582d3e4fbb7)
+
+![](https://github.com/user-attachments/assets/d3195c2e-0941-4d44-b653-ac08a2aa25da)
+
+![](https://github.com/user-attachments/assets/17e80b08-e366-4f1f-80b4-efb030af5e14)
+
+### 7.5. Windows Defender Application Control
+
+![](https://github.com/user-attachments/assets/68dde866-ca9d-45ef-a4b2-10782ada68f0)
+
+![](https://github.com/user-attachments/assets/2e94b4ff-a510-4a0a-9857-192959702403)
