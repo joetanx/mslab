@@ -81,6 +81,8 @@ Configure the details for each alert:
 
 ## 3. Setup ConfigMgr to deliver definition updates
 
+### 3.1. Configure software update point
+
 https://learn.microsoft.com/en-us/intune/configmgr/protect/deploy-use/endpoint-definitions-configmgr
 
 ConfigMgr console → Administration → Site Configuration → Sites → Select site → Right-click → Configure Site Components → Software Update Point
@@ -106,6 +108,36 @@ ConfigMgr console → Software Library → Software Updates → All Software Upd
 ![](https://github.com/user-attachments/assets/9709c4d2-b593-4eb8-a143-5d576fe38493)
 
 ![](https://github.com/user-attachments/assets/eb513f59-2b30-4e0c-8192-116ccd32902a)
+
+### 3.2. Configure automatic deployment rule
+
+ConfigMgr console → Software Library → Software Updates → Automatic Deployment Rules → Create Automatic Deployment Rule
+
+![](https://github.com/user-attachments/assets/732d3346-c1d6-4029-a225-94628c7cab54)
+
+Select _SCEP and Windows Defender Antivirus Updates_ template and the desired target collection:
+
+![](https://github.com/user-attachments/assets/6cef895c-dc94-455a-9c24-dd4753c9795f)
+
+![](https://github.com/user-attachments/assets/2d9088ef-2c6e-4d3c-9dc2-676d7121da61)
+
+The _SCEP and Windows Defender Antivirus Updates_ template selects the required products and update classifications for endpoint protection
+
+![](https://github.com/user-attachments/assets/0b3c11f8-5348-4e3d-b34f-fa41d05b09f4)
+
+![](https://github.com/user-attachments/assets/31267667-d109-41b5-9aee-7f7f79410871)
+
+![](https://github.com/user-attachments/assets/b60a52b3-f9b9-4445-a972-ffb384190091)
+
+![](https://github.com/user-attachments/assets/11321849-1a59-4d6c-a898-5ca2507e1993)
+
+![](https://github.com/user-attachments/assets/f9e0477f-8367-4ae1-9c27-bbed1d7859a1)
+
+![](https://github.com/user-attachments/assets/9c986b1e-7b8f-4177-bc74-ce335b061787)
+
+![](https://github.com/user-attachments/assets/ad4d2696-3b90-40af-a76d-9773a4c26c45)
+
+![](https://github.com/user-attachments/assets/934cc73b-583a-48be-8d32-48cfa19a6bef)
 
 ## 4. Configure antimalware policies for endpoint protection
 
