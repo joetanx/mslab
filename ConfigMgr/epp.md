@@ -89,11 +89,11 @@ ConfigMgr console → Administration → Site Configuration → Sites → Select
 
 ![](https://github.com/user-attachments/assets/825a7332-e543-4ff2-bfbe-897068567961)
 
-Classifications tab → Check "Definition Updates":
+**Classifications** → Check "Definition Updates":
 
 ![](https://github.com/user-attachments/assets/b980fe6c-f0b2-41f7-a766-ff876fd30708)
 
-Products tab → Check "System Center Endpoint Protection", "Microsoft Defender Antivirus" and "Microsoft Defender for Endpoint":
+**Products** → Check "System Center Endpoint Protection", "Microsoft Defender Antivirus" and "Microsoft Defender for Endpoint":
 
 > [!Tip]
 >
@@ -102,6 +102,10 @@ Products tab → Check "System Center Endpoint Protection", "Microsoft Defender 
 ![](https://github.com/user-attachments/assets/891a6f8d-e9d6-4ecd-ae74-2f7c1b83e56a)
 
 ![](https://github.com/user-attachments/assets/0b40566c-e99b-41c3-aeeb-1ea5ffadbba9)
+
+**Sync Schedule** → check _Enable synchronization on a schedule_ → configure desired frequency
+
+![](https://github.com/user-attachments/assets/8f405854-22f7-4a87-8bce-b263740f1de2)
 
 ConfigMgr console → Software Library → Software Updates → All Software Updates → Synchronize Software Updates
 
@@ -115,17 +119,23 @@ ConfigMgr console → Software Library → Software Updates → Automatic Deploy
 
 ![](https://github.com/user-attachments/assets/732d3346-c1d6-4029-a225-94628c7cab54)
 
-Select _SCEP and Windows Defender Antivirus Updates_ template and the desired target collection:
+Select _SCEP and Windows Defender Antivirus Updates_ template and the desired target collection
 
-![](https://github.com/user-attachments/assets/6cef895c-dc94-455a-9c24-dd4753c9795f)
+_Add to an existing Software Update Group_: a new SUG is created the first time the ADR is evaluated and reused for each subsequent evaluation of the ADR
 
-![](https://github.com/user-attachments/assets/2d9088ef-2c6e-4d3c-9dc2-676d7121da61)
+![](https://github.com/user-attachments/assets/944c792b-72bc-414f-9192-0d5b1453491a)
+
+![](https://github.com/user-attachments/assets/25a0477b-3455-462a-ab95-bce8afe0e9fb)
 
 The _SCEP and Windows Defender Antivirus Updates_ template selects the required products and update classifications for endpoint protection
 
 ![](https://github.com/user-attachments/assets/0b3c11f8-5348-4e3d-b34f-fa41d05b09f4)
 
-![](https://github.com/user-attachments/assets/31267667-d109-41b5-9aee-7f7f79410871)
+The SUP sync schedule configured above is shown here
+
+It doesn't make sense to run an ADR evaluation more frequently than the SUP sync frequency because there will be no new updates to find
+
+![](https://github.com/user-attachments/assets/6ba69009-fefe-43b9-b365-a1c7249acb2f)
 
 ![](https://github.com/user-attachments/assets/b60a52b3-f9b9-4445-a972-ffb384190091)
 
@@ -133,11 +143,21 @@ The _SCEP and Windows Defender Antivirus Updates_ template selects the required 
 
 ![](https://github.com/user-attachments/assets/f9e0477f-8367-4ae1-9c27-bbed1d7859a1)
 
-![](https://github.com/user-attachments/assets/9c986b1e-7b8f-4177-bc74-ce335b061787)
+Deployment packages are simply the collection of files needed for a set of updates
 
-![](https://github.com/user-attachments/assets/ad4d2696-3b90-40af-a76d-9773a4c26c45)
+They must have a source folder (e.g. `\\<ConfigMgr>\SMS_<site_code>\DeploymentPackages`) and be available to clients by assigning them to distribution points
 
-![](https://github.com/user-attachments/assets/934cc73b-583a-48be-8d32-48cfa19a6bef)
+![](https://github.com/user-attachments/assets/e5e33827-b0f0-495a-99d7-13d615bb2ea1)
+
+![](https://github.com/user-attachments/assets/e9fb8fa1-ab8d-4912-9be3-a25335680f71)
+
+![](https://github.com/user-attachments/assets/94be3684-5be6-4e53-830a-26357812c98d)
+
+![](https://github.com/user-attachments/assets/eed88ca1-f796-413c-a3b2-435846b8e1d6)
+
+![](https://github.com/user-attachments/assets/5eeb44b2-bd77-487e-ab9c-86f1ade5356e)
+
+![](https://github.com/user-attachments/assets/48722499-013e-47f7-90e5-e4dbc7e452e1)
 
 ## 4. Configure antimalware policies for endpoint protection
 
