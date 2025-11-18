@@ -6,3 +6,4 @@ Collection of lab setups done as a Microsoft techie
 |Secure Azure VM access with Bastion and internet connection with Azure Firewall|https://github.com/joetanx/mslab/blob/main/firewall-bastion-natgw.md|
 |Onboard VM credentials to Azure key vault to secure VM access via bastion|https://github.com/joetanx/mslab/blob/main/key-vault.md|
 |Setup Azure Arc connection for on-premise Windows and Linux machines|https://github.com/joetanx/mslab/blob/main/arc.md|
+|Create Azure OpenAI resource (for use with tools like n8n)|https://github.com/joetanx/mslab/blob/main/azure-openai.md|
