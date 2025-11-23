@@ -342,7 +342,7 @@ Sign the JWT:
 $jwtSignature = $rsaKey.SignData([System.Text.Encoding]::UTF8.GetBytes($jwtUnsigned), [System.Security.Cryptography.HashAlgorithmName]::SHA256, [System.Security.Cryptography.RSASignaturePadding]::Pss)
 ```
 
-### 2.3.4. Request for access token
+#### 2.3.4. Request for access token
 
 The parameters required to request for access token are finally complete with the `client_assertion`:
 
