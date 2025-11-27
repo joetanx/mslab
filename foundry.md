@@ -20,7 +20,7 @@
 
 The API key shown at [Foundry portal](https://ai.azure.com) is `KEY 1` for the Foundry resource:
 
-![](https://github.com/user-attachments/assets/7e852683-42f2-447b-bce1-27138709b8f5)
+![](https://github.com/user-attachments/assets/b9edc76b-d249-428e-ae35-a70efe2b124c)
 
 To access `KEY 2` or regenerate the keys, go the the Foundry resource in [Azure portal](https://portal.azure.com)
 
