@@ -36,4 +36,20 @@ To access `KEY 2` or regenerate the keys, go the the Foundry resource in [Azure 
 
 ![](https://github.com/user-attachments/assets/6bb2fd90-0cab-42d6-81a6-a010f624cfe3)
 
-![](https://github.com/user-attachments/assets/dff0114e-dc74-4273-8f8d-dad0fe579bd3)
+> [!Note]
+>
+> Claude Sonnet is available on Foundry, but requires permission to purchase from Marketplace
+> 
+> ![](https://github.com/user-attachments/assets/818040dd-3e93-4bc1-947f-05ec1e6ed9e8)
+>
+> ![](https://github.com/user-attachments/assets/ce9bb327-2a81-4384-8c01-3800d5e90ac4)
+
+> [!Note]
+> 
+> Registration is required for access to the `gpt-5-pro`, `gpt-5`, & `gpt-5-codex` models.
+>
+> `gpt-5-mini` , `gpt-5-nano`, and `gpt-5-chat` do not require registration.
+>
+> https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/concepts/models-sold-directly-by-azure#gpt-5
+> 
+> ![](https://github.com/user-attachments/assets/50a8335b-607c-4167-ac4d-7eb49248fc23)
