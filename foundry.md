@@ -18,7 +18,7 @@
 
 ## 2. Retrieve Endpoint and Keys
 
-The API key shown at [Foundry portal](https://ai.azure.com) is `KEY 1` for the Foundry resource:
+The API key shown at [Foundry portal](https://ai.azure.com) is `KEY 1` of the Foundry resource:
 
 ![](https://github.com/user-attachments/assets/b9edc76b-d249-428e-ae35-a70efe2b124c)
 
