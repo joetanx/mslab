@@ -2,52 +2,52 @@
 
 ### 1.1. Basics
 
-<img width="792" height="946" alt="image" src="https://github.com/user-attachments/assets/2169f0f1-7723-40ed-98ac-a4ce1b94169d" />
+![](https://github.com/user-attachments/assets/fb1c8335-07d3-4fd1-8b7c-cd7eb4744fdf)
 
 ### 1.2. Frontends
 
-<img width="792" height="517" alt="image" src="https://github.com/user-attachments/assets/c8849b25-52d7-4992-942d-cc8f887a0d15" />
+![](https://github.com/user-attachments/assets/52a16903-7072-4b11-845b-edb7b8279cb4)
 
 ### 1.3. Backends
 
-Langflow and n8n:
-
-<img width="792" height="562" alt="image" src="https://github.com/user-attachments/assets/ca9ed50d-2638-4bcb-92bf-ba58eefd89e6" />
-
-OpenCTI:
-
-<img width="792" height="562" alt="image" src="https://github.com/user-attachments/assets/076e7df2-d1ad-4a99-b5f3-301acf3d0b82" />
-
-<img width="1280" height="800" alt="image" src="https://github.com/user-attachments/assets/64214c71-bc56-4d74-80d6-01d40480a23b" />
+<img width="790" height="459" alt="image" src="https://github.com/user-attachments/assets/9c573ac3-414c-4b29-8872-c923fa6c8017" />
 
 ### 1.4. Routing
 
-<img width="1280" height="800" alt="image" src="https://github.com/user-attachments/assets/24cedf47-eddd-4443-84aa-80b8fa55da2d" />
+![](https://github.com/user-attachments/assets/fb919aec-f0dd-4f14-9faf-2e9404763076)
 
-#### 1.4.1. Langflow
+![](https://github.com/user-attachments/assets/5f811295-1e66-4f8c-b5ef-5cfda731afff)
 
-<img width="855" height="984" alt="image" src="https://github.com/user-attachments/assets/52009af2-3632-45e6-a9bb-91326bef714f" />
+![](https://github.com/user-attachments/assets/e245f4d7-fd74-4e22-b02d-b2f933655484)
 
-<img width="855" height="653" alt="image" src="https://github.com/user-attachments/assets/48489fae-93ae-4876-ae13-e4e170ab6b63" />
+![](https://github.com/user-attachments/assets/c052ef3f-06d7-42ad-94b3-5b2c55f37ffc)
 
-<img width="855" height="782" alt="image" src="https://github.com/user-attachments/assets/f02cf326-8fef-4988-adab-fa2ca1742a2b" />
+![](https://github.com/user-attachments/assets/68dfb07d-9869-4b87-aab7-f2f03b48ea2f)
 
-#### 1.4.2. n8n
+## 2. Add additional routes
 
-<img width="855" height="984" alt="image" src="https://github.com/user-attachments/assets/53c5f29e-9aa4-4f52-8050-7d228f92e81a" />
+### 2.1. Add backend pool
 
-<img width="855" height="653" alt="image" src="https://github.com/user-attachments/assets/c9d9ae27-9457-4072-b886-f450dadc36ee" />
+<img width="585" height="521" alt="image" src="https://github.com/user-attachments/assets/a503a7f8-8aa4-44b9-b25a-c426761908a2" />
 
-<img width="855" height="782" alt="image" src="https://github.com/user-attachments/assets/fd40ac64-94ea-4252-8d7d-2da28fb50b7f" />
+### 2.2. Add listeners
 
-#### 1.4.3. OpenCTI
+<img width="585" height="942" alt="image" src="https://github.com/user-attachments/assets/db827e38-27b4-48a0-9ee3-4a5978e31c23" />
 
-<img width="855" height="984" alt="image" src="https://github.com/user-attachments/assets/9d2890a0-dda5-41ff-80ae-363dc22c8f99" />
+<img width="585" height="942" alt="image" src="https://github.com/user-attachments/assets/a77a9a74-fcc9-4222-85dd-73f1c97d9dcc" />
 
-<img width="855" height="653" alt="image" src="https://github.com/user-attachments/assets/41200c97-ebb0-440e-94cf-4eef568bbe3a" />
+### 2.3. Add backend settings
 
-<img width="855" height="782" alt="image" src="https://github.com/user-attachments/assets/2769e31d-e72d-4f63-b9ef-4d28a370b7cf" />
+<img width="855" height="861" alt="image" src="https://github.com/user-attachments/assets/c6d1e8d9-ae94-4b64-a140-741509cc81eb" />
 
-#### 1.4.4. Configuration overview
+<img width="855" height="861" alt="image" src="https://github.com/user-attachments/assets/b14ec19d-93c3-4358-a8c8-64d4b95c7378" />
 
-<img width="1272" height="566" alt="image" src="https://github.com/user-attachments/assets/9211f546-f364-4e72-b536-27734953fea3" />
+### 2.4. Add routing rules
+
+<img width="855" height="352" alt="image" src="https://github.com/user-attachments/assets/9f5ae13a-989b-4339-824b-e0a587355d77" />
+
+<img width="855" height="655" alt="image" src="https://github.com/user-attachments/assets/4ea137b5-a119-46b5-b29f-218ff240e67a" />
+
+<img width="855" height="352" alt="image" src="https://github.com/user-attachments/assets/ccafc1f2-9722-4a1c-969a-90857263dac7" />
+
+<img width="855" height="655" alt="image" src="https://github.com/user-attachments/assets/d7fb2e14-5ccb-4c85-8137-06ac7359874a" />
