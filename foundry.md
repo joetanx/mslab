@@ -28,9 +28,9 @@ To access `KEY 2` or regenerate the keys, go the the Foundry resource in [Azure 
 
 ## 3. Deploy a model
 
-![](https://github.com/user-attachments/assets/07815cd1-9400-446a-8375-9cd83488417b)
+![](https://github.com/user-attachments/assets/9d9a8e5a-c0eb-493e-9dea-f91f31e0d9d4)
 
-![](https://github.com/user-attachments/assets/2e4812da-0d48-4a14-a705-4268888123f4)
+![](https://github.com/user-attachments/assets/bf1f3b99-e9e3-4037-9ac0-d2ea72d84963)
 
 > [!Note]
 >
@@ -52,19 +52,22 @@ To access `KEY 2` or regenerate the keys, go the the Foundry resource in [Azure 
 
 Deploy the model with default or custom settings:
 
-![](https://github.com/user-attachments/assets/4f29af1d-024c-4cab-a9e3-19264a4507b0)
+![](https://github.com/user-attachments/assets/cc202614-2ce7-48a1-8483-8bcdb6fa50a1)
 
 Custom enable settings adjustment before deploying:
 
-![](https://github.com/user-attachments/assets/cfa5cccc-2517-4370-abd7-9930345c11ff)
+![](https://github.com/user-attachments/assets/36505e44-7b6a-4bcf-8729-172b1e3b16bc)
 
 Default setting just proceeds to deploy:
 
-![](https://github.com/user-attachments/assets/76f36f37-9fca-4bab-a29f-1cc5caa2a024)
+![](https://github.com/user-attachments/assets/7cb10f41-92bf-4475-bf67-3c86fb50c3b6)
 
 > [!Note]
 >
-> 1. Settings can still be changed under _Details_ after the model is deployed:
-> 2. The _Key_ listed in the model _Details_ is `Key 1` of the Foundry resource
+> 1. The _Key_ listed in the model _Details_ is `Key 1` of the Foundry resource
 >
-> ![](https://github.com/user-attachments/assets/c12cef21-5e6b-4294-9b6a-5ecbe248b006)
+> ![](https://github.com/user-attachments/assets/18306b8d-3ec1-4e7f-81ec-7a924b8fbe71)
+>
+> 2. Settings can still be changed under _Details_ after the model is deployed:
+>
+> ![](https://github.com/user-attachments/assets/4150a37f-b689-42fd-b295-40fd7602f2fc)
