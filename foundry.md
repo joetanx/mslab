@@ -1,30 +1,30 @@
 ## 1. Create Foundry resource
 
-![](https://github.com/user-attachments/assets/8b8ec791-8929-4630-b0e1-44f950dac70e)
+![](https://github.com/user-attachments/assets/6c38fb19-1ad5-41c3-9941-2a27370c3a53)
 
 > [!Note]
 >
 > The name of the Foundry resource must be globally unique, because it forms the domain name (`https://<az-openai-resource-name>.openai.azure.com`) for the resource endpoint
 > 
-> ![](https://github.com/user-attachments/assets/3998d6d9-33d8-4138-90c1-af14b100025b)
+> ![](https://github.com/user-attachments/assets/f3f6aac1-9357-48ff-a447-2b459ff30fc6)
 
-![](https://github.com/user-attachments/assets/62258918-b12d-430a-a7df-dc3b0ae69906)
+![](https://github.com/user-attachments/assets/58659b2c-6c8f-482a-b7ca-659ec2430b3e)
 
-![](https://github.com/user-attachments/assets/405637e1-1c34-4a80-a8f0-e854a9ae7451)
+![](https://github.com/user-attachments/assets/d131fbe9-6367-4f73-93a0-a6b3d9df16d5)
 
-![](https://github.com/user-attachments/assets/a81a66e7-4ecb-47d9-8739-626d58262ff5)
+![](https://github.com/user-attachments/assets/1402ac55-6c30-45f1-9cb1-3611f6ea3111)
 
-![](https://github.com/user-attachments/assets/852d25e7-a462-454c-8a2b-507e80a534fa)
+![](https://github.com/user-attachments/assets/d46a96ab-bcfc-4866-9a28-0a98e05ab536)
 
 ## 2. Retrieve Endpoint and Keys
 
 The API key shown at [Foundry portal](https://ai.azure.com) is `KEY 1` of the Foundry resource:
 
-![](https://github.com/user-attachments/assets/b9edc76b-d249-428e-ae35-a70efe2b124c)
+![](https://github.com/user-attachments/assets/60a26bc9-d5b2-4342-b2d3-91ac49b48576)
 
 To access `KEY 2` or regenerate the keys, go the the Foundry resource in [Azure portal](https://portal.azure.com)
 
-![](https://github.com/user-attachments/assets/67bcaedc-a00c-44d3-8703-eed155a14973)
+![](https://github.com/user-attachments/assets/a3c442b6-c1ae-4d58-a2ae-eb4e0b78de1a)
 
 ## 3. Deploy a model
 
