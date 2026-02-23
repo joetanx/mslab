@@ -7,7 +7,7 @@
 |Common|`https://login.microsoftonline.com/common/…`|A shared endpoint that supports sign-in for any tenant (multi-tenant apps) and also Microsoft personal accounts. It does not bind to a specific tenant until the user logs in.|
 |Tenant-specific|`https://login.microsoftonline.com/<tenant_id>/…`|Bound to a specific tenant (identified by tenant ID or domain name). Only users from that tenant can authenticate.|
 
-|Endpoint|URI|
+|Endpoint|URI suffix|
 |---|---|
 |OIDC well-known configuration|`…/v2.0/.well-known/openid-configuration`|
 |`token_endpoint`|`…/oauth2/v2.0/token`|
