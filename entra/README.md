@@ -1,12 +1,32 @@
 ## 1. Entra applications
 
-### 1.1. App registration and enterprise application
+### 1.1. Entra identity endpoints
 
-### 1.2. Application and delegated permissions
+|Endpoint|URI prefix|Usage|
+|---|---|---|
+|Common|`https://login.microsoftonline.com/common/…`|A shared endpoint that supports sign-in for any tenant (multi-tenant apps) and also Microsoft personal accounts. It does not bind to a specific tenant until the user logs in.|
+|Tenant-specific|`https://login.microsoftonline.com/<tenant_id>/…`|Bound to a specific tenant (identified by tenant ID or domain name). Only users from that tenant can authenticate.|
+
+|Endpoint|URI|
+|---|---|
+|OIDC well-known configuration|`…/v2.0/.well-known/openid-configuration`|
+|`token_endpoint`|`…/oauth2/v2.0/token`|
+|`authorization_endpoint`|`…/oauth2/v2.0/authorize`|
+|`device_authorization_endpoint`|`…/oauth2/v2.0/devicecode`|
+|`end_session_endpoint`|`…/oauth2/v2.0/logout`|
+
+### 1.2. App registration and enterprise application
+
+|Object|Purpose|
+|---|---|
+|App Registration|**Application object**: application template that contains configurations like redirect URL, API permissions, credentials (client secrets, certificate, FIC) app roles, etc|
+|Enterprise Application|**Service principal object** (i.e. service account or machine identity): created from the application object and inherits certain properties from that application object|
+
+### 1.3. Application and delegated permissions
 
 Entra permission reference: https://learn.microsoft.com/en-us/graph/permissions-reference
 
-### 1.3. Azure and Defender RBAC
+### 1.4. Azure and Defender RBAC
 
 ## 2. Authentication Flows
 
