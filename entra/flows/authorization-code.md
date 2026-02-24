@@ -79,7 +79,7 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 $headers = @{ Authorization='Bearer '+$token.access_token }
 ```
 
-### 2.5 Access target resource with access token
+### 2.4. Access target resource with access token
 
 The access token is sent in the `Authorization` header in the format of: `Bearer: <access-token-jwt>`
 
