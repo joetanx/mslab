@@ -15,18 +15,68 @@
 |`device_authorization_endpoint`|`…/oauth2/v2.0/devicecode`|
 |`end_session_endpoint`|`…/oauth2/v2.0/logout`|
 
-### 1.2. App registration and enterprise application
+### 1.2. App registration
 
-|Object|Purpose|
+App registration is the **application object** which contains configurations like redirect URL, API permissions, credentials (client secrets, certificate, FIC) app roles, etc
+
+![](https://github.com/user-attachments/assets/a8433c2e-7f75-4d3f-94cd-3d82caef638f)
+
+|ID|Purpose|
 |---|---|
-|App Registration|**Application object**: application template that contains configurations like redirect URL, API permissions, credentials (client secrets, certificate, FIC) app roles, etc|
-|Enterprise Application|**Service principal object** (i.e. service account or machine identity): created from the application object and inherits certain properties from that application object|
+|Application (client) ID|Unique ID of the **application object** in the Entra directory<br>Also known as AppID or client ID|
+|Object ID|Unique ID of **the service principal object** associated with the application|
+|Directory (tenant) ID|Unique ID of the Entra tenant|
 
-### 1.3. Application and delegated permissions
+#### 1.2.1. Application credentials
+
+##### Client secret:
+
+- The client secret is like an API key or client password
+- Used in the `client_secret` parameter during authentication
+- Good for testing, not recommended for production
+
+![](https://github.com/user-attachments/assets/8b1b0074-6190-4ffc-b22f-13b089e5bab3)
+
+##### Client certificate:
+
+- The client certificate is used to sign the JWT that claims the application's identity
+- The signed JWT is used the `client_assertion` parameter during authentication
+- When using a certificate chain, upload the certificate that is signing the JWT to the app registration, not the root or intermediate CAs, the public key in the signing certificate is used to verify the JWT signature
+
+![](https://github.com/user-attachments/assets/5c6c604b-9a51-471e-aba2-ab43697a9de3)
+
+##### Federated identity credential (FIC)
+
+- The FIC represents the trust relationship between an external identity provider (IdP) and an app in Microsoft Entra ID
+- Several scenarios of [workload identity federation](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation#supported-scenarios) are supported, includign the managed identity example below
+- Note: it is not possible to use another application in Entra as FIC:
+  - `AADSTS700222: AAD-issued tokens may not be used for federated identity flows.`
+
+![](https://github.com/user-attachments/assets/469ce69d-7688-4f8e-a38b-ba8b7453991a)
+
+#### 1.2.2. API permissions
+
+Application and delegated permissions
 
 Entra permission reference: https://learn.microsoft.com/en-us/graph/permissions-reference
 
-### 1.4. Azure and Defender RBAC
+#### 1.2.3. Authentication
+
+##### Redirect URI
+
+##### Public client flow
+
+### 1.3. Enterprise application
+
+Enterprise application is the **service principal object** (i.e. service account or machine identity) created from the _application object_
+
+![](https://github.com/user-attachments/assets/7c0dc378-930a-470f-a569-18348dc373ff)
+
+#### 1.3.1. Permissions
+
+#### 1.3.2. Group membership
+
+#### 1.3.3. Azure and Defender RBAC
 
 ## 2. Authentication Flows
 
