@@ -209,7 +209,7 @@ Bearer           3599           3599 <access-token-jwt>
 
 ## 3. Access target resource with access token
 
-Azure resources expect access token in the `Authorization` header in the format of: `Bearer: <access-token-jwt>`
+The access token is sent in the `Authorization` header in the format of: `Bearer: <access-token-jwt>`
 
 Prepare the request header:
 
