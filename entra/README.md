@@ -24,7 +24,6 @@ App registration is the **application object** which contains configurations lik
 |ID|Purpose|
 |---|---|
 |Application (client) ID|Unique ID of the **application object** in the Entra directory<br>Also known as AppID or client ID|
-|Object ID|Unique ID of **the service principal object** associated with the application|
 |Directory (tenant) ID|Unique ID of the Entra tenant|
 
 #### 1.2.1. Application credentials
@@ -48,7 +47,7 @@ App registration is the **application object** which contains configurations lik
 ##### Federated identity credential (FIC)
 
 - The FIC represents the trust relationship between an external identity provider (IdP) and an app in Microsoft Entra ID
-- Several scenarios of [workload identity federation](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation#supported-scenarios) are supported, includign the managed identity example below
+- Several scenarios of [workload identity federation](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation#supported-scenarios) are supported (example of managed identity shown below)
 - Note: it is not possible to use another application in Entra as FIC:
   - `AADSTS700222: AAD-issued tokens may not be used for federated identity flows.`
 
@@ -58,11 +57,17 @@ App registration is the **application object** which contains configurations lik
 
 Entra permission reference: https://learn.microsoft.com/en-us/graph/permissions-reference
 
-|Application Permission|Delegated Permission|
-|---|---|
-|**Non-interactive** and require admin approval because they give the app broad access across the tenant|**Interactive** and scoped to the signed-in user's privileges; the app can only do what the user can do, within the consented scope|
-|![](https://github.com/user-attachments/assets/6610914e-0643-4c85-b6d0-e566bd278e9a)|![](https://github.com/user-attachments/assets/de7890e6-8f7c-42df-bc60-d117256a738b)|
-||Tracking user consent<br>![](https://github.com/user-attachments/assets/9769f454-de32-476e-9db6-e89aef7787f6)|
+##### Application Permission
+
+**Non-interactive** and require admin approval because they give the app broad access across the tenant
+
+![](https://github.com/user-attachments/assets/6610914e-0643-4c85-b6d0-e566bd278e9a)
+
+##### Delegated Permission
+
+**Interactive** and scoped to the signed-in user's privileges; the app can only do what the user can do, within the consented scope
+
+![](https://github.com/user-attachments/assets/de7890e6-8f7c-42df-bc60-d117256a738b)
 
 #### 1.2.3. Authentication
 
@@ -109,9 +114,45 @@ Enterprise application is the **service principal object** (i.e. service account
 
 #### 1.3.1. Permissions
 
+API permissions granted to the application object are used by the service principal:
+
+![](https://github.com/user-attachments/assets/38559e04-5a22-4c66-8f57-db4f41f9f19a)
+
+For delegated permission, all user consents granted are tracked:
+
+![](https://github.com/user-attachments/assets/9769f454-de32-476e-9db6-e89aef7787f6)
+
 #### 1.3.2. Group membership
 
-#### 1.3.3. Azure and Defender RBAC
+- Applications can be added to groups
+- Notice that the type is `Service principal` and the `Object Id` is `25baa229-e19d-4ab2-9618-9912575e4ce1`, which is the enterprise application
+
+![](https://github.com/user-attachments/assets/c09a6599-4de2-4f34-a7ff-563d79a71135)
+
+#### 1.3.3. Azure RBAC roles
+
+Application can also be [assigned to Azure RBAC roles](https://learn.microsoft.com/en-us/entra/identity-platform/howto-create-service-principal-portal#assign-a-role-to-the-application)
+
+Note: applications aren't displayed in the available options by default, search for the application by name to find it:
+
+![](https://github.com/user-attachments/assets/747eb580-63e8-4883-91a1-0b9e3e35ea19)
+
+Notice that the type is `Service principal` and the `Object Id` is `25baa229-e19d-4ab2-9618-9912575e4ce1`, which is the enterprise application:
+
+![](https://github.com/user-attachments/assets/2afc030e-0fab-49cf-92e1-23faf01fe130)
+
+> [!Tip]
+>
+> The following error occurs if the application does not have the appropriate permissions on the resource
+>
+> ```json
+>  {
+>   "error": {
+>     "code": "AuthorizationFailed",
+>     "message": "The client 'd07dbc70-fece-4439-a455-15f8618b8cb6' with object id 'd07dbc70-fece-4439-a455-15f8618b8cb6' does not have authorization to perform action 'Microsoft.OperationalInsights/workspaces/read' over scope '/subscriptions/d199f75f-56c4-4977-8bba-33b529ddf9a8' or the scope is invalid. If access was recently granted, please refresh your credentials."
+>   }
+> }
+> ```
 
 ## 2. Authentication Flows
 
