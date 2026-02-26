@@ -23,10 +23,10 @@
 |List agent identity blueprint[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-list)|`Application.Read.All`||
 |List agent identity blueprint principal[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprintprincipal-list)|`Application.Read.All]`||
 |List agent identity[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentity-list)|`Application.Read.All]`||
-|List agent user[🔗](https://learn.microsoft.com/en-us/graph/api/agentuser-list)|`User.ReadBasic.All`|
+|List agent user[🔗](https://learn.microsoft.com/en-us/graph/api/agentuser-list)|`User.ReadBasic.All`<br>`AgentIdUser.ReadWrite.All`|`AgentIdUser.ReadWrite.All` is actually also required; without it, the response fails when enumerating the `identityParent` field of the first agent user fails, resulting in truncated response|
 |Delete agent identity blueprint[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-list)|`AgentIdentityBlueprint.DeleteRestore.All`|Agent identity blueprint principal is deleted when agent identity blueprint is deleted|
-|Delete agent identity[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentity-list)|`AgentIdentity.DeleteRestore.All`||
-|Delete agent user[🔗](https://learn.microsoft.com/en-us/graph/api/agentuser-list)|`AgentIdUser.ReadWrite.IdentityParentedBy`||
+|Delete agent identity[🔗](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-delete)|`AgentIdentity.DeleteRestore.All`|Oddly, the agent identity isn't deleted when the agent identity bluepint is deleted<br>There also doesn't seem to be a docs for deleting agent identity, but deleting service prinicpal works|
+|Delete agent user[🔗](https://learn.microsoft.com/en-us/graph/api/agentuser-list)|`AgentIdUser.ReadWrite.IdentityParentedBy`<br>`AgentIdUser.ReadWrite.All,`|`AgentIdUser.ReadWrite.All` is needed if using another application to delete the agent user|
 |[🔗]()|``||
 |[🔗]()|``||
 |[🔗]()|``||
