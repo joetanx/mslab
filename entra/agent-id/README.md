@@ -18,7 +18,6 @@
 |Add federated identity credential (FIC) to agent identity blueprint[🔗](https://learn.microsoft.com/en-us/graph/api/federatedidentitycredential-post)|`Application.ReadWrite.OwnedBy`<br>`Application.ReadWrite.All]` (preferred)|The application performing this action is unlikely to be the owner of the agent identity blueprint; hence, `Application.ReadWrite.All` is preferred|
 |Remove federated identity credential (FIC) from agent identity blueprint[🔗](https://learn.microsoft.com/en-us/graph/api/federatedidentitycredential-delete)|`Application.ReadWrite.OwnedBy`<br>`Application.ReadWrite.All` (preferred)|The application performing this action is unlikely to be the owner of the agent identity blueprint; hence, `Application.ReadWrite.All` is preferred|
 |Create agent identity[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentity-post)|`AgentIdentity.CreateAsManager`<br>`AgentIdentity.Create.All`|Performed by agent identity blueprint; `AgentIdentity.CreateAsManager` is automatically granted to the agent identity blueprint|
-|Grant application permission (appRole) to agent identity blueprint[🔗](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-post-approleassignments)|`AppRoleAssignment.ReadWrite.All`<br>`Application.Read.All`||
 |Create agent user[🔗](https://learn.microsoft.com/en-us/graph/api/agentuser-post)|`AgentIdUser.ReadWrite.IdentityParentedBy`|Performed by agent identity blueprint; `AgentIdUser.ReadWrite.All` is needed if using another application to create agent user|
 |List agent identity blueprint[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-list)|`Application.Read.All`||
 |List agent identity blueprint principal[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprintprincipal-list)|`Application.Read.All]`||
@@ -27,13 +26,10 @@
 |Delete agent identity blueprint[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-list)|`AgentIdentityBlueprint.DeleteRestore.All`|Agent identity blueprint principal is deleted when agent identity blueprint is deleted|
 |Delete agent identity[🔗](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-delete)|`AgentIdentity.DeleteRestore.All`|Oddly, the agent identity isn't deleted when the agent identity bluepint is deleted<br>There also doesn't seem to be a docs for deleting agent identity, but deleting service prinicpal works|
 |Delete agent user[🔗](https://learn.microsoft.com/en-us/graph/api/agentuser-list)|`AgentIdUser.ReadWrite.IdentityParentedBy`<br>`AgentIdUser.ReadWrite.All,`|`AgentIdUser.ReadWrite.All` is needed if using another application to delete the agent user|
-|[🔗]()|``||
-|[🔗]()|``||
-|[🔗]()|``||
-|[🔗]()|``||
-|[🔗]()|``||
-|[🔗]()|``||
-|[🔗]()|``||
-|[🔗]()|``||
-|[🔗]()|``||
-|[🔗]()|``||
+|Grant application permission (appRoleAssignments) to service principal[🔗](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-post-approleassignments)|`AppRoleAssignment.ReadWrite.All`<br>`Application.Read.All`||
+|Grant delegated permission (oAuth2PermissionGrant) to service principal[🔗](https://learn.microsoft.com/en-us/graph/api/oauth2permissiongrant-post)|`DelegatedPermissionGrant.ReadWrite.All`||
+|Configure inheritable permissions that agent identities automatically inherit from parent agent identity blueprint.[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-post-inheritablepermissions)|`AgentIdentityBlueprint.Create`|Only delegated permission scopes can be inherited|
+|List application permissions (appRoleAssignments) granted to service principal[🔗](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-list-approleassignments)|`Application.Read.All`||
+|List delegated permissions (oAuth2PermissionGrant) granted to service principal[🔗](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-list-oauth2permissiongrants)|`Directory.Read.All`||
+|Delete application permissions (appRoleAssignments) granted to service principal[🔗](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-delete-approleassignments)|`AppRoleAssignment.ReadWrite.All`||
+|Delete delegated permissions (oAuth2PermissionGrant) granted to service principal[🔗](https://learn.microsoft.com/en-us/graph/api/oauth2permissiongrant-delete)|`DelegatedPermissionGrant.ReadWrite.All`||
