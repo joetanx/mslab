@@ -145,8 +145,8 @@ Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 ```pwsh
 $endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals(appId='00000003-0000-0000-c000-000000000000')"
 Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable GraphSP
-$role = 'AgentIdUser.ReadWrite.IdentityParentedBy'
-$AppRole = $GraphSP.appRoles | ? { $_.value -eq $role }
+$PermissionName = 'AgentIdUser.ReadWrite.IdentityParentedBy'
+$AppRole = $GraphSP.appRoles | ? { $_.value -eq $PermissionName }
 ```
 
 #### 1.4.2. Grant permission to agent blueprint
