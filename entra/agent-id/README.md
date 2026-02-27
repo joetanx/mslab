@@ -9,7 +9,7 @@
 
 ## 2. APIs and permissions requried to provision Entra agent identity objects
 
-|API|Minimum permission<br>([Entra permission reference](https://learn.microsoft.com/en-us/graph/permissions-reference))|Remarks|
+|API|Minimum permission<br>([Graph API permission reference](https://learn.microsoft.com/en-us/graph/permissions-reference))|Remarks|
 |---|---|---|
 |Create agent identity blueprint[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-post)|`AgentIdentityBlueprint.Create`|
 |Create agent identity blueprint principal[🔗](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprintprincipal-post)|`[AgentIdentityBlueprintPrincipal.Create`||
