@@ -140,11 +140,18 @@ Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 
 ### 1.4. Grant agent identity blueprint permission to create agent user [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-post-approleassignments)
 
+Get the Graph API service principal ID and application permission ID:
+
 ```pwsh
 $endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals(appId='00000003-0000-0000-c000-000000000000')"
 Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable GraphSP
 $role = 'AgentIdUser.ReadWrite.IdentityParentedBy'
 $AppRole = $GraphSP.appRoles | ? { $_.value -eq $role }
+```
+
+Grant permission to agent identity blueprint:
+
+```pwsh
 $endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals/$($AgentIdBpPrincipal.id)/appRoleAssignments"
 $body=@{
   principalId = $AgentIdBpPrincipal.id
