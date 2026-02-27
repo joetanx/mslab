@@ -45,6 +45,16 @@ $endpointuri = 'https://graph.microsoft.com/v1.0/users?$filter=userPrincipalName
 Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable managerUser
 ```
 
+### 0.4. Staging names
+
+```pwsh
+$AgentIdBpName = 'Agent IdBp01'
+$AgentIdName = 'Agent IdBp01 Id01'
+$AgentUserName = 'Agent IdBp01 Id01 User01'
+$AgentUserAlias = 'agent-idbp01-id01-user01'
+$tenantDomain = 'MngEnvMCAP398230.onmicrosoft.com'
+```
+
 ## 1. Agent identity blueprint
 
 ### 1.1. Create agent identity blueprint [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-post)
@@ -53,7 +63,7 @@ Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable managerU
 $endpointuri = 'https://graph.microsoft.com/beta/applications/microsoft.graph.agentIdentityBlueprint'
 $body=@{
   '@odata.type' = 'Microsoft.Graph.AgentIdentityBlueprint'
-  displayName = 'Agent IdBp01'
+  displayName = $AgentIdBpName
   'sponsors@odata.bind' = @( "https://graph.microsoft.com/v1.0/users/$($managerUser.value.id)" )
   'owners@odata.bind' = @( "https://graph.microsoft.com/v1.0/users/$($managerUser.value.id)" )
 }
@@ -126,6 +136,22 @@ $endpointuri = "https://graph.microsoft.com/beta/applications/$($AgentIdBp.id)/m
 Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 ```
 
+### 1.4. Grant agent identity blueprint permission to create agent user [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-post-approleassignments)
+
+```pwsh
+$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals(appId='00000003-0000-0000-c000-000000000000')"
+Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable GraphSP
+$role = 'AgentIdUser.ReadWrite.IdentityParentedBy'
+$AppRole = $GraphSP.appRoles | ? { $_.value -eq $role }
+$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals/$($AgentIdBpPrincipal.id)/appRoleAssignments"
+$body=@{
+  principalId = $AgentIdBpPrincipal.id
+  resourceId = $GraphSP.id
+  appRoleId = $AppRole.id
+}
+Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $($body | ConvertTo-Json) -ContentType 'application/json'
+```
+
 ## 2. Get access token for agent identity blueprint
 
 ### 2.1.A. Using client secret
@@ -165,49 +191,27 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 $headersAgentIdBp = @{ Authorization='Bearer '+$tokenAgentIdBp.access_token }
 ```
 
-## 3. Agent identity
-
-### 3.1. Create agent identity [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentity-post)
+## 3. Agent identity [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentity-post)
 
 ```pwsh
 $endpointuri = 'https://graph.microsoft.com/beta/servicePrincipals/microsoft.graph.agentIdentity'
 $body=@{
-  displayName = 'Agent IdBp01 Id01'
+  displayName = $AgentIdName
   agentIdentityBlueprintId = $AgentIdBp.id
   'sponsors@odata.bind' = @( "https://graph.microsoft.com/v1.0/users/$($managerUser.value.id)" )
 }
 Invoke-RestMethod $endpointuri -Method Post -Headers $headersAgentIdBp -Body $($body | ConvertTo-Json) -ContentType 'application/json' | Tee-Object -Variable AgentId
 ```
 
-## 4. Agent user
-
-### 4.1. grant app role to agent blueprint | AppRoleAssignment and Application.Read.All | https://learn.microsoft.com/en-us/graph/api/serviceprincipal-post-approleassignments
-#### application and delegated permission reference https://learn.microsoft.com/en-us/graph/permissions-reference
-
-```pwsh
-$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals(appId='00000003-0000-0000-c000-000000000000')"
-Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable GraphSP
-$role = 'AgentIdUser.ReadWrite.IdentityParentedBy'
-$AppRole = $GraphSP.appRoles | ? { $_.value -eq $role }
-$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals/$($AgentIdBpPrincipal.id)/appRoleAssignments"
-$body=@{
-  principalId = $AgentIdBpPrincipal.id
-  resourceId = $GraphSP.id
-  appRoleId = $AppRole.id
-}
-Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $($body | ConvertTo-Json) -ContentType 'application/json'
-```
-
-### 4.2. create agent user | AgentIdUser.ReadWrite.IdentityParentedBy | https://learn.microsoft.com/en-us/graph/api/agentuser-post
-#### re-authenticate agentIdBp to get updated token with the `AgentIdUser.ReadWrite.IdentityParentedBy` permission
+## 4. Agent user [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentuser-post)
 
 ```pwsh
 $endpointuri = 'https://graph.microsoft.com/beta/users/microsoft.graph.agentUser'
 $body=@{
   accountEnabled = 'true'
-  displayName = 'Agent IdBp01 Id01 User01'
-  mailNickname = 'agent-idbp01-id01-user01'
-  userPrincipalName = 'agent-idbp01-id01-user01@MngEnvMCAP398230.onmicrosoft.com'
+  displayName = $AgentUserName
+  mailNickname = $AgentUserAlias
+  userPrincipalName = $AgentUserAlias+'@'+$tenantDomain
   identityParentId = $AgentId.id
 }
 Invoke-RestMethod $endpointuri -Method Post -Headers $headersAgentIdBp -Body $($body | ConvertTo-Json) -ContentType 'application/json' | Tee-Object -Variable AgentUser
