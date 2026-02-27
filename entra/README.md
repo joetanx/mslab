@@ -230,6 +230,10 @@ sequenceDiagram
 
 ### 2.3. On-behalf-of
 
+The [Entra on-behalf-of flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) is based on [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523):
+- `urn:ietf:params:oauth:grant-type:jwt-bearer`
+- `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`
+
 ```mermaid
 sequenceDiagram
   actor A as User
@@ -257,3 +261,11 @@ sequenceDiagram
   E->>F:Request resource<br>with token (resource)
   F->>E:Response
 ```
+
+### 2.4. Federated identity credentials (FIC)
+
+Entra doesn't implement the [RFC 8693 - OAuth 2.0 Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693) (`urn:ietf:params:oauth:grant-type:token-exchange`)
+
+The Entra workload identity / FIC is a customized implementation (`aud`: `api://AzureADTokenExchange`)
+- https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview
+- https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation-create-trust
