@@ -37,7 +37,7 @@ $headers = @{ Authorization='Bearer '+$token.access_token }
 
 ### 0.3. Get user id for sponsor and owner [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/user-list)
 
-Example using user UPN `delta-vm-winsvr`:
+Example using user UPN `admin@MngEnvMCAP398230.onmicrosoft.com`:
 
 ```pwsh
 $userPN = 'admin@MngEnvMCAP398230.onmicrosoft.com'
