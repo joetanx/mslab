@@ -35,7 +35,24 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 $headers = @{ Authorization='Bearer '+$token.access_token }
 ```
 
-### 0.3. Get user id for sponsor and owner [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/user-list)
+### 0.3. Provisioning flow
+
+```mermaid
+flowchart TD
+  A(agent-identity-app)
+  subgraph agent blueprint
+    B2(agent blueprint<br>principal)
+    B1(agent blueprint)
+    C("credentials<br>(secret/fic)")
+  end
+  A-->|create| B1
+  A -->|add| C
+  A -->|create| B2
+  B1 --->|create| I(agent identity)
+  B1 --->|create| U(agent user)
+```
+
+### 0.4. Get user id for sponsor and owner [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/user-list)
 
 Example using user UPN `admin@MngEnvMCAP398230.onmicrosoft.com`:
 
@@ -46,7 +63,7 @@ $endpointuri = 'https://graph.microsoft.com/v1.0/users?$filter='+$query
 Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable managerUser
 ```
 
-### 0.4. Staging names
+### 0.5. Staging names
 
 ```pwsh
 $AgentIdBpName = 'Agent IdBp01'
