@@ -315,7 +315,7 @@ $body=@{
 Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $($body | ConvertTo-Json) -ContentType 'application/json'
 ```
 
-### 5.2. Grant delegated permission to agent identity to authorize agent identity to act on behalf of agent user
+### 5.2. Grant delegated permission to authorize agent identity to act on behalf of agent user [ᵈᵒᶜ](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/autonomous-agent-request-agent-user-tokens#grant-consent-to-agent-identity)
 
 Example: agent identity to use `SecurityIncident.Read.All` permission on behalf of agent user
 
