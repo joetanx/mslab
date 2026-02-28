@@ -59,13 +59,19 @@ Entra permission reference: https://learn.microsoft.com/en-us/graph/permissions-
 
 ##### Application Permission
 
-**Non-interactive** and require admin approval because they give the app broad access across the tenant
+[Application permissions](https://learn.microsoft.com/en-us/graph/permissions-overview#application-permissions), also called _app roles_, enables **non-interactive** access without a signed-in user
+
+The application can access any data that the permission is associated with
 
 ![](https://github.com/user-attachments/assets/6610914e-0643-4c85-b6d0-e566bd278e9a)
 
 ##### Delegated Permission
 
-**Interactive** and scoped to the signed-in user's privileges; the app can only do what the user can do, within the consented scope
+[Delegated permissions](https://learn.microsoft.com/en-us/graph/permissions-overview#delegated-permissions), also called _scopes_, requires **interactive** user sign-in
+
+The application acts **on behalf of** a signed-in user; access is scoped to the signed-in user's privileges
+
+The application **cannot** access anything the signed-in user couldn't access
 
 ![](https://github.com/user-attachments/assets/de7890e6-8f7c-42df-bc60-d117256a738b)
 
