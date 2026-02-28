@@ -159,7 +159,7 @@ Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 
 > [!Note]
 >
-> Use an agent blueprint access token to create agent identity; read: [agent blueprint graph api access token](auth-flows.md#21-graph-api-access-token)
+> Use an agent blueprint access token to create agent identity; read: [get agent blueprint graph api access token](auth-flows.md#21-graph-api-access-token)
 
 ```pwsh
 $endpointuri = 'https://graph.microsoft.com/beta/servicePrincipals/microsoft.graph.agentIdentity'
@@ -175,7 +175,7 @@ Invoke-RestMethod $endpointuri -Method Post -Headers $headersAgentIdBp -Body $($
 
 > [!Note]
 >
-> 1. Use an agent blueprint access token to create agent user; read: [agent blueprint graph api access token](auth-flows.md#21-graph-api-access-token)
+> 1. Use an agent blueprint access token to create agent user; read: [get agent blueprint graph api access token](auth-flows.md#21-graph-api-access-token)
 > 2. The agent blueprint requires `AgentIdUser.ReadWrite.IdentityParentedBy` application permission to create agent user with itself as parent; read: [grant create agent user permission to agent blueprint](permissions-and-consent.md#51-grant-create-agent-user-permission-to-agent-blueprint-ᵈᵒᶜ)
 
 ```pwsh
