@@ -14,8 +14,8 @@ flowchart TD
     AU --> G3(Graph API resource access)
   end
   subgraph autonomous agent
-    B2(agent blueprint <i>token exchange</i> token) --> I1(agent identity <i>Graph API</i> token)
-    I1 ---> G2(Graph API resource access)
+    B2(agent blueprint <i>token exchange</i> token) ---> I1(agent identity <i>Graph API</i> token)
+    I1 --> G2(Graph API resource access)
   end
   subgraph create agent identity/user
     B1(agent blueprint <i>Graph API</i> token) ----> G1(Graph API: create agent identity / user)
