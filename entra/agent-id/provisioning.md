@@ -138,29 +138,6 @@ $endpointuri = "https://graph.microsoft.com/beta/applications/$($AgentIdBp.id)/m
 Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 ```
 
-### 1.4. Grant create agent user permission to agent blueprint [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-post-approleassignments)
-
-#### 1.4.1. Get Graph API service principal ID and application permission ID
-
-```pwsh
-$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals(appId='00000003-0000-0000-c000-000000000000')"
-Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable GraphSP
-$PermissionName = 'AgentIdUser.ReadWrite.IdentityParentedBy'
-$AppRole = $GraphSP.appRoles | ? { $_.value -eq $PermissionName }
-```
-
-#### 1.4.2. Grant permission to agent blueprint
-
-```pwsh
-$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals/$($AgentIdBpPrincipal.id)/appRoleAssignments"
-$body=@{
-  principalId = $AgentIdBpPrincipal.id
-  resourceId = $GraphSP.id
-  appRoleId = $AppRole.id
-}
-Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $($body | ConvertTo-Json) -ContentType 'application/json'
-```
-
 ## 2. Get access token for agent blueprint
 
 ### 2.1.A. Using client secret
@@ -213,6 +190,12 @@ Invoke-RestMethod $endpointuri -Method Post -Headers $headersAgentIdBp -Body $($
 ```
 
 ## 4. Create agent user [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentuser-post)
+
+> [!Note]
+>
+> The agent blueprint requires `AgentIdUser.ReadWrite.IdentityParentedBy` application permission to create agent user with itself as parent
+>
+> Read [Grant create agent user permission to agent blueprint](permissions-and-consent.md#51-grant-create-agent-user-permission-to-agent-blueprint-ᵈᵒᶜ)
 
 ```pwsh
 $endpointuri = 'https://graph.microsoft.com/beta/users/microsoft.graph.agentUser'
