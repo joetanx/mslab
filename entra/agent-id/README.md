@@ -38,3 +38,9 @@
 >
 > 1. `DelegatedPermissionGrant.ReadWrite.All` allows a principal to grant admin consent for `Delegated` permissions
 > 2. `AppRoleAssignment.ReadWrite.All` allows a principal to grant admin consent for `Application` permissions
+
+### 3. Next steps
+
+1. [Provisioning Entra agent identity objects](provisioning.md)
+2. [Permissions management](permissions-and-consent.md)
+3. [Authorization flows](auth-flows.md)
