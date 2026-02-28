@@ -1,9 +1,5 @@
 ## 0. Prerequisites
 
-References:
-- [Create agent blueprint, agent blueprint principal, configure credentials for agent blueprint](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/create-blueprint)
-- [Create agent identities](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/create-delete-agent-identities)
-
 ### 0.1. Provisioning application
 
 The procedures writen below uses an application with the necessary [permissions required](/entra/agent-id#2-apis-and-permissions-requried-to-provision-entra-agent-identity-objects) to perform the provisioning
@@ -36,6 +32,12 @@ $headers = @{ Authorization='Bearer '+$token.access_token }
 ```
 
 ## 1. Grant delegated permission to agent blueprint
+
+[Delegated permissions](https://learn.microsoft.com/en-us/graph/permissions-overview#delegated-permissions), also called _scopes_, requires **interactive** user sign-in
+
+The application acts **on behalf of** a signed-in user; access is scoped to the signed-in user's privileges
+
+The application **cannot** access anything the signed-in user couldn't access
 
 ### 1.1. Get Graph API service principal ID and delegated permission ID
 
@@ -115,6 +117,10 @@ Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $($body | Co
 
 ## 2. Grant application permission to agent blueprint
 
+[Application permissions](https://learn.microsoft.com/en-us/graph/permissions-overview#application-permissions), also called _app roles_, enables **non-interactive** access without a signed-in user present
+
+The application can access any data that the permission is associated with
+
 ### 2.1. Get Graph API service principal ID and application permission ID
 
 Using `SecurityIncident.Read.All` as example application permission to be granted
@@ -181,7 +187,7 @@ Sign in as tenant administrator to approve:
 > `AppRoleAssignment.ReadWrite.All` allows a principal to grant admin consent for `Application` permissions
 
 ```pwsh
-$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals/$($AgentId.id)/appRoleAssignments"
+$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals/$($AgentIdBpPrincipal.id)/appRoleAssignments"
 $body=@{
   principalId = $AgentIdBpPrincipal.id
   resourceId = $GraphSP.id
@@ -282,7 +288,63 @@ $endpointuri = "https://graph.microsoft.com/beta/applications/$($AgentIdBp.id)/m
 Invoke-RestMethod $endpointuri -Headers $headers
 ```
 
+## 5. Assigning permissions used by Entra agent identity
 
+### 5.1. Grant create agent user permission to agent blueprint [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-post-approleassignments)
 
+The agent blueprint requires `AgentIdUser.ReadWrite.IdentityParentedBy` application permission to create agent user with itself as parent
 
+#### 5.1.1. Get Graph API service principal ID and application permission ID
 
+```pwsh
+$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals(appId='00000003-0000-0000-c000-000000000000')"
+Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable GraphSP
+$PermissionName = 'AgentIdUser.ReadWrite.IdentityParentedBy'
+$AppRole = $GraphSP.appRoles | ? { $_.value -eq $PermissionName }
+```
+
+#### 5.1.2. Grant permission to agent blueprint principal
+
+```pwsh
+$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals/$($AgentIdBpPrincipal.id)/appRoleAssignments"
+$body=@{
+  principalId = $AgentIdBpPrincipal.id
+  resourceId = $GraphSP.id
+  appRoleId = $AppRole.id
+}
+Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $($body | ConvertTo-Json) -ContentType 'application/json'
+```
+
+### 5.2. Grant delegated permission to agent identity to authorize agent identity to act on behalf of agent user
+
+Example: agent identity to use `SecurityIncident.Read.All` permission on behalf of agent user
+
+> [!Tip]
+>
+> The delegated permission can also be granted to the agent blueprint, then have inheritable permissions push down to the agent identity ([section 1.](#1-grant-delegated-permission-to-agent-blueprint))
+>
+> The assignment via agent blueprint would need `consentType` to be set to `AllPrincipals`
+
+#### 5.2.1. Get Graph API service principal ID
+
+```pwsh
+$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals(appId='00000003-0000-0000-c000-000000000000')"
+Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable GraphSP
+$PermissionName = 'SecurityIncident.Read.All'
+```
+
+#### 5.2.2. Grant permission to agent blueprint principal
+
+Notice that `consentType` is set to `Principal` and the authorized principal is scoped only to the agent user (`principalId`: `$AgentUser.id`)
+
+```pwsh
+$endpointuri = "https://graph.microsoft.com/v1.0/oauth2PermissionGrants"
+$body=@{
+  clientId = $AgentId.id
+  consentType = 'Principal'
+  principalId = $AgentUser.id
+  resourceId = $GraphSP.id
+  scope = $PermissionName
+}
+Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $($body | ConvertTo-Json) -ContentType 'application/json'
+```
