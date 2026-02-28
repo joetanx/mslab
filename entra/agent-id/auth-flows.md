@@ -113,3 +113,55 @@ $body=@{
 }
 Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentIdBp
 ```
+
+## 3. Get agent identity token
+
+### 3.1. Graph API access token
+
+Use agent blueprint token to get agent identity _access_ token [ᵈᵒᶜ](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/autonomous-agent-request-tokens#request-an-agent-identity-token)
+- Autonomous agent flow
+
+```pwsh
+$body=@{
+  client_id = $AgentId.id
+  client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+  client_assertion = $tokenAgentIdBp.access_token
+  grant_type = 'client_credentials'
+  scope = 'https://graph.microsoft.com/.default'
+}
+Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentIdentity
+```
+
+### 3.2. Token exchange token
+
+Use agent blueprint token to get agent identity _token exchange_ token [ᵈᵒᶜ](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/autonomous-agent-request-agent-user-tokens#request-agent-user-token)
+- Agent user impersonation flow
+
+```pwsh
+$body=@{
+  client_id = $AgentId.id
+  client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+  client_assertion = $tokenAgentIdBp.access_token
+  grant_type = 'client_credentials'
+  scope = 'api://AzureADTokenExchange/.default'
+}
+Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentIdentity
+```
+
+## 4. Get agent user token
+
+Use agent identity _token exchange_ token to get agent user token [ᵈᵒᶜ](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/autonomous-agent-request-agent-user-tokens#request-agent-user-token)
+- Agent user impersonation flow
+
+```pwsh
+$body=@{
+  client_id = $AgentId.id
+  client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+  client_assertion = $tokenAgentIdBp.access_token
+  user_id = $AgentUser.id
+  user_federated_identity_credential = $tokenAgentIdentity.access_token
+  grant_type = 'user_fic'
+  scope = 'https://graph.microsoft.com/.default'
+}
+Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentUser
+```
