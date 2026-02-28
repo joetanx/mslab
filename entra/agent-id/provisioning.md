@@ -155,46 +155,11 @@ $endpointuri = "https://graph.microsoft.com/beta/applications/$($AgentIdBp.id)/m
 Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 ```
 
-## 2. Get access token for agent blueprint
+## 2. Create agent identity [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentity-post)
 
-### 2.1.A. Using client secret
-
-```pwsh
-$body=@{
-  client_id = $AgentIdBp.id
-  client_secret = $AgentIdBpPw.secretText
-  grant_type = 'client_credentials'
-  scope = 'https://graph.microsoft.com/.default'
-}
-Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentIdBp
-$headersAgentIdBp = @{ Authorization='Bearer '+$tokenAgentIdBp.access_token }
-```
-
-### 2.1.B. Using FIC (e.g. using Azure VM to get managed identity token)
-
-#### 2.1.B.1. Get exchange token for MI [ᵈᵒᶜ](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/how-to-use-vm-token)
-
-```pwsh
-$endpointuri = 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=api://AzureADTokenExchange'
-Invoke-RestMethod $endpointuri -Headers @{Metadata="true"} | Tee-Object -Variable tokenMI
-$tokenMI.access_token
-```
-
-#### 2.1.B.2. Exchange MI token for agent blueprint token [ᵈᵒᶜ](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/create-delete-agent-identities#get-an-access-token-using-agent-identity-blueprint)
-
-```pwsh
-$body=@{
-  client_id = $AgentIdBp.id
-  client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-  client_assertion = $tokenMI.access_token
-  grant_type = 'client_credentials'
-  scope = 'https://graph.microsoft.com/.default'
-}
-Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentIdBp
-$headersAgentIdBp = @{ Authorization='Bearer '+$tokenAgentIdBp.access_token }
-```
-
-## 3. Create agent identity [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentity-post)
+> [!Note]
+>
+> Use an agent blueprint access token to create agent identity; read: [agent blueprint graph api access token](auth-flows.md#21-graph-api-access-token)
 
 ```pwsh
 $endpointuri = 'https://graph.microsoft.com/beta/servicePrincipals/microsoft.graph.agentIdentity'
@@ -206,13 +171,12 @@ $body=@{
 Invoke-RestMethod $endpointuri -Method Post -Headers $headersAgentIdBp -Body $($body | ConvertTo-Json) -ContentType 'application/json' | Tee-Object -Variable AgentId
 ```
 
-## 4. Create agent user [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentuser-post)
+## 3. Create agent user [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentuser-post)
 
 > [!Note]
 >
-> The agent blueprint requires `AgentIdUser.ReadWrite.IdentityParentedBy` application permission to create agent user with itself as parent
->
-> Read [Grant create agent user permission to agent blueprint](permissions-and-consent.md#51-grant-create-agent-user-permission-to-agent-blueprint-ᵈᵒᶜ)
+> 1. Use an agent blueprint access token to create agent user; read: [agent blueprint graph api access token](auth-flows.md#21-graph-api-access-token)
+> 2. The agent blueprint requires `AgentIdUser.ReadWrite.IdentityParentedBy` application permission to create agent user with itself as parent; read: [grant create agent user permission to agent blueprint](permissions-and-consent.md#51-grant-create-agent-user-permission-to-agent-blueprint-ᵈᵒᶜ)
 
 ```pwsh
 $endpointuri = 'https://graph.microsoft.com/beta/users/microsoft.graph.agentUser'
@@ -226,11 +190,11 @@ $body=@{
 Invoke-RestMethod $endpointuri -Method Post -Headers $headersAgentIdBp -Body $($body | ConvertTo-Json) -ContentType 'application/json' | Tee-Object -Variable AgentUser
 ```
 
-## 5. Misc troubleshooing
+## 4. Misc troubleshooing
 
-### 5.1. Get things
+### 4.1. Get things
 
-#### 5.1.1. Get agentIdentityBlueprint [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-list)
+#### 4.1.1. Get agentIdentityBlueprint [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-list)
 
 ```pwsh
 $query = "displayName eq '$AgentIdBpName'"
@@ -238,7 +202,7 @@ $endpointuri = 'https://graph.microsoft.com/beta/applications/microsoft.graph.ag
 $AgentIdBp = (Invoke-RestMethod $endpointuri -Headers $headers).value
 ```
 
-#### 5.1.2. Get agentIdentityBlueprintPrincipal [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprintprincipal-list)
+#### 4.1.2. Get agentIdentityBlueprintPrincipal [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprintprincipal-list)
 
 ```pwsh
 $query = "displayName eq '$AgentIdBpName'"
@@ -246,7 +210,7 @@ $endpointuri = 'https://graph.microsoft.com/beta/servicePrincipals/microsoft.gra
 $AgentIdBpPrincipal = (Invoke-RestMethod $endpointuri -Headers $headers).value
 ```
 
-#### 5.1.3. Get agentIdentity [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentity-list)
+#### 4.1.3. Get agentIdentity [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentity-list)
 
 ```pwsh
 $query = "displayName eq '$AgentIdName'"
@@ -254,7 +218,7 @@ $endpointuri = 'https://graph.microsoft.com/beta/servicePrincipals/microsoft.gra
 $AgentId = (Invoke-RestMethod $endpointuri -Headers $headers).value
 ```
 
-#### 5.1.4. Get agentUser [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentuser-list)
+#### 4.1.4. Get agentUser [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentuser-list)
 
 ```pwsh
 $query = "displayName eq '$AgentUserName'"
@@ -262,9 +226,9 @@ $endpointuri = 'https://graph.microsoft.com/beta/users/microsoft.graph.agentUser
 $AgentUser = (Invoke-RestMethod $endpointuri -Headers $headers).value
 ```
 
-### 5.2. Delete things
+### 4.2. Delete things
 
-#### 5.2.1. Delete agentIdentityBlueprint [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-delete)
+#### 4.2.1. Delete agentIdentityBlueprint [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-delete)
 
 > [!Tip]
 >
@@ -275,7 +239,7 @@ $endpointuri = "https://graph.microsoft.com/beta/applications/$($AgentIdBp.id)/m
 Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 ```
 
-#### 5.2.2. Delete agentIdentity [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-delete?view=graph-rest-beta)
+#### 4.2.2. Delete agentIdentity [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-delete?view=graph-rest-beta)
 
 > [!Tip]
 >
@@ -288,7 +252,7 @@ $endpointuri = "https://graph.microsoft.com/beta/serviceprincipals/$($AgentId.id
 Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 ```
 
-#### 5.2.3. Delete agentUser [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentuser-delete)
+#### 4.2.3. Delete agentUser [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentuser-delete)
 
 ```pwsh
 $endpointuri = "https://graph.microsoft.com/beta/users/microsoft.graph.agentUser/$($AgentUser.id)"
