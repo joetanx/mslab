@@ -256,6 +256,5 @@ Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 
 ```pwsh
 $endpointuri = "https://graph.microsoft.com/beta/users/microsoft.graph.agentUser/$($AgentUser.id)"
-Invoke-RestMethod $endpointuri -Method Delete -Headers $headersAgentIdBp
+Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 ```
-
