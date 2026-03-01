@@ -164,6 +164,14 @@ Notice that the type is `Service principal` and the `Object Id` is `25baa229-e19
 
 ### 2.1. Client credential
 
+[Entra client credential flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow) follows section `4.4. Client Credentials Grant` of [RFC 6749 OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749) and works with:
+1. Client secret: section `2.3.1. Client Password` of RFC 6749
+2. Client assertion (signed with application certificate): uses `client_assertion_type` of `urn:ietf:params:oauth:client-assertion-type:jwt-bearer` from section `2.2. Using JWTs for Client Authentication` of [RFC 5723 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523)
+
+The [Entra on-behalf-of flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) is based on [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523):
+- `urn:ietf:params:oauth:grant-type:jwt-bearer`
+- `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`
+
 ```mermaid
 sequenceDiagram
   participant B as Application
@@ -179,6 +187,8 @@ sequenceDiagram
 ```
 
 ### 2.2. Authorization code
+
+[Entra authorization code flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow) follows section `4.1. Authorization Code Grant` of [RFC 6749 OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
 
 #### 2.2.1. without Proof Key for Code Exchange (PKCE)
 
@@ -206,6 +216,8 @@ sequenceDiagram
 ```
 
 #### 2.2.2. with Proof Key for Code Exchange (PKCE)
+
+[RFC 7636 - Proof Key for Code Exchange by OAuth Public Clients](https://datatracker.ietf.org/doc/html/rfc7636)
 
 ```mermaid
 sequenceDiagram
@@ -236,9 +248,9 @@ sequenceDiagram
 
 ### 2.3. On-behalf-of
 
-The [Entra on-behalf-of flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) is based on [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523):
-- `urn:ietf:params:oauth:grant-type:jwt-bearer`
-- `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`
+[Entra on-behalf-of flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) comprises of:
+1. Authorization code flow to get client application token
+2. Client application token is then used to get mibble-tier application token with `grant_type` of `urn:ietf:params:oauth:grant-type:jwt-bearer` from section `2.1. Using JWTs as Authorization Grants` of [RFC 5723 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523)
 
 ```mermaid
 sequenceDiagram
