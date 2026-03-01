@@ -4,7 +4,7 @@
 flowchart TD
   subgraph on-behalf-of human user
     B4(agent blueprint <i>token exchange</i> token) ---> OBO(agent identity obo human user token)
-    HU(human user token) --> OBO
+    HUT(human user token) --> OBO
     OBO --> G4(Graph API resource access)
   end
   subgraph agent user impersonation
@@ -20,10 +20,12 @@ flowchart TD
   subgraph create agent identity/user
     B1(agent blueprint <i>Graph API</i> token) ----> G1(Graph API: create agent identity / user)
   end
-  Start --> B1
-  Start --> B2
-  Start --> B3
-  Start --> B4
+  HU(human user authorization) -->|authorization code flow| HUT
+  HU ~~~ B3
+  BP(agent blueprint authorization) --> B1
+  BP --> B2
+  BP --> B3
+  BP --> B4
 ```
 
 ## 2. Get agent blueprint token
