@@ -252,7 +252,7 @@ $appRoleAssignments.value
 
 ```pwsh
 for ($i = 0; $i -lt $appRoleAssignments.value.Length; $i++) {
-  $endpointuri = "https://graph.microsoft.com/v1.0/appRoleAssignments/$($appRoleAssignments.value[$i].id)"
+  $endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals/$($AgentId.id)/appRoleAssignments/$($appRoleAssignments.value[$i].id)"
   Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 }
 ```
