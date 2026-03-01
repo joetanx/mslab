@@ -518,9 +518,7 @@ The browser will attempt to redirect the code to http://localhost:
 
 ![](https://github.com/user-attachments/assets/18c8d310-ea99-4c05-91ae-202d0c037690)
 
-It's possible to setup a listener on PowerShell to automatically capture and parse for the code, but for simple test, just manually copy the address and extract the code
-
-The address will be in the format:
+It is possible to setup a listener on PowerShell to automatically capture and parse for the code, but for simplicity, just manually copy the address and extract the code:
 
 ```
 http://localhost/?code=<this-long-string-is-the-authorization-code-to-copy>&state=<uuid-from-auth-code-url-generation>&session_state=<uuid-from-entra>#
