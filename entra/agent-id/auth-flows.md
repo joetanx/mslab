@@ -392,3 +392,201 @@ Notice:
   "xms_tnt_fct": "3 6"
 }
 ```
+
+## 5. On-behalf-of human user
+
+[Entra agent on-behalf-of human user](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/agent-on-behalf-of-oauth-flow) comprises of:
+1. Human user sign-in to client application via authorization code flow to get client application token
+2. Client application token is then used to get agent identity token
+
+### 5.1. Preparation
+
+#### 5.1.1. Setup agent identity blueprint [ᵈᵒᶜ](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/create-blueprint?tabs=microsoft-graph-api#configure-identifier-uri-and-scope)
+
+The [update application](https://learn.microsoft.com/en-us/graph/api/application-update) API is used to expose the `access_agent` API on the agent identity blueprint
+
+`/beta` is used here because the `v1.0` spec does not have the ability to update agent identity blueprint application
+
+```pwsh
+$endpointuri = "https://graph.microsoft.com/beta/applications/$($AgentIdBp.id)"
+$accessagentscopeid = [guid]::NewGuid().ToString()
+$body = @{
+  identifierUris = @( "api://$($AgentIdBp.id)" )
+  api = @{
+    oauth2PermissionScopes = @(
+      @{
+        id = $accessagentscopeid
+        adminConsentDisplayName = 'Agent IdBp01'
+        adminConsentDescription = 'Agent Identity Blueprint 01'
+        userConsentDisplayName = 'Agent IdBp01'
+        userConsentDescription = 'Agent Identity Blueprint 01'
+        value = 'access_agent'
+        type = 'User'
+        isEnabled = 'true'
+      }
+    )
+  }
+}
+Invoke-RestMethod $endpointuri -Method Patch -Headers $headers -Body $($body | ConvertTo-Json -Depth 3) -ContentType 'application/json'
+```
+
+The application URI and scope is reflect in the Entra portal:
+
+(search for the agent blueprint object id to get here)
+
+![](https://github.com/user-attachments/assets/54421d19-8a50-4cb6-8294-b1324d48c99f)
+
+> [!Tip]
+>
+> The Entra portal does not yet work to edit agent blueprint application, Graph API (beta) is the only way to work currently
+>
+> ![](https://github.com/user-attachments/assets/de928243-5e54-4dd9-a512-226c494f979f)
+
+#### 5.1.2. Setup client app
+
+Configure redirect URI and add the agent blueprint application into the client app permissions
+
+```pwsh
+$clientappobjectid = '34358650-875c-4446-8d7c-1fe9f60284c4'
+$endpointuri = "https://graph.microsoft.com/v1.0/applications/$clientappobjectid"
+$body = @{
+  web = @{
+    redirectUris = @( 'http://localhost' )
+  }
+  requiredResourceAccess = @(
+    @{
+      resourceAppId = $AgentIdBp.id
+      resourceAccess = @(
+        @{
+          id = $accessagentscopeid
+          type = 'Scope'
+        }
+      )
+    }
+  )
+}
+Invoke-RestMethod $endpointuri -Method Patch -Headers $headers -Body $($body | ConvertTo-Json -Depth 4) -ContentType 'application/json'
+```
+
+> [!Note]
+>
+> 1. The client application's object ID (not applicaiton ID) is used for the update application API
+>
+> ![](https://github.com/user-attachments/assets/ca40ae53-41e6-47c9-a5b5-d3e55fbe5c4b)
+>
+> 2. Unlike the agent blueprint, updating the client app works in Entra portal
+>
+> ![](https://github.com/user-attachments/assets/6a1154b0-a4d5-4db5-9987-384cb3ef880d)
+>
+> ![](https://github.com/user-attachments/assets/27f4a30f-620d-4627-bb84-050ebb18ab75)
+
+### 5.2. Authorization flow
+
+#### 5.2.1. Human user authorization code flow
+
+##### 5.2.1.1. Get authorization code as human user
+
+Prepare authorization code URL:
+
+> [!Note]
+>
+> The client application's application ID (not object ID) is used for the authorization code URL
+>
+> ![](https://github.com/user-attachments/assets/ca40ae53-41e6-47c9-a5b5-d3e55fbe5c4b)
+
+```pwsh
+$clientappid='629f37fd-84c5-411c-b04d-a0ffb3ef56a1'
+$clientappsecret='<client-application-secret'
+$scope = "api://$($AgentIdBp.id)/access_agent"
+$redirect_uri = 'http://localhost'
+$state = [guid]::NewGuid().ToString()
+$auth_url = "https://login.microsoftonline.com/$tenant/oauth2/v2.0/authorize" +
+  "?client_id=$clientappid" +
+  "&redirect_uri=$([uri]::EscapeDataString($redirect_uri))" +
+  "&response_type=code" +
+  "&response_mode=query" +
+  "&scope=$([uri]::EscapeDataString($scope))" +
+  "&state=$State"
+Start-Process $auth_url
+```
+
+![](https://github.com/user-attachments/assets/eee80677-3d37-4fac-b401-e1ea0dfec2f0)
+
+![](https://github.com/user-attachments/assets/ad45a5c1-61b7-4651-b6ff-e09983143397)
+
+The browser will attempt to redirect the code to http://localhost:
+
+![](https://github.com/user-attachments/assets/18c8d310-ea99-4c05-91ae-202d0c037690)
+
+It's possible to setup a listener on PowerShell to automatically capture and parse for the code, but for simple test, just manually copy the address and extract the code
+
+The address will be in the format:
+
+```
+http://localhost/?code=<this-long-string-is-the-authorization-code-to-copy>&state=<uuid-from-auth-code-url-generation>&session_state=<uuid-from-entra>#
+```
+
+#### 5.2.3. Redeem the authorization code for client token
+
+> [!Tip]
+>
+> 1. The authorization code has a 10 minute validity, copy and use it quickly!
+> 2. The client app example here uses a client secret, client assertion will also work
+
+```pwsh
+$code = '<code-copied-from-browser>'
+$token_endpoint = "https://login.microsoftonline.com/$tenant/oauth2/v2.0/token"
+$body=@{
+  client_id = $clientappid
+  client_secret = $clientappsecret
+  scope = $scope
+  code = $code
+  redirect_uri = 'http://localhost'
+  grant_type = 'authorization_code'
+}
+Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable clientapptoken
+```
+
+Example client application token:
+1. `aud`: `8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c` (agent bluepint object ID)
+2. `azp` (authorized parties): `629f37fd-84c5-411c-b04d-a0ffb3ef56a1` (client application's application ID)
+3. `oid`: `ec7c790a-2df0-4eee-bdbb-748f644c5321` (human user's object ID)
+
+```json
+{
+  "aud": "8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c",
+  "iss": "https://login.microsoftonline.com/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/v2.0",
+  "iat": 1772369407,
+  "nbf": 1772369407,
+  "exp": 1772373862,
+  "aio": "AaQAW/8bAAAA2A+exrv2oBRcPLX3jiIgMF7pt/XlUb4/WLlOEb9o4MMqngG1jONiV8ThsbJ6ZKrGXunpGRS+LnGGFv5a+x+Kz39gwW7q8pN2gKaqXELgfBqEjnSTfxvcWy0AZY9NSZ5ht9vJkSx3LdxOOsLrSsyKRSquozafID5yQ2P+Bq7cn15oj2Jw4+9aeQH6zdPaBkgUATIsusXMRMa7pM4RCehcnQ==",
+  "azp": "629f37fd-84c5-411c-b04d-a0ffb3ef56a1",
+  "azpacr": "1",
+  "name": "Alpha Admin",
+  "oid": "ec7c790a-2df0-4eee-bdbb-748f644c5321",
+  "preferred_username": "alpha@MngEnvMCAP398230.onmicrosoft.com",
+  "rh": "1.AWMB9SY2Mv4bzUiJAt39_UThztjfIooV8-FOvoTF9GpbCzwAAPBjAQ.",
+  "scp": "access_agent",
+  "sid": "002df5ba-99e6-f20e-be1b-15c941d05dfe",
+  "sub": "3p9g5BouAwEteoO2GTS_ywmUGiHZOcsC6dd5J9jGykw",
+  "tid": "323626f5-1bfe-48cd-8902-ddfdfd44e1ce",
+  "uti": "GQkNlJPZNEqUJ4refg3IAA",
+  "ver": "2.0",
+  "xms_ftd": "icN5oA7iYkezpTRW6VjIAXygqRQIO1WdKXFBJOG0G9YBdXNzb3V0aC1kc21z"
+}
+```
+
+#### 5.2.4. Request for agent identity OBO token
+
+```pwsh
+$body=@{
+  client_id = $AgentId.id
+  client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+  client_assertion = $tokenAgentIdBp.access_token
+  scope = 'https://graph.microsoft.com/.default'
+  assertion = $clientapptoken.access_token
+  grant_type = 'urn:ietf:params:oauth:grant-type:jwt-bearer'
+  requested_token_use = 'on_behalf_of'
+}
+Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentObo
+```
