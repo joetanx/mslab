@@ -594,9 +594,13 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 
 > [!Tip]
 >
-> The agent blueprint should have inheritable permissions configured to push configured delegated permissions to the agent identity
+> The agent identity must have delegated permissions for the intended human user with:
+> - either `consentType`: `Principal` + `principalId`: `<oid-of-intended-human-user>`
+> - or `consentType`: `AllPrincipals`
 >
-> If the required delegated permissions are directly assigned to the agent identity, this error will occur:
+> The permissions may be directly assigned to the agent identity or inherited from the agent blueprint, as long as the principal scope is correct
+>
+> Otherwise, this error will occur:
 >
 > ```json
 > {
