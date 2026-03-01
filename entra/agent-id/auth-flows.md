@@ -75,46 +75,48 @@ $headersAgentIdBp = @{ Authorization='Bearer '+$tokenAgentIdBp.access_token }
 
 #### 2.1.1. Example agent blueprint Graph API access token
 
-Notice that:
+Notice:
 1. `aud`: `https://graph.microsoft.com`
 2. `iss`: `https://sts.windows.net/<tenant-id>/`
-3. `roles`: `AgentIdUser.ReadWrite.IdentityParentedBy` + `AgentIdentity.CreateAsManager`
+3. `appid`: `8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c` (agent bluepint object ID)
+4. `oid`, `sub`: `12d1b58c-d6e1-4b90-a8de-e8a8cecfb46d` (agent bluepint principal object ID)
+5. `roles`: `AgentIdUser.ReadWrite.IdentityParentedBy` + `AgentIdentity.CreateAsManager`
 
 ```json
 {
   "aud": "https://graph.microsoft.com",
   "iss": "https://sts.windows.net/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/",
-  "iat": 1772327485,
-  "nbf": 1772327485,
-  "exp": 1772331385,
-  "aio": "k2ZgYJhndz/b8uyHNezulVls53Y6AwA=",
+  "iat": 1772364461,
+  "nbf": 1772364461,
+  "exp": 1772368361,
+  "aio": "k2ZgYNg2pdm/lHebXKiZEWfd8yZvAA==",
   "app_displayname": "Agent IdBp01",
-  "appid": "e8c058ec-3ac5-4086-b58d-bd731d7bae4f",
+  "appid": "8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c",
   "appidacr": "1",
   "idp": "https://sts.windows.net/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/",
   "idtyp": "app",
-  "oid": "7fdc982b-c0c8-4c17-a9aa-5ac91815326f",
+  "oid": "12d1b58c-d6e1-4b90-a8de-e8a8cecfb46d",
   "rh": "1.AWMB9SY2Mv4bzUiJAt39_UThzgMAAAAAAAAAwAAAAAAAAAAAAABjAQ.",
   "roles": [
     "AgentIdUser.ReadWrite.IdentityParentedBy",
     "AgentIdentity.CreateAsManager"
   ],
-  "sub": "7fdc982b-c0c8-4c17-a9aa-5ac91815326f",
+  "sub": "12d1b58c-d6e1-4b90-a8de-e8a8cecfb46d",
   "tenant_region_scope": "NA",
   "tid": "323626f5-1bfe-48cd-8902-ddfdfd44e1ce",
-  "uti": "pBmCzQc5oEmjQkkvSH4UAQ",
+  "uti": "GQkNlJPZNEqUJ4reXrPGAA",
   "ver": "1.0",
   "wids": [
     "0997a1d0-0d1d-4acb-b408-d5ca73121e90"
   ],
-  "xms_acd": 1772327622,
-  "xms_act_fct": "3 9",
-  "xms_ftd": "_9fURogc-X1_POOZNftHE8ZZdxBuMeMTDR1Ul_oNeqwBdXNzb3V0aC1kc21z",
-  "xms_idrel": "22 7",
-  "xms_rd": "0.42LjYBJieswkJMLBLiTQ0DHRMuN1vNfMtZcz4oSOTwWKcgoJlCmsXbVajdVz42tO_qRq8etAUQ4hAWYGCDgApYGi3EICjTOuZXzffNfaKfxo0K6H2usA",
+  "xms_acd": 1772364424,
+  "xms_act_fct": "9 3",
+  "xms_ftd": "aJ0fGVJmcUPAXi_PkddSpAkraCC4y5v3plYyaTDRpYABdXNzb3V0aC1kc21z",
+  "xms_idrel": "8 7",
+  "xms_rd": "0.42LjYBJieswkJMLBLiQQtXu9kpAqp0cXn4lv9ZfXd4GinEICZQprV61WY_Xc-JqTP6la_DpQlENIgJkBAg5AaaAot5DAwT2Jb16_T91gHB85v-jC4tkA",
   "xms_sub_fct": "9 3",
   "xms_tcdt": 1752658764,
-  "xms_tnt_fct": "3 14"
+  "xms_tnt_fct": "10 3"
 }
 ```
 
@@ -163,32 +165,35 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 
 #### 2.2.1. Example agent blueprint token exchange token
 
-Notice that:
+Notice:
 1. `aud`: `fb60f99c-7a34-4190-8149-302f77469936` (AAD token exchange public endpoint)
 2. `iss`: `https://login.microsoftonline.com/<tenant-id>/v2.0`
-3. `roles`: _not present_
+3. `azp` (authorized parties): `8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c` (agent bluepint object ID)
+4. `oid`: `12d1b58c-d6e1-4b90-a8de-e8a8cecfb46d` (agent bluepint principal object ID)
+5. `sub`: `.../f3526a0b-788e-4f6c-bb3e-9864b45a3074` (agent identity object ID)
+6. `roles`: _not present_
 
 ```json
 {
   "aud": "fb60f99c-7a34-4190-8149-302f77469936",
   "iss": "https://login.microsoftonline.com/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/v2.0",
-  "iat": 1772327768,
-  "nbf": 1772327768,
-  "exp": 1772331668,
-  "aio": "k2ZgYFhWoCirKfq65tTN1a2uCW0l5z7uNjZgTvQ75W7xcSffLU4A",
-  "azp": "e8c058ec-3ac5-4086-b58d-bd731d7bae4f",
+  "iat": 1772364652,
+  "nbf": 1772364652,
+  "exp": 1772368552,
+  "aio": "k2ZgYHhWX7KPVVRh+ict3rrIfV0t61pnVvtamjge/xeYkdLM8xsA",
+  "azp": "8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c",
   "azpacr": "1",
   "idtyp": "app",
-  "oid": "7fdc982b-c0c8-4c17-a9aa-5ac91815326f",
+  "oid": "12d1b58c-d6e1-4b90-a8de-e8a8cecfb46d",
   "rh": "1.AWMB9SY2Mv4bzUiJAt39_UThzpz5YPs0epBBgUkwL3dGmTYAAABjAQ.",
-  "sub": "/eid1/c/pub/t/9SY2Mv4bzUiJAt39_UThzg/a/7FjA6MU6hkC1jb1zHXuuTw/0a0df95c-728a-44b9-af60-f214343332b6",
+  "sub": "/eid1/c/pub/t/9SY2Mv4bzUiJAt39_UThzg/a/2N8iihXz4U6-hMX0alsLPA/f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "tid": "323626f5-1bfe-48cd-8902-ddfdfd44e1ce",
-  "uti": "tLhn6wP7kkefQewTrGpZAA",
+  "uti": "4V2CRJvtF0q2t05mF0gmAA",
   "ver": "2.0",
-  "xms_act_fct": "9 3",
+  "xms_act_fct": "3 9",
   "xms_ficinfo": "CAAQABgAIAAoAjAA",
-  "xms_ftd": "og6k3vuGbdYekYLYMkEcEbceUw7hRCs0nuZ22F2pWtEBdXNlYXN0LWRzbXM",
-  "xms_idrel": "7 16",
+  "xms_ftd": "EdHbnkq1lfvottB1vCcuOByaFbkZTo0Fl4BLT4HGYsIBdXN3ZXN0My1kc21z",
+  "xms_idrel": "7 26",
   "xms_sub_fct": "3 9"
 }
 ```
@@ -213,45 +218,47 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 
 #### 3.1.1. Example agent identity Graph API access token
 
-Notice that:
+Notice:
 1. `aud`: `https://graph.microsoft.com`
 2. `iss`: `https://sts.windows.net/<tenant-id>/`
-3. `roles`: `SecurityIncident.Read.All` (the agent identity was granted `SecurityIncident.Read.All` application permission)
+3. `appid`, `oid`, `sub`: `f3526a0b-788e-4f6c-bb3e-9864b45a3074` (agent identity object ID)
+4. `roles`: `SecurityIncident.Read.All` (the agent identity was granted `SecurityIncident.Read.All` application permission)
+5. `xms_par_app_azp`: `8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c`  (agent bluepint object ID)
 
 ```json
 {
   "aud": "https://graph.microsoft.com",
   "iss": "https://sts.windows.net/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/",
-  "iat": 1772328467,
-  "nbf": 1772328467,
-  "exp": 1772332367,
-  "aio": "ASQA2/8bAAAAzJWnR1ufeUjpFlm4wP/O8gWxcx6ZY7UUg84O+bZieEQ=",
+  "iat": 1772365320,
+  "nbf": 1772365320,
+  "exp": 1772369220,
+  "aio": "k2ZgYKjf5Zu+4N8tLzd/iXnCdpO2T5zj2mlxI7vH20x6R7EKay0A",
   "app_displayname": "Agent IdBp01 Id01",
-  "appid": "0a0df95c-728a-44b9-af60-f214343332b6",
+  "appid": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "appidacr": "2",
   "idp": "https://sts.windows.net/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/",
   "idtyp": "app",
-  "oid": "0a0df95c-728a-44b9-af60-f214343332b6",
+  "oid": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "rh": "1.AWMB9SY2Mv4bzUiJAt39_UThzgMAAAAAAAAAwAAAAAAAAAAAAABjAQ.",
   "roles": [
     "SecurityIncident.Read.All"
   ],
-  "sub": "0a0df95c-728a-44b9-af60-f214343332b6",
+  "sub": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "tenant_region_scope": "NA",
   "tid": "323626f5-1bfe-48cd-8902-ddfdfd44e1ce",
-  "uti": "yu1i0RBdqkqeTd9HbORAAQ",
+  "uti": "EigReKRUyEuiPKxpn3NfAQ",
   "ver": "1.0",
   "wids": [
     "0997a1d0-0d1d-4acb-b408-d5ca73121e90"
   ],
   "xms_act_fct": "3 11 9",
-  "xms_ftd": "VYvhF-MEkqaNZyMWMd3A3aKPdg-sYqjx_4gpK5tTFNwBdXNub3J0aC1kc21z",
-  "xms_idrel": "7 28",
-  "xms_par_app_azp": "e8c058ec-3ac5-4086-b58d-bd731d7bae4f",
-  "xms_rd": "0.42LjYBJieswkJMLBLiTQ7Jl0JUTyifM8qzvLVSMmJAFFOYUEyhTWrlqtxuq58TUnf1K1-HWgKIeQADMDBByA0kBRbiEBgxQZLuHpShw331Tvf7bo8HYpPg4uIS5Dc3MjYyNzczMLAA",
+  "xms_ftd": "1rxXWn6flFc3gyTXK1CGMR4BsEgPCD5eSV9sFK8aX00BdXNlYXN0LWRzbXM",
+  "xms_idrel": "28 7",
+  "xms_par_app_azp": "8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c",
+  "xms_rd": "0.42LjYBJieswkJMLBLiSwNTxtx4n9Ck5LVBq3Lct8Ug4U5RQSKFNYu2q1Gqvnxtec_EnV4teBohxCAswMEHAASgNFuYUE7nFxTJr__ek1Tul523TXBCdK8XFwCXEZmpsbGZuZGhibAwA",
   "xms_sub_fct": "11 3 9",
   "xms_tcdt": 1752658764,
-  "xms_tnt_fct": "3 8"
+  "xms_tnt_fct": "14 3"
 }
 ```
 
@@ -273,34 +280,36 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 
 #### 3.2.1. Example agent identity token exchange token
 
-Notice that:
+Notice:
 1. `aud`: `fb60f99c-7a34-4190-8149-302f77469936` (AAD token exchange public endpoint)
 2. `iss`: `https://login.microsoftonline.com/<tenant-id>/v2.0`
-3. `roles`: _not present_
+3. `azp`, `oid`, `sub`: `f3526a0b-788e-4f6c-bb3e-9864b45a3074` (agent identity object ID)
+4. `roles`: _not present_
+5. `xms_par_app_azp`: `8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c`  (agent bluepint object ID)
 
 ```json
 {
   "aud": "fb60f99c-7a34-4190-8149-302f77469936",
   "iss": "https://login.microsoftonline.com/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/v2.0",
-  "iat": 1772328602,
-  "nbf": 1772328602,
-  "exp": 1772332502,
-  "aio": "k2ZgYJhryHmPnzX3iIVm7nkll+9PNa/zzgrKO60dWFDIK2osfh4A",
-  "azp": "0a0df95c-728a-44b9-af60-f214343332b6",
+  "iat": 1772365317,
+  "nbf": 1772365317,
+  "exp": 1772369217,
+  "aio": "k2ZgYFjYop6SYfqv/tW0G7wVWk2OjyMsp117GXV+Sru5oqelUTsA",
+  "azp": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "azpacr": "2",
   "idtyp": "app",
-  "oid": "0a0df95c-728a-44b9-af60-f214343332b6",
+  "oid": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "rh": "1.AWMB9SY2Mv4bzUiJAt39_UThzpz5YPs0epBBgUkwL3dGmTYAAABjAQ.",
-  "sub": "0a0df95c-728a-44b9-af60-f214343332b6",
+  "sub": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "tid": "323626f5-1bfe-48cd-8902-ddfdfd44e1ce",
-  "uti": "fEDcIOqNIEqkE6XGb2BKAA",
+  "uti": "xWGr77lq1kWN9vKZRuqTAA",
   "ver": "2.0",
-  "xms_act_fct": "9 11 3",
+  "xms_act_fct": "3 9 11",
   "xms_ficinfo": "CAAQABgAIAAoAzAAOAE",
-  "xms_ftd": "pQ-MuGTABggM117tBl3IcTYgTzeYjkNAvaIWYOARrv4BdXN3ZXN0My1kc21z",
-  "xms_idrel": "7 30",
-  "xms_par_app_azp": "e8c058ec-3ac5-4086-b58d-bd731d7bae4f",
-  "xms_sub_fct": "11 3 9"
+  "xms_ftd": "iHm9KmDUUtHxmaXdHy2fajcso_dQ8UILkB_0Md3Zq3kBdXNzb3V0aC1kc21z",
+  "xms_idrel": "14 7",
+  "xms_par_app_azp": "8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c",
+  "xms_sub_fct": "9 3 11"
 }
 ```
 
@@ -324,59 +333,62 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 
 ### 4.1. Example agent user Graph API access token
 
-Notice that:
+Notice:
 1. `aud`: `https://graph.microsoft.com`
 2. `iss`: `https://sts.windows.net/<tenant-id>/`
-3. `scp`: includes `SecurityIncident.Read.All`
+3. `appid`: `f3526a0b-788e-4f6c-bb3e-9864b45a3074` (agent identity object ID)
+4. `oid`: `956d09a9-5f97-458c-a410-417be7449d04` (agent user object ID)
+5. `scp`: includes `SecurityIncident.Read.All`
     1. The agent identity was granted delegated permission  to perform `SecurityIncident.Read.All` on behalf of agent user
     2. `scp` means delegated permissions
-4. `idtyp`: `user`
+6. `idtyp`: `user`
+7. `xms_par_app_azp`: `8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c`  (agent bluepint object ID)
 
 ```json
 {
   "aud": "https://graph.microsoft.com",
   "iss": "https://sts.windows.net/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/",
-  "iat": 1772328639,
-  "nbf": 1772328639,
-  "exp": 1772333669,
+  "iat": 1772365495,
+  "nbf": 1772365495,
+  "exp": 1772369618,
   "acct": 0,
   "acr": "0",
   "acrs": [
     "p1",
     "urn:user:registersecurityinfo"
   ],
-  "aio": "AbQAS/8bAAAAkbrRxUM8iVLwMguVYJ0Wo1c1YueCzAYuhBmfbGVd96QRBN6umGaj0KHDvP3Va6FqePngbCt+cUy8JLBrtpu/6xcvdCh4lVG6g9y5r7ZsGg2ZiU4JCrMTnu5u1eL+GSOonuUmbUuqtsuPQWix12tFNNGckrhKy6vw4iUs2NZZbRuYqj/eYlPrv1yI1jmACpd+DgnVZyM4gVG3tv68RnR6J9evQVx3AYPzGtZqnIRGMjo=",
+  "aio": "AbQAS/8bAAAA/B30GZhgT6AivCNYiYAmD9OvoMQH+VKqp5ZgV31D5bMkZFff4SNPBBfgKdvO+dc7ZFHIwgi9MC7SYWoz21HCXJHjfuRuzMaqbKQ6HYZwsw7bzUbXLbUBmjVOCUILqbEnhlfYxAfxMbMDoF8ezl31r7m0OTav00wZFypp18ZvwjCJpv6+8E5OXgWLXOJeFaeenZYB+XPk9Cik6jRtcMNpVhSkgkOEbThybckGjhp+/oM=",
   "app_displayname": "Agent IdBp01 Id01",
-  "appid": "0a0df95c-728a-44b9-af60-f214343332b6",
+  "appid": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "appidacr": "2",
   "idtyp": "user",
   "ipaddr": "175.156.74.57",
   "name": "Agent IdBp01 Id01 User01",
-  "oid": "01dc61bb-1e7f-41d0-864b-c4f98ed69f43",
+  "oid": "956d09a9-5f97-458c-a410-417be7449d04",
   "platf": "3",
-  "puid": "10032005A44E3D0A",
-  "rh": "1.AWMB9SY2Mv4bzUiJAt39_UThzgMAAAAAAAAAwAAAAAAAAAAAAFVjAQ.",
+  "puid": "10032005A4F00AF8",
+  "rh": "1.AWMB9SY2Mv4bzUiJAt39_UThzgMAAAAAAAAAwAAAAAAAAAAAAEBjAQ.",
   "scp": "SecurityIncident.Read.All profile openid email",
-  "sid": "002df5ba-0133-a43b-3934-946f95b3131e",
-  "sub": "im5H3LNNBG2JgoxoIUI-7WeVorvyH0C9_rnxEm8DQvs",
+  "sid": "002df5ba-69f5-fbdf-7bc6-7f3a7d821e02",
+  "sub": "jDRooRkrHByXnyz-djw0WZ1fTKZRhG6ZnEYNuJ3VRKE",
   "tenant_region_scope": "NA",
   "tid": "323626f5-1bfe-48cd-8902-ddfdfd44e1ce",
   "unique_name": "agent-idbp01-id01-user01@MngEnvMCAP398230.onmicrosoft.com",
   "upn": "agent-idbp01-id01-user01@MngEnvMCAP398230.onmicrosoft.com",
-  "uti": "oMSWJi67DUqdjM8IC3JFAA",
+  "uti": "IFAI1eh4QkelZ35TgjMMAA",
   "ver": "1.0",
   "wids": [
     "b79fbf4d-3ef9-4689-8143-76b194e85509"
   ],
-  "xms_act_fct": "11 9 3",
-  "xms_ftd": "ldhj0A_dKm7TZqeQykMeV6qAXXh9Fstb5cTTWvf_q54BdXNub3J0aC1kc21z",
-  "xms_idrel": "1 10",
-  "xms_par_app_azp": "e8c058ec-3ac5-4086-b58d-bd731d7bae4f",
+  "xms_act_fct": "3 11 9",
+  "xms_ftd": "ZTvHG9VYzr3gaKZvdiMi8utx0T3IFV0zRMmQGSTVwrwBdXNzb3V0aC1kc21z",
+  "xms_idrel": "1 32",
+  "xms_par_app_azp": "8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c",
   "xms_st": {
-    "sub": "pKsS-2WMrAxhF_JK20FeMk5QNurMyYuAYBbz8j__Nx8"
+    "sub": "2-wfJ3s-tc6OrgXFUvg50tiTrLHq9c2sJ8CorU0xTak"
   },
   "xms_sub_fct": "3 13",
   "xms_tcdt": 1752658764,
-  "xms_tnt_fct": "3 14"
+  "xms_tnt_fct": "3 6"
 }
 ```
