@@ -1,4 +1,4 @@
-## 1. Authorization flows in Entra identity
+## 1. Entra agent identity authorization flows
 
 ```mermaid
 flowchart TD
@@ -119,7 +119,7 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 ### 3.1. Graph API access token
 
 Use agent blueprint token to get agent identity _access_ token [ᵈᵒᶜ](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/autonomous-agent-request-tokens#request-an-agent-identity-token)
-- Autonomous agent flow
+> Autonomous agent flow
 
 ```pwsh
 $body=@{
@@ -135,7 +135,7 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 ### 3.2. Token exchange token
 
 Use agent blueprint token to get agent identity _token exchange_ token [ᵈᵒᶜ](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/autonomous-agent-request-agent-user-tokens#request-agent-user-token)
-- Agent user impersonation flow
+> Agent user impersonation flow
 
 ```pwsh
 $body=@{
@@ -151,7 +151,7 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 ## 4. Get agent user token
 
 Use agent identity _token exchange_ token to get agent user token [ᵈᵒᶜ](https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/autonomous-agent-request-agent-user-tokens#request-agent-user-token)
-- Agent user impersonation flow
+> Agent user impersonation flow
 
 ```pwsh
 $body=@{
