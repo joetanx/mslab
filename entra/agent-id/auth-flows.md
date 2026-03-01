@@ -339,7 +339,7 @@ Notice:
 3. `appid`: `f3526a0b-788e-4f6c-bb3e-9864b45a3074` (agent identity object ID)
 4. `oid`: `956d09a9-5f97-458c-a410-417be7449d04` (agent user object ID)
 5. `scp`: includes `SecurityIncident.Read.All`
-    1. The agent identity was granted delegated permission  to perform `SecurityIncident.Read.All` on behalf of agent user
+    1. The agent identity was granted delegated permission to perform `SecurityIncident.Read.All` on behalf of agent user
     2. `scp` means delegated permissions
 6. `idtyp`: `user`
 7. `xms_par_app_azp`: `8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c`  (agent bluepint object ID)
@@ -549,17 +549,18 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 
 Example client application token:
 1. `aud`: `8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c` (agent bluepint object ID)
-2. `azp` (authorized parties): `629f37fd-84c5-411c-b04d-a0ffb3ef56a1` (client application's application ID)
-3. `oid`: `ec7c790a-2df0-4eee-bdbb-748f644c5321` (human user's object ID)
+2. `iss`: `https://login.microsoftonline.com/<tenant-id>/v2.0`
+3. `azp` (authorized parties): `629f37fd-84c5-411c-b04d-a0ffb3ef56a1` (client application's application ID)
+4. `oid`: `ec7c790a-2df0-4eee-bdbb-748f644c5321` (human user's object ID)
 
 ```json
 {
   "aud": "8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c",
   "iss": "https://login.microsoftonline.com/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/v2.0",
-  "iat": 1772369407,
-  "nbf": 1772369407,
-  "exp": 1772373862,
-  "aio": "AaQAW/8bAAAA2A+exrv2oBRcPLX3jiIgMF7pt/XlUb4/WLlOEb9o4MMqngG1jONiV8ThsbJ6ZKrGXunpGRS+LnGGFv5a+x+Kz39gwW7q8pN2gKaqXELgfBqEjnSTfxvcWy0AZY9NSZ5ht9vJkSx3LdxOOsLrSsyKRSquozafID5yQ2P+Bq7cn15oj2Jw4+9aeQH6zdPaBkgUATIsusXMRMa7pM4RCehcnQ==",
+  "iat": 1772371668,
+  "nbf": 1772371668,
+  "exp": 1772376722,
+  "aio": "AaQAW/8bAAAA20r7HDF757hTrw3/vHTdHhjYx4dTzB622jPOigZWrMaDtcT7k2Wv/hMdja1H/RAr91YINrSXeKXJqVwCOCA1gKTxhNe6THvf4AMNouX5ebzrrETqvKnK6v0Qg72K/q/oqS0wlEg8Ki9pwEVMKU5Qf20wUxch+Sd2qFwHc7eEVYesNEs8sfkbXULHjvLFeAV/8oiFzu0sznHK6/x+M6TaEg==",
   "azp": "629f37fd-84c5-411c-b04d-a0ffb3ef56a1",
   "azpacr": "1",
   "name": "Alpha Admin",
@@ -570,9 +571,9 @@ Example client application token:
   "sid": "002df5ba-99e6-f20e-be1b-15c941d05dfe",
   "sub": "3p9g5BouAwEteoO2GTS_ywmUGiHZOcsC6dd5J9jGykw",
   "tid": "323626f5-1bfe-48cd-8902-ddfdfd44e1ce",
-  "uti": "GQkNlJPZNEqUJ4refg3IAA",
+  "uti": "XIPhdvl9Q02PcQEYU04kAA",
   "ver": "2.0",
-  "xms_ftd": "icN5oA7iYkezpTRW6VjIAXygqRQIO1WdKXFBJOG0G9YBdXNzb3V0aC1kc21z"
+  "xms_ftd": "iBy8VpZaFUNPXCLA62-XGjzURgKmCsdBlBnI0z4Ig0oBdXNub3J0aC1kc21z"
 }
 ```
 
@@ -589,4 +590,88 @@ $body=@{
   requested_token_use = 'on_behalf_of'
 }
 Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentObo
+```
+
+> [!Tip]
+>
+> The agent blueprint should have inheritable permissions configured to push configured delegated permissions to the agent identity
+>
+> If the required delegated permissions are directly assigned to the agent identity, this error will occur:
+>
+> ```json
+> {
+>   "error": "invalid_grant",
+>   "error_description": "AADSTS65001: The user or administrator has not consented to use the application with ID 'f3526a0b-788e-4f6c-bb3e-9864b45a3074' named 'Agent IdBp01 Id01'. Send an interactive authorization request for this user and resource. Trace ID: 9a55f72d-a1e9-4981-bd94-4ef3d7675c01 Correlation ID: f343ad39-0651-4165-9ee0-697d3eaca6ad Timestamp: 2026-03-01 13:08:48Z",
+>   "error_codes": [
+>     65001
+>   ],
+>   "timestamp": "2026-03-01 13:08:48Z",
+>   "trace_id": "9a55f72d-a1e9-4981-bd94-4ef3d7675c01",
+>   "correlation_id": "f343ad39-0651-4165-9ee0-697d3eaca6ad",
+>   "suberror": "consent_required",
+>   "claims": "{\"access_token\":{\"capolids\":{\"essential\":true,\"values\":[\"ff3efee0-276e-467d-9a11-21c413943b33\"]}}}"
+> }
+> ```
+
+Example agent identity obo token:
+1. `aud`: `https://graph.microsoft.com`
+2. `iss`: `https://sts.windows.net/<tenant-id>/`
+3. `appid`: `f3526a0b-788e-4f6c-bb3e-9864b45a3074` (agent identity object ID)
+4. `oid`: `ec7c790a-2df0-4eee-bdbb-748f644c5321` (human user's object ID)
+5. `scp`: includes `SecurityIncident.Read.All`
+    1. The agent identity inherited delegated permission to perform `SecurityIncident.Read.All` on behalf of any principal
+    2. `scp` means delegated permissions
+6. `idtyp`: `user`
+7. `xms_par_app_azp`: `8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c`  (agent bluepint object ID)
+
+```json
+{
+  "aud": "https://graph.microsoft.com",
+  "iss": "https://sts.windows.net/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/",
+  "iat": 1772371695,
+  "nbf": 1772371695,
+  "exp": 1772376720,
+  "acct": 0,
+  "acr": "1",
+  "acrs": [
+    "p1"
+  ],
+  "aio": "AcQAO/8bAAAAFXGd+a4+7KvyMk62P68FbFsGXAMlJHo7OUjSIqFoRHdJiFwo/esldLQJ/jAbVVov7M2FRkIekphBwBlSfK9r+qcEr9QPS2oblVkpLBrEZOuJZVPyDMwlcWGoBYuheup+GsbR//47G4Iz6HXqSQVeOiASQd5RF90Sx5QX3ZSWXQfLUBmH8LrwDUSh+bzY9m+ThgGkYpT5EsYE7kyNQ7X9JfjLr45ZrARgWMtnrBULq/hPZApgnmONPnJTc+0mTNN4",
+  "amr": [
+    "pwd",
+    "mfa"
+  ],
+  "app_displayname": "Agent IdBp01 Id01",
+  "appid": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
+  "appidacr": "2",
+  "idtyp": "user",
+  "ipaddr": "175.156.74.57",
+  "name": "Alpha Admin",
+  "oid": "ec7c790a-2df0-4eee-bdbb-748f644c5321",
+  "platf": "3",
+  "puid": "10032004EF121ECC",
+  "rh": "1.AWMB9SY2Mv4bzUiJAt39_UThzgMAAAAAAAAAwAAAAAAAAAAAAPBjAQ.",
+  "scp": "profile openid email SecurityIncident.Read.All",
+  "sid": "002df5ba-99e6-f20e-be1b-15c941d05dfe",
+  "sub": "ICgG-POIWoOCMINW3QLiL7rV2aqvDQKp1N2kbYhKW8Q",
+  "tenant_region_scope": "NA",
+  "tid": "323626f5-1bfe-48cd-8902-ddfdfd44e1ce",
+  "unique_name": "alpha@MngEnvMCAP398230.onmicrosoft.com",
+  "upn": "alpha@MngEnvMCAP398230.onmicrosoft.com",
+  "uti": "3uhdUKFZ3Ui8SGaob9KmAA",
+  "ver": "1.0",
+  "wids": [
+    "b79fbf4d-3ef9-4689-8143-76b194e85509"
+  ],
+  "xms_act_fct": "3 9 11",
+  "xms_ftd": "p65wgrUD2xV80tppcOFM97tZPobDJ5fYl7EGEgYwunEBdXNlYXN0LWRzbXM",
+  "xms_idrel": "18 1",
+  "xms_par_app_azp": "8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c",
+  "xms_st": {
+    "sub": "7GwrrJzmTDHWoRK1ZWInNF7xkOe0JWSeLHDB8v-Ln9Q"
+  },
+  "xms_sub_fct": "3 10",
+  "xms_tcdt": 1752658764,
+  "xms_tnt_fct": "3 8"
+}
 ```
