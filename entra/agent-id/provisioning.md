@@ -58,8 +58,8 @@ Example using user UPN `admin@MngEnvMCAP398230.onmicrosoft.com`:
 
 ```pwsh
 $userPN = 'admin@MngEnvMCAP398230.onmicrosoft.com'
-$query = "userPrincipalName eq '$userPN'"
-$endpointuri = 'https://graph.microsoft.com/v1.0/users?$filter='+$query
+$filter = "userPrincipalName eq '$userPN'"
+$endpointuri = 'https://graph.microsoft.com/v1.0/users?$filter='+$filter
 Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable managerUser
 ```
 
@@ -130,8 +130,8 @@ Example using Azure VM with name `delta-vm-winsvr`:
 
 ```pwsh
 $miName = 'delta-vm-winsvr'
-$query = "servicePrincipalType eq 'ManagedIdentity' and displayName eq '$miName'"
-$endpointuri = 'https://graph.microsoft.com/v1.0/servicePrincipals?$filter='+$query
+$filter = "servicePrincipalType eq 'ManagedIdentity' and displayName eq '$miName'"
+$endpointuri = 'https://graph.microsoft.com/v1.0/servicePrincipals?$filter='+$filter
 Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable managedIdentity
 ```
 
@@ -197,32 +197,32 @@ Invoke-RestMethod $endpointuri -Method Post -Headers $headersAgentIdBp -Body $($
 #### 4.1.1. Get agentIdentityBlueprint [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-list)
 
 ```pwsh
-$query = "displayName eq '$AgentIdBpName'"
-$endpointuri = 'https://graph.microsoft.com/beta/applications/microsoft.graph.agentIdentityBlueprint?$filter='+$query
+$filter = "displayName eq '$AgentIdBpName'"
+$endpointuri = 'https://graph.microsoft.com/beta/applications/microsoft.graph.agentIdentityBlueprint?$filter='+$filter
 $AgentIdBp = (Invoke-RestMethod $endpointuri -Headers $headers).value
 ```
 
 #### 4.1.2. Get agentIdentityBlueprintPrincipal [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprintprincipal-list)
 
 ```pwsh
-$query = "displayName eq '$AgentIdBpName'"
-$endpointuri = 'https://graph.microsoft.com/beta/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal?$filter='+$query
+$filter = "displayName eq '$AgentIdBpName'"
+$endpointuri = 'https://graph.microsoft.com/beta/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal?$filter='+$filter
 $AgentIdBpPrincipal = (Invoke-RestMethod $endpointuri -Headers $headers).value
 ```
 
 #### 4.1.3. Get agentIdentity [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentity-list)
 
 ```pwsh
-$query = "displayName eq '$AgentIdName'"
-$endpointuri = 'https://graph.microsoft.com/beta/servicePrincipals/microsoft.graph.agentIdentity?$filter='+$query
+$filter = "displayName eq '$AgentIdName'"
+$endpointuri = 'https://graph.microsoft.com/beta/servicePrincipals/microsoft.graph.agentIdentity?$filter='+$filter
 $AgentId = (Invoke-RestMethod $endpointuri -Headers $headers).value
 ```
 
 #### 4.1.4. Get agentUser [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentuser-list)
 
 ```pwsh
-$query = "displayName eq '$AgentUserName'"
-$endpointuri = 'https://graph.microsoft.com/beta/users/microsoft.graph.agentUser?$filter='+$query
+$filter = "displayName eq '$AgentUserName'"
+$endpointuri = 'https://graph.microsoft.com/beta/users/microsoft.graph.agentUser?$filter='+$filter
 $AgentUser = (Invoke-RestMethod $endpointuri -Headers $headers).value
 ```
 
