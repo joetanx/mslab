@@ -166,7 +166,7 @@ Notice that the type is `Service principal` and the `Object Id` is `25baa229-e19
 
 [Entra client credential flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow) follows section `4.4. Client Credentials Grant` of [RFC 6749 OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749) and works with:
 1. Client secret: section `2.3.1. Client Password` of RFC 6749
-2. Client assertion (signed with application certificate): uses `client_assertion_type` of `urn:ietf:params:oauth:client-assertion-type:jwt-bearer` from section `2.2. Using JWTs for Client Authentication` of [RFC 5723 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523)
+2. Client assertion (signed with application certificate): uses `client_assertion_type` of `urn:ietf:params:oauth:client-assertion-type:jwt-bearer` from section `2.2. Using JWTs for Client Authentication` of [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523)
 
 The [Entra on-behalf-of flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) is based on [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523):
 - `urn:ietf:params:oauth:grant-type:jwt-bearer`
