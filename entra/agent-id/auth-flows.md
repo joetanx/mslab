@@ -90,7 +90,7 @@ Notice:
   "nbf": 1772364461,
   "exp": 1772368361,
   "aio": "k2ZgYNg2pdm/lHebXKiZEWfd8yZvAA==",
-  "app_displayname": "Agent IdBp01",
+  "app_displayname": "episilon-AgentIdentityBlueprint",
   "appid": "8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c",
   "appidacr": "1",
   "idp": "https://sts.windows.net/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/",
@@ -213,7 +213,7 @@ $body=@{
   grant_type = 'client_credentials'
   scope = 'https://graph.microsoft.com/.default'
 }
-Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentIdentity
+Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentId
 ```
 
 #### 3.1.1. Example agent identity Graph API access token
@@ -233,7 +233,7 @@ Notice:
   "nbf": 1772365320,
   "exp": 1772369220,
   "aio": "k2ZgYKjf5Zu+4N8tLzd/iXnCdpO2T5zj2mlxI7vH20x6R7EKay0A",
-  "app_displayname": "Agent IdBp01 Id01",
+  "app_displayname": "episilon-AgentIdentity",
   "appid": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "appidacr": "2",
   "idp": "https://sts.windows.net/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/",
@@ -275,7 +275,7 @@ $body=@{
   grant_type = 'client_credentials'
   scope = 'api://AzureADTokenExchange/.default'
 }
-Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentIdentity
+Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable tokenAgentId
 ```
 
 #### 3.2.1. Example agent identity token exchange token
@@ -324,7 +324,7 @@ $body=@{
   client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
   client_assertion = $tokenAgentIdBp.access_token
   user_id = $AgentUser.id
-  user_federated_identity_credential = $tokenAgentIdentity.access_token
+  user_federated_identity_credential = $tokenAgentId.access_token
   grant_type = 'user_fic'
   scope = 'https://graph.microsoft.com/.default'
 }
@@ -358,12 +358,12 @@ Notice:
     "urn:user:registersecurityinfo"
   ],
   "aio": "AbQAS/8bAAAA/B30GZhgT6AivCNYiYAmD9OvoMQH+VKqp5ZgV31D5bMkZFff4SNPBBfgKdvO+dc7ZFHIwgi9MC7SYWoz21HCXJHjfuRuzMaqbKQ6HYZwsw7bzUbXLbUBmjVOCUILqbEnhlfYxAfxMbMDoF8ezl31r7m0OTav00wZFypp18ZvwjCJpv6+8E5OXgWLXOJeFaeenZYB+XPk9Cik6jRtcMNpVhSkgkOEbThybckGjhp+/oM=",
-  "app_displayname": "Agent IdBp01 Id01",
+  "app_displayname": "episilon-AgentIdentity",
   "appid": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "appidacr": "2",
   "idtyp": "user",
   "ipaddr": "175.156.74.57",
-  "name": "Agent IdBp01 Id01 User01",
+  "name": "episilon-AgentUser",
   "oid": "956d09a9-5f97-458c-a410-417be7449d04",
   "platf": "3",
   "puid": "10032005A4F00AF8",
@@ -373,8 +373,8 @@ Notice:
   "sub": "jDRooRkrHByXnyz-djw0WZ1fTKZRhG6ZnEYNuJ3VRKE",
   "tenant_region_scope": "NA",
   "tid": "323626f5-1bfe-48cd-8902-ddfdfd44e1ce",
-  "unique_name": "agent-idbp01-id01-user01@MngEnvMCAP398230.onmicrosoft.com",
-  "upn": "agent-idbp01-id01-user01@MngEnvMCAP398230.onmicrosoft.com",
+  "unique_name": "episilon-AgentUser@MngEnvMCAP398230.onmicrosoft.com",
+  "upn": "episilon-AgentUser@MngEnvMCAP398230.onmicrosoft.com",
   "uti": "IFAI1eh4QkelZ35TgjMMAA",
   "ver": "1.0",
   "wids": [
@@ -416,10 +416,10 @@ $body = @{
     oauth2PermissionScopes = @(
       @{
         id = $accessagentscopeid
-        adminConsentDisplayName = 'Agent IdBp01'
-        adminConsentDescription = 'Agent Identity Blueprint 01'
-        userConsentDisplayName = 'Agent IdBp01'
-        userConsentDescription = 'Agent Identity Blueprint 01'
+        adminConsentDisplayName = 'episilon-AgentIdentityBlueprint'
+        adminConsentDescription = 'episilon Agent Identity Blueprint'
+        userConsentDisplayName = 'episilon-AgentIdentityBlueprint'
+        userConsentDescription = 'episilon Agent Identity Blueprint'
         value = 'access_agent'
         type = 'User'
         isEnabled = 'true'
@@ -603,7 +603,7 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 > ```json
 > {
 >   "error": "invalid_grant",
->   "error_description": "AADSTS65001: The user or administrator has not consented to use the application with ID 'f3526a0b-788e-4f6c-bb3e-9864b45a3074' named 'Agent IdBp01 Id01'. Send an interactive authorization request for this user and resource. Trace ID: 9a55f72d-a1e9-4981-bd94-4ef3d7675c01 Correlation ID: f343ad39-0651-4165-9ee0-697d3eaca6ad Timestamp: 2026-03-01 13:08:48Z",
+>   "error_description": "AADSTS65001: The user or administrator has not consented to use the application with ID 'f3526a0b-788e-4f6c-bb3e-9864b45a3074' named 'episilon-AgentIdentity'. Send an interactive authorization request for this user and resource. Trace ID: 9a55f72d-a1e9-4981-bd94-4ef3d7675c01 Correlation ID: f343ad39-0651-4165-9ee0-697d3eaca6ad Timestamp: 2026-03-01 13:08:48Z",
 >   "error_codes": [
 >     65001
 >   ],
@@ -643,7 +643,7 @@ Example agent identity obo token:
     "pwd",
     "mfa"
   ],
-  "app_displayname": "Agent IdBp01 Id01",
+  "app_displayname": "episilon-AgentIdentity",
   "appid": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "appidacr": "2",
   "idtyp": "user",
