@@ -354,8 +354,8 @@ Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $($body | Co
 ```pwsh
 $permissions = @(
   'ThreatHunting.Read.All',
-  'SecurityAlert.Read.All',
-  'SecurityIncident.Read.All'
+  'SecurityAlert.ReadWrite.All',
+  'SecurityIncident.ReadWrite.All'
 )
 foreach ( $PermissionName in $permissions ) {
 	$endpointuri = "https://graph.microsoft.com/v1.0/servicePrincipals(appId='00000003-0000-0000-c000-000000000000')"
