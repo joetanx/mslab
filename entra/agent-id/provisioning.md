@@ -179,7 +179,7 @@ Invoke-RestMethod $endpointuri -Method Post -Headers $headersAgentIdBp -Body $($
 > 2. The agent blueprint requires `AgentIdUser.ReadWrite.IdentityParentedBy` application permission to create agent user with itself as parent; read: [grant create agent user permission to agent blueprint](permissions-and-consent.md#51-grant-create-agent-user-permission-to-agent-blueprint-ᵈᵒᶜ)
 
 ```pwsh
-$endpointuri = 'https://graph.microsoft.com/beta/users/microsoft.graph.agentUser'
+$endpointuri = 'https://graph.microsoft.com/v1.0/users/microsoft.graph.agentUser'
 $body=@{
   accountEnabled = 'true'
   displayName = $AgentUserName
@@ -222,7 +222,7 @@ $AgentId = (Invoke-RestMethod $endpointuri -Headers $headers).value
 
 ```pwsh
 $filter = "displayName eq '$AgentUserName'"
-$endpointuri = 'https://graph.microsoft.com/beta/users/microsoft.graph.agentUser?$filter='+$filter
+$endpointuri = 'https://graph.microsoft.com/v1.0/users/microsoft.graph.agentUser?$filter='+$filter
 $AgentUser = (Invoke-RestMethod $endpointuri -Headers $headers).value
 ```
 
@@ -239,7 +239,7 @@ $endpointuri = "https://graph.microsoft.com/v1.0/applications/$($AgentIdBp.id)/m
 Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 ```
 
-#### 4.2.2. Delete agentIdentity [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-delete?view=graph-rest-beta)
+#### 4.2.2. Delete agentIdentity [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-delete)
 
 > [!Tip]
 >
@@ -255,6 +255,6 @@ Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 #### 4.2.3. Delete agentUser [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentuser-delete)
 
 ```pwsh
-$endpointuri = "https://graph.microsoft.com/beta/users/microsoft.graph.agentUser/$($AgentUser.id)"
+$endpointuri = "https://graph.microsoft.com/v1.0/users/microsoft.graph.agentUser/$($AgentUser.id)"
 Invoke-RestMethod $endpointuri -Method Delete -Headers $headers
 ```
