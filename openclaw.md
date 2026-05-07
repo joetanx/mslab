@@ -36,7 +36,7 @@ curl -fsSL https://openclaw.ai/install.sh | bash
 
 > [!Tip]
 > 
-> If the first setup was abort, setup can be rerun with:
+> If the first setup was aborted, it can be rerun with:
 > 
 > ```sh
 > openclaw onboard
