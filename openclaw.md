@@ -60,7 +60,20 @@ Select `QuickStart` to use defaults:
 
 ### 0.5. Setup Teams app
 
-![](https://github.com/user-attachments/assets/14cb5875-d9a8-486a-b240-989bef8a326f)
+#### 0.5.1. Install [Teams CLI v3](https://microsoft.github.io/teams-sdk/cli/)
+
+The `@preview` suffix is requried to install v3, which is current in preview
+
+```sh
+apt update && apt -y install npm
+npm install -g @microsoft/teams.cli@preview
+```
+
+The Teams CLI v3 includes options like [login](https://microsoft.github.io/teams-sdk/cli/commands/login/), [status](https://microsoft.github.io/teams-sdk/cli/commands/status/) and [app create](https://microsoft.github.io/teams-sdk/cli/commands/app/create)
+
+![](https://github.com/user-attachments/assets/61be52c0-170a-4a49-9acc-589b81164eb0)
+
+#### 0.5.2. Login
 
 ```
 teams login
@@ -68,4 +81,12 @@ teams login
 
 ![](https://github.com/user-attachments/assets/2f998112-41a5-4fc9-b272-89f403112f7e)
 
-![](https://github.com/user-attachments/assets/a0e78f13-599d-464b-bbb7-b1efb4f80d76)
+![](https://github.com/user-attachments/assets/2ee0af13-53e4-4b70-9942-233cbb9ddee7)
+
+Teams CLI requires sideloading to be enabled in the policy applied to the sign-in user
+
+Teams Admin Center → Users → Find the user → Policies → App setup policy → "Upload custom apps"
+
+![](https://github.com/user-attachments/assets/ed911e99-d387-4666-9783-ab405b1b181c)
+
+![](https://github.com/user-attachments/assets/707dc008-28bd-4306-906d-15819bda4c4c)
