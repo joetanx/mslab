@@ -57,3 +57,15 @@ Select `QuickStart` to use defaults:
 ![](https://github.com/user-attachments/assets/47f86230-e9a8-448b-a426-15619a16a94e)
 
 ![](https://github.com/user-attachments/assets/ee984f60-ce74-45ad-9461-4070d8d9bae1)
+
+### 0.5. Setup Teams app
+
+![](https://github.com/user-attachments/assets/14cb5875-d9a8-486a-b240-989bef8a326f)
+
+```
+teams login
+```
+
+![](https://github.com/user-attachments/assets/2f998112-41a5-4fc9-b272-89f403112f7e)
+
+![](https://github.com/user-attachments/assets/a0e78f13-599d-464b-bbb7-b1efb4f80d76)
