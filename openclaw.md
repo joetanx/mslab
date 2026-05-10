@@ -90,3 +90,7 @@ Teams Admin Center → Users → Find the user → Policies → App setup policy
 ![](https://github.com/user-attachments/assets/ed911e99-d387-4666-9783-ab405b1b181c)
 
 ![](https://github.com/user-attachments/assets/707dc008-28bd-4306-906d-15819bda4c4c)
+
+#### 0.5.3. Expose OpenClaw Teams Endpoint over API Management
+
+![](https://github.com/user-attachments/assets/4cf04aea-82a9-4604-9545-6ec745474c89)
