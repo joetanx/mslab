@@ -95,19 +95,19 @@ Teams Admin Center → Users → Find the user → Policies → App setup policy
 
 Select the VNet and subnet that the APIM should attach to:
 
-![](https://github.com/user-attachments/assets/4cf04aea-82a9-4604-9545-6ec745474c89)
+![](https://github.com/user-attachments/assets/ef6c8b64-5158-4dbe-b8d2-94d9247ebd54)
 
 Run the VNet verifier:
 
-![](https://github.com/user-attachments/assets/465facc7-fc28-4dbd-a544-885441a19eae)
+![](https://github.com/user-attachments/assets/9958f45e-f924-497f-8ba3-851bef3f4c88)
 
 Example list of errors:
 
 ![](https://github.com/user-attachments/assets/c5997a6e-26b4-4b0d-a115-531b09dce085)
 
-_Vnet Routing Issues detected - Vnet peering is detected with no UDR for API Management network traffic on subnet access-appgw. Please make the changes below._
+_Vnet Routing Issues detected - Vnet peering is detected with no UDR for API Management network traffic on subnet access-apim. Please make the changes below._
 
-![](https://github.com/user-attachments/assets/770184a7-853c-4f39-9709-5a45c8f217fd)
+![](https://github.com/user-attachments/assets/6d4e3309-6806-4e6d-ab79-02e41c5abfe9)
 
 _NSG Security rules do not fulfill the recommended requirements_
 
