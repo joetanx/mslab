@@ -103,8 +103,6 @@ Run the VNet verifier:
 
 <details><Summary><h5>Common APIM VNet integration errors and fixes</h5></Summary>
 
-##### Common APIM VNet integration errors and fixes
-
 ![](https://github.com/user-attachments/assets/c5997a6e-26b4-4b0d-a115-531b09dce085)
 
 ##### Vnet Routing Issues detected - Vnet peering is detected with no UDR for API Management network traffic on subnet access-apim. Please make the changes below.
