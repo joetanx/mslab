@@ -103,8 +103,16 @@ Run the VNet verifier:
 
 Example list of errors:
 
-![](https://github.com/user-attachments/assets/c5a7fb89-fda1-4bec-acaa-3c5ab09b895c)
+![](https://github.com/user-attachments/assets/c5997a6e-26b4-4b0d-a115-531b09dce085)
 
-![](https://github.com/user-attachments/assets/23d7e65b-edd4-4b66-90b0-3e16173f187e)
+_Vnet Routing Issues detected - Vnet peering is detected with no UDR for API Management network traffic on subnet access-appgw. Please make the changes below._
 
-![](https://github.com/user-attachments/assets/5317af3b-a532-4b4c-aa56-3fb9ddbdab50)
+![](https://github.com/user-attachments/assets/770184a7-853c-4f39-9709-5a45c8f217fd)
+
+_NSG Security rules do not fulfill the recommended requirements_
+
+![](https://github.com/user-attachments/assets/f243843a-f057-499b-8419-4a4c5a4d517d)
+
+_Service endpoints are not enabled for recommended services._
+
+![](https://github.com/user-attachments/assets/7630cfef-03c2-4ee4-92a8-d595931128d3)
