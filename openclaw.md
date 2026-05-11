@@ -105,14 +105,22 @@ Example list of errors:
 
 ![](https://github.com/user-attachments/assets/c5997a6e-26b4-4b0d-a115-531b09dce085)
 
-_Vnet Routing Issues detected - Vnet peering is detected with no UDR for API Management network traffic on subnet access-apim. Please make the changes below._
+##### Vnet Routing Issues detected - Vnet peering is detected with no UDR for API Management network traffic on subnet access-apim. Please make the changes below.
 
 ![](https://github.com/user-attachments/assets/6d4e3309-6806-4e6d-ab79-02e41c5abfe9)
 
-_NSG Security rules do not fulfill the recommended requirements_
+![](https://github.com/user-attachments/assets/e26fbd71-2484-46de-870f-1bf3570b23ff)
+
+![](https://github.com/user-attachments/assets/f31cfd42-c822-4b99-9481-6de041e127bc)
+
+##### NSG Security rules do not fulfill the recommended requirements
 
 ![](https://github.com/user-attachments/assets/f243843a-f057-499b-8419-4a4c5a4d517d)
 
-_Service endpoints are not enabled for recommended services._
+![](https://github.com/user-attachments/assets/bc3840a5-2568-4d03-80cf-fae9fbdefd92)
+
+##### Service endpoints are not enabled for recommended services.
 
 ![](https://github.com/user-attachments/assets/7630cfef-03c2-4ee4-92a8-d595931128d3)
+
+![](https://github.com/user-attachments/assets/9d8e70c0-5e3f-4a0a-bd28-60670f711238)
