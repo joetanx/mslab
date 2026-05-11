@@ -143,16 +143,33 @@ The Teams CLI v3 includes options like [login](https://microsoft.github.io/teams
 
 #### 2.3.2. Login
 
+On headless server (e.g. SSH) use:
+
+```sh
+export TEAMS_NO_INTERACTIVE=1
+teams login
 ```
+
+or
+
+```sh
 teams login --device-code
 ```
 
-![](https://github.com/user-attachments/assets/2f998112-41a5-4fc9-b272-89f403112f7e)
+![](https://github.com/user-attachments/assets/aacbdb79-c5e7-4480-a99f-41e7df33dcae)
 
-![](https://github.com/user-attachments/assets/39f97fd4-a559-4ff9-8ada-0e9f884d811e)
+```sh
+teams status
+```
+
+![](https://github.com/user-attachments/assets/5472caa0-b703-477c-9d7f-d0669518667d)
 
 #### 2.3.3. Create Teams app
 
 ```
-teams app create --name OpenClaw --endpoint 'https://access-7f518691.azure-api.net/api/messages'
+teams app create --name OpenClaw --endpoint https://access-7f518691.azure-api.net/api/messages
 ```
+
+> example shown, IDs and secret no longer valid
+
+![](https://github.com/user-attachments/assets/e96f74e7-0bbe-49b6-b4d7-d47702be9694)
