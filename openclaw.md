@@ -1,89 +1,16 @@
-## 0. Setup
+## 1. Setup prequisites
 
-### 0.1. Grant OpenClaw access to Foundry model
+### 1.1. Grant Foundry model access to OpenClaw
 
 Add role assignment for `Cognitive Services User` to the Azure VM system managed identity:
 
 ![](https://github.com/user-attachments/assets/173738c1-ca77-4aa7-8b89-018fb3b78d70)
 
-### 0.2. Setup Azure CLI
+### 1.2. Enable sideloading in Teams
 
-Install Azure CLI:
-
-```sh
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-```
-
-Login to Azure VM with system managed identity:
-
-```sh
-az login --identity
-```
-
-Check account and subscription are currently set as the active context:
-
-```sh
-az account show
-```
-
-### 0.3. Install OpenClaw
-
-```sh
-curl -fsSL https://openclaw.ai/install.sh | bash
-```
-
-![](https://github.com/user-attachments/assets/b8108796-8f88-437e-9ffe-0b476d9d2f13)
-
-> [!Tip]
-> 
-> If the first setup was aborted, it can be rerun with:
-> 
-> ```sh
-> openclaw onboard
-> ```
-
-Select `QuickStart` to use defaults:
-
-![](https://github.com/user-attachments/assets/74c90a73-ed3e-4656-a199-8aa84ea71921)
-
-### 0.4. Setup Microsoft Foundry model provider
-
-![](https://github.com/user-attachments/assets/5753dddc-049f-49d4-abf4-5260e3c86750)
-
-![](https://github.com/user-attachments/assets/5809e748-9bce-4bc9-844c-d35bd914e512)
-
-![](https://github.com/user-attachments/assets/7ca529f1-97c8-493c-844c-7605b235986a)
-
-![](https://github.com/user-attachments/assets/47f86230-e9a8-448b-a426-15619a16a94e)
-
-![](https://github.com/user-attachments/assets/ee984f60-ce74-45ad-9461-4070d8d9bae1)
-
-### 0.5. Setup Teams app
-
-#### 0.5.1. Install [Teams CLI v3](https://microsoft.github.io/teams-sdk/cli/)
-
-The `@preview` suffix is requried to install v3, which is current in preview
-
-```sh
-apt update && apt -y install npm
-npm install -g @microsoft/teams.cli@preview
-```
-
-The Teams CLI v3 includes options like [login](https://microsoft.github.io/teams-sdk/cli/commands/login/), [status](https://microsoft.github.io/teams-sdk/cli/commands/status/) and [app create](https://microsoft.github.io/teams-sdk/cli/commands/app/create)
-
-![](https://github.com/user-attachments/assets/61be52c0-170a-4a49-9acc-589b81164eb0)
-
-#### 0.5.2. Login
-
-```
-teams login
-```
-
-![](https://github.com/user-attachments/assets/2f998112-41a5-4fc9-b272-89f403112f7e)
+Teams CLI requires sideloading to be enabled in the policy applied to the sign-in user:
 
 ![](https://github.com/user-attachments/assets/2ee0af13-53e4-4b70-9942-233cbb9ddee7)
-
-Teams CLI requires sideloading to be enabled in the policy applied to the sign-in user
 
 Teams Admin Center → Users → Find the user → Policies → App setup policy → "Upload custom apps"
 
@@ -91,7 +18,9 @@ Teams Admin Center → Users → Find the user → Policies → App setup policy
 
 ![](https://github.com/user-attachments/assets/707dc008-28bd-4306-906d-15819bda4c4c)
 
-#### 0.5.3. Configure VNet for API management to reach OpenClaw VM
+### 1.3. Setup API management for OpenClaw Teams plugin
+
+#### 1.3.1. Configure VNet for API management to reach OpenClaw VM
 
 Select the VNet and subnet that the APIM should attach to:
 
@@ -130,3 +59,100 @@ Run the VNet verifier:
 ![](https://github.com/user-attachments/assets/f85a5624-c358-4554-b191-b1b4a163a4da)
 
 </details>
+
+#### 1.3.2. Create API to OpenClaw Teams plugin
+
+![](https://github.com/user-attachments/assets/d9b45a39-ee90-4af3-9a8b-6846f7782bf1)
+
+![](https://github.com/user-attachments/assets/0cad784e-9a96-42da-a4c3-be39632f8ebd)
+
+![](https://github.com/user-attachments/assets/a9fe2c61-ed67-46ff-852c-1e7002cd0281)
+
+## 2. Setup OpenClaw
+
+### 2.1. Install OpenClaw
+
+```sh
+curl -fsSL https://openclaw.ai/install.sh | bash
+```
+
+![](https://github.com/user-attachments/assets/b8108796-8f88-437e-9ffe-0b476d9d2f13)
+
+> [!Tip]
+> 
+> If the first setup was aborted, it can be rerun with:
+> 
+> ```sh
+> openclaw onboard
+> ```
+
+Select `QuickStart` to use defaults:
+
+![](https://github.com/user-attachments/assets/74c90a73-ed3e-4656-a199-8aa84ea71921)
+
+### 2.2. Setup Microsoft Foundry model provider
+
+#### 2.2.1. Setup Azure CLI
+
+Install Azure CLI:
+
+```sh
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+```
+
+Login to Azure VM with system managed identity:
+
+```sh
+az login --identity
+```
+
+Check account and subscription are currently set as the active context:
+
+```sh
+az account show
+```
+
+#### 2.2.2. Configure Microsoft Foundry model provider
+
+![](https://github.com/user-attachments/assets/5753dddc-049f-49d4-abf4-5260e3c86750)
+
+![](https://github.com/user-attachments/assets/5809e748-9bce-4bc9-844c-d35bd914e512)
+
+![](https://github.com/user-attachments/assets/7ca529f1-97c8-493c-844c-7605b235986a)
+
+![](https://github.com/user-attachments/assets/47f86230-e9a8-448b-a426-15619a16a94e)
+
+![](https://github.com/user-attachments/assets/ee984f60-ce74-45ad-9461-4070d8d9bae1)
+
+### 2.3. Setup Teams integration
+
+[OpenClaw Teams plugin documentation](https://docs.openclaw.ai/channels/msteams)
+
+#### 2.3.1. Install [Teams CLI v3](https://microsoft.github.io/teams-sdk/cli/)
+
+The `@preview` suffix is requried to install v3, which is current in preview
+
+```sh
+apt update && apt -y install npm
+npm install -g @microsoft/teams.cli@preview
+```
+
+The Teams CLI v3 includes options like [login](https://microsoft.github.io/teams-sdk/cli/commands/login/), [status](https://microsoft.github.io/teams-sdk/cli/commands/status/) and [app create](https://microsoft.github.io/teams-sdk/cli/commands/app/create)
+
+![](https://github.com/user-attachments/assets/61be52c0-170a-4a49-9acc-589b81164eb0)
+
+#### 2.3.2. Login
+
+```
+teams login --device-code
+```
+
+![](https://github.com/user-attachments/assets/2f998112-41a5-4fc9-b272-89f403112f7e)
+
+![](https://github.com/user-attachments/assets/39f97fd4-a559-4ff9-8ada-0e9f884d811e)
+
+#### 2.3.3. Create Teams app
+
+```
+teams app create --name OpenClaw --endpoint 'https://access-7f518691.azure-api.net/api/messages'
+```
