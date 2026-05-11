@@ -101,7 +101,9 @@ Run the VNet verifier:
 
 ![](https://github.com/user-attachments/assets/9958f45e-f924-497f-8ba3-851bef3f4c88)
 
-Example list of errors:
+<details><Summary><h5>Common APIM VNet integration errors and fixes</h5></Summary>
+
+##### Common APIM VNet integration errors and fixes
 
 ![](https://github.com/user-attachments/assets/c5997a6e-26b4-4b0d-a115-531b09dce085)
 
@@ -124,3 +126,9 @@ Example list of errors:
 ![](https://github.com/user-attachments/assets/7630cfef-03c2-4ee4-92a8-d595931128d3)
 
 ![](https://github.com/user-attachments/assets/9d8e70c0-5e3f-4a0a-bd28-60670f711238)
+
+##### Example successful VNet verifier results
+
+![](https://github.com/user-attachments/assets/f85a5624-c358-4554-b191-b1b4a163a4da)
+
+</details>
