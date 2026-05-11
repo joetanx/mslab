@@ -68,6 +68,68 @@ Run the VNet verifier:
 
 ![](https://github.com/user-attachments/assets/a9fe2c61-ed67-46ff-852c-1e7002cd0281)
 
+### 1.4. Setup Teams app
+
+[OpenClaw Teams plugin documentation](https://docs.openclaw.ai/channels/msteams)
+
+#### 1.4.1. Install [Teams CLI v3](https://microsoft.github.io/teams-sdk/cli/)
+
+The `@preview` suffix is requried to install v3, which is current in preview
+
+```sh
+apt update && apt -y install npm
+npm install -g @microsoft/teams.cli@preview
+```
+
+The Teams CLI v3 includes options like [login](https://microsoft.github.io/teams-sdk/cli/commands/login/), [status](https://microsoft.github.io/teams-sdk/cli/commands/status/) and [app create](https://microsoft.github.io/teams-sdk/cli/commands/app/create)
+
+![](https://github.com/user-attachments/assets/61be52c0-170a-4a49-9acc-589b81164eb0)
+
+#### 1.4.2. Login
+
+On headless server (e.g. SSH) use:
+
+```sh
+export TEAMS_NO_INTERACTIVE=1
+teams login
+```
+
+or
+
+```sh
+teams login --device-code
+```
+
+![](https://github.com/user-attachments/assets/aacbdb79-c5e7-4480-a99f-41e7df33dcae)
+
+```sh
+teams status
+```
+
+![](https://github.com/user-attachments/assets/5472caa0-b703-477c-9d7f-d0669518667d)
+
+#### 1.4.3. Create Teams app
+
+```
+teams app create --name OpenClaw --endpoint https://access-7f518691.azure-api.net/api/messages
+```
+
+![](https://github.com/user-attachments/assets/e96f74e7-0bbe-49b6-b4d7-d47702be9694)
+
+The `teams app create` command creates a Teams app, a Teams-managed bot and an Entra ID app registration
+
+Verify the Teams resources created on Teams developer portal: https://dev.teams.microsoft.com/
+
+![](https://github.com/user-attachments/assets/419380a6-76d3-4f48-a1be-cdabf50efa1d)
+
+![](https://github.com/user-attachments/assets/f64c2a6c-7be8-4376-9b48-24c37c0f3930)
+
+#### 1.4.4. Setup federated identity credential to OpenClaw app registration
+
+![](https://github.com/user-attachments/assets/c39e1c2f-3b70-4d23-9fbb-a7d0914cfb7a)
+
+![](https://github.com/user-attachments/assets/f9a31961-5a5c-4bde-848e-313482766483)
+
 ## 2. Setup OpenClaw
 
 ### 2.1. Install OpenClaw
@@ -123,53 +185,3 @@ az account show
 ![](https://github.com/user-attachments/assets/47f86230-e9a8-448b-a426-15619a16a94e)
 
 ![](https://github.com/user-attachments/assets/ee984f60-ce74-45ad-9461-4070d8d9bae1)
-
-### 2.3. Setup Teams integration
-
-[OpenClaw Teams plugin documentation](https://docs.openclaw.ai/channels/msteams)
-
-#### 2.3.1. Install [Teams CLI v3](https://microsoft.github.io/teams-sdk/cli/)
-
-The `@preview` suffix is requried to install v3, which is current in preview
-
-```sh
-apt update && apt -y install npm
-npm install -g @microsoft/teams.cli@preview
-```
-
-The Teams CLI v3 includes options like [login](https://microsoft.github.io/teams-sdk/cli/commands/login/), [status](https://microsoft.github.io/teams-sdk/cli/commands/status/) and [app create](https://microsoft.github.io/teams-sdk/cli/commands/app/create)
-
-![](https://github.com/user-attachments/assets/61be52c0-170a-4a49-9acc-589b81164eb0)
-
-#### 2.3.2. Login
-
-On headless server (e.g. SSH) use:
-
-```sh
-export TEAMS_NO_INTERACTIVE=1
-teams login
-```
-
-or
-
-```sh
-teams login --device-code
-```
-
-![](https://github.com/user-attachments/assets/aacbdb79-c5e7-4480-a99f-41e7df33dcae)
-
-```sh
-teams status
-```
-
-![](https://github.com/user-attachments/assets/5472caa0-b703-477c-9d7f-d0669518667d)
-
-#### 2.3.3. Create Teams app
-
-```
-teams app create --name OpenClaw --endpoint https://access-7f518691.azure-api.net/api/messages
-```
-
-> example shown, IDs and secret no longer valid
-
-![](https://github.com/user-attachments/assets/e96f74e7-0bbe-49b6-b4d7-d47702be9694)
