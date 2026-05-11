@@ -91,6 +91,20 @@ Teams Admin Center → Users → Find the user → Policies → App setup policy
 
 ![](https://github.com/user-attachments/assets/707dc008-28bd-4306-906d-15819bda4c4c)
 
-#### 0.5.3. Expose OpenClaw Teams Endpoint over API Management
+#### 0.5.3. Configure VNet for API management to reach OpenClaw VM
+
+Select the VNet and subnet that the APIM should attach to:
 
 ![](https://github.com/user-attachments/assets/4cf04aea-82a9-4604-9545-6ec745474c89)
+
+Run the VNet verifier:
+
+![](https://github.com/user-attachments/assets/465facc7-fc28-4dbd-a544-885441a19eae)
+
+Example list of errors:
+
+![](https://github.com/user-attachments/assets/c5a7fb89-fda1-4bec-acaa-3c5ab09b895c)
+
+![](https://github.com/user-attachments/assets/23d7e65b-edd4-4b66-90b0-3e16173f187e)
+
+![](https://github.com/user-attachments/assets/5317af3b-a532-4b4c-aa56-3fb9ddbdab50)
