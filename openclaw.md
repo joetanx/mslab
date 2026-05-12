@@ -138,7 +138,7 @@ Verify the Teams resources created on Teams developer portal: https://dev.teams.
 curl -fsSL https://openclaw.ai/install.sh | bash
 ```
 
-![](https://github.com/user-attachments/assets/b8108796-8f88-437e-9ffe-0b476d9d2f13)
+![](https://github.com/user-attachments/assets/3ed219b2-bd0e-42d5-9d5b-1752e7ccec33)
 
 Exit the setup with `Ctrl + C` and run below command to set gateway bind to `lan`:
 
@@ -180,7 +180,7 @@ az account show
 
 #### 2.2.2. Configure Microsoft Foundry model provider
 
-![](https://github.com/user-attachments/assets/5753dddc-049f-49d4-abf4-5260e3c86750)
+![](https://github.com/user-attachments/assets/dd6a8c50-895c-49b4-a083-a8dd5c2240df)
 
 ![](https://github.com/user-attachments/assets/5809e748-9bce-4bc9-844c-d35bd914e512)
 
@@ -188,4 +188,4 @@ az account show
 
 ![](https://github.com/user-attachments/assets/47f86230-e9a8-448b-a426-15619a16a94e)
 
-![](https://github.com/user-attachments/assets/ee984f60-ce74-45ad-9461-4070d8d9bae1)
+![](https://github.com/user-attachments/assets/27da0230-3a37-4bdb-84a0-622527c6b0a0)
