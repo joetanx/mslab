@@ -143,10 +143,10 @@ openclaw config set gateway.controlUi.allowedOrigins '[ \
   "http://<vm-ip-address>:18789", \
   "https://<domain-name>" \
 ]' --strict-json
-systemctl --user restart openclaw-gateway
+openclaw gateway restart
 ```
 
-![](https://github.com/user-attachments/assets/70dcaa16-bf48-463a-935a-1d7066b22f66)
+![](https://github.com/user-attachments/assets/38d7cba2-2a6a-4c44-a689-8ca11da30f0c)
 
 Other than checking `.openclaw/openclaw.json`, the settings can also be retrieved with:
 
@@ -328,7 +328,7 @@ openclaw config set channels.msteams.webhook '{ "port": 3978, "path": "/api/mess
 Restart OpenClaw gateway:
 
 ```
-systemctl --user restart openclaw-gateway
+openclaw gateway restart
 ```
 
 ### 2.6. Chat with OpenClaw over teams
