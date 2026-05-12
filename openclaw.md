@@ -189,3 +189,17 @@ az account show
 ![](https://github.com/user-attachments/assets/93f90fc0-a95c-4839-b086-29a5c6479be2)
 
 ![](https://github.com/user-attachments/assets/1ef26ffb-85ea-4119-9adc-ae2fc9807db2)
+
+Skip other configurations:
+
+![](https://github.com/user-attachments/assets/407d3640-1a94-492b-873b-09633a2d1b47)
+
+![](https://github.com/user-attachments/assets/95081108-9b57-4ffe-84f4-1503074cba63)
+
+![](https://github.com/user-attachments/assets/faa03b56-64c4-4061-9f23-d2e94ebb01ad)
+
+![](https://github.com/user-attachments/assets/ae5a80ab-d0ac-4569-bf74-a4044ce574f5)
+
+![](https://github.com/user-attachments/assets/f7d64b4f-77c3-40f7-bd2c-e545068e899a)
+
+![](https://github.com/user-attachments/assets/07876b0c-9d7c-4bf5-8316-b80e144c9cea)
