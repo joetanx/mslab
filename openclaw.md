@@ -251,7 +251,7 @@ openclaw config set gateway.controlUi.allowedOrigins '["http://localhost:18789",
 systemctl --user restart openclaw-gateway
 ```
 
-![](https://github.com/user-attachments/assets/6f3d8a50-e0f4-4cd2-90f4-7500137f0c15)
+![](https://github.com/user-attachments/assets/70dcaa16-bf48-463a-935a-1d7066b22f66)
 
 Other than checking `.openclaw/openclaw.json`, the settings can also be retrieved with:
 
@@ -259,15 +259,28 @@ Other than checking `.openclaw/openclaw.json`, the settings can also be retrieve
 openclaw config get gateway.controlUi.allowedOrigins
 ```
 
-![](https://github.com/user-attachments/assets/992131ba-238b-4608-a088-7abf8659044b)
+![](https://github.com/user-attachments/assets/fbe2ca56-94fd-4e14-b9e2-bccfe20177eb)
 
 ### 2.4. Allow remote client connection to OpenClaw gateway dashboard
 
 New clients connecting to OpenClaw gateway dashboard are blocked with `device pairing required` error:
 
-![](https://github.com/user-attachments/assets/f670fa3e-5fe1-4cbb-8c74-9247f487207a)
+![](https://github.com/user-attachments/assets/a85a12ef-edf9-4958-abb8-40f9a5f77240)
 
 ```sh
 openclaw devices list
 ```
 
+![](https://github.com/user-attachments/assets/ab244d52-7ea5-420f-bcd1-fe7cecd04394)
+
+Approve the device with:
+
+```sh
+openclaw devices approve <request-id>
+```
+
+![](https://github.com/user-attachments/assets/a934e156-cf98-45d8-b19e-3457c206fcb9)
+
+Reload the page after approval:
+
+![](https://github.com/user-attachments/assets/c800e4d3-cdb7-4ae1-acd4-b14dac1652f4)
