@@ -180,12 +180,12 @@ az account show
 
 #### 2.2.2. Configure Microsoft Foundry model provider
 
-![](https://github.com/user-attachments/assets/dd6a8c50-895c-49b4-a083-a8dd5c2240df)
+![](https://github.com/user-attachments/assets/429b387a-a7e6-4c7b-a362-2f72822f4ec3)
 
-![](https://github.com/user-attachments/assets/5809e748-9bce-4bc9-844c-d35bd914e512)
+![](https://github.com/user-attachments/assets/e53fbcbb-3429-4701-9886-332b89b42ed2)
 
-![](https://github.com/user-attachments/assets/7ca529f1-97c8-493c-844c-7605b235986a)
+![](https://github.com/user-attachments/assets/15e002c1-d256-4546-a11d-e19826382e78)
 
-![](https://github.com/user-attachments/assets/47f86230-e9a8-448b-a426-15619a16a94e)
+![](https://github.com/user-attachments/assets/93f90fc0-a95c-4839-b086-29a5c6479be2)
 
-![](https://github.com/user-attachments/assets/27da0230-3a37-4bdb-84a0-622527c6b0a0)
+![](https://github.com/user-attachments/assets/1ef26ffb-85ea-4119-9adc-ae2fc9807db2)
