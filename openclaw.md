@@ -150,7 +150,7 @@ curl -fsSL https://openclaw.ai/install.sh | bash
 
 Select `QuickStart` to use defaults:
 
-![](https://github.com/user-attachments/assets/74c90a73-ed3e-4656-a199-8aa84ea71921)
+![](https://github.com/user-attachments/assets/388e947b-0eda-41ab-9447-f0d95156a726)
 
 ### 2.2. Setup Microsoft Foundry model provider
 
