@@ -138,7 +138,7 @@ Verify the Teams resources created on Teams developer portal: https://dev.teams.
 curl -fsSL https://openclaw.ai/install.sh | bash
 ```
 
-![](https://github.com/user-attachments/assets/207d4752-1ea0-4439-8ba9-4009339b553e)
+![](https://github.com/user-attachments/assets/a4f96b06-a6b6-4f0f-955f-55a86e69a14f)
 
 Exit the setup with `Ctrl + C` and run below command to set gateway bind to `lan`:
 
@@ -220,6 +220,22 @@ Skip other configurations:
 
 ### 2.3. Access OpenClaw gateway dashboard from reverse proxy
 
+Example reverse proxy setup:
+
+```
+client
+└───Azure app gateway → TLS offloading (e.g. https://<domain-name>/)
+    └───OpenClaw VM → http://<vm-ip-address>:18789
+```
+
+To get OpenClaw gateway token:
+
+```sh
+cat .openclaw/openclaw.json | jq -r '.gateway.auth.token'
+```
+
+Access OpenClaw gateway dashboard: `https://<domain-name>/#token=<.gateway.auth.token>`
+
 The gateway default settings allow origins from `http://localhost:18789` and `http://127.0.0.1:18789`
 
 This setting is in `.openclaw/openclaw.json`:
@@ -247,7 +263,12 @@ Attempting to access from a reverse proxy's domain leads to `origin not allowed`
 Add the desired domains with `openclaw config set gateway.controlUi.allowedOrigins` and restart the gateway:
 
 ```sh
-openclaw config set gateway.controlUi.allowedOrigins '["http://localhost:18789","http://127.0.0.1:18789","http://10.2.0.4:18789","https://openclaw.vx"]' --strict-json
+openclaw config set gateway.controlUi.allowedOrigins '[ \
+  "http://localhost:18789", \
+  "http://127.0.0.1:18789", \
+  "http://<vm-ip-address>:18789", \
+  "https://<domain-name>" \
+]' --strict-json
 systemctl --user restart openclaw-gateway
 ```
 
