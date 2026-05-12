@@ -240,9 +240,9 @@ Run the VNet verifier:
 
 ![](https://github.com/user-attachments/assets/d9b45a39-ee90-4af3-9a8b-6846f7782bf1)
 
-![](https://github.com/user-attachments/assets/0cad784e-9a96-42da-a4c3-be39632f8ebd)
+![](https://github.com/user-attachments/assets/706686b8-81d6-4609-92a7-0a07684e3a60)
 
-![](https://github.com/user-attachments/assets/a9fe2c61-ed67-46ff-852c-1e7002cd0281)
+![](https://github.com/user-attachments/assets/7b187d36-1356-4507-adc4-2d8ccd5d9999)
 
 ### 2.3. Setup Teams app
 
@@ -312,7 +312,7 @@ Verify the Teams resources created on Teams developer portal: https://dev.teams.
 openclaw plugins install @openclaw/msteams
 ```
 
-![](https://github.com/user-attachments/assets/3719669c-d19f-4062-851c-e1c61d73e63d)
+![](https://github.com/user-attachments/assets/f8d89e30-db21-4cba-88fe-76c47204d16b)
 
 ### 2.5. Configure Teams channel
 
