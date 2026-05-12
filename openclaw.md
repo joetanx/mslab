@@ -217,3 +217,57 @@ Skip other configurations:
 > ```
 
 ![](https://github.com/user-attachments/assets/07876b0c-9d7c-4bf5-8316-b80e144c9cea)
+
+### 2.3. Access OpenClaw gateway dashboard from reverse proxy
+
+The gateway default settings allow origins from `http://localhost:18789` and `http://127.0.0.1:18789`
+
+This setting is in `.openclaw/openclaw.json`:
+
+```json
+{
+  ⋮
+  "gateway": {
+    ⋮
+    "controlUi": {
+      "allowInsecureAuth": true,
+      "allowedOrigins": [
+        "http://localhost:18789",
+        "http://127.0.0.1:18789"
+      ]
+    },
+```
+
+Attempting to access from a reverse proxy's domain leads to `origin not allowed` error:
+
+> origin not allowed (open the Control UI from the gateway host or allow it in gateway.controlUi.allowedOrigins)
+
+![](https://github.com/user-attachments/assets/713cbc72-d16b-499d-aef9-023d82c060bb)
+
+Add the desired domains with `openclaw config set gateway.controlUi.allowedOrigins` and restart the gateway:
+
+```sh
+openclaw config set gateway.controlUi.allowedOrigins '["http://localhost:18789","http://127.0.0.1:18789","http://10.2.0.4:18789","https://openclaw.vx"]' --strict-json
+systemctl --user restart openclaw-gateway
+```
+
+![](https://github.com/user-attachments/assets/6f3d8a50-e0f4-4cd2-90f4-7500137f0c15)
+
+Other than checking `.openclaw/openclaw.json`, the settings can also be retrieved with:
+
+```sh
+openclaw config get gateway.controlUi.allowedOrigins
+```
+
+![](https://github.com/user-attachments/assets/992131ba-238b-4608-a088-7abf8659044b)
+
+### 2.4. Allow remote client connection to OpenClaw gateway dashboard
+
+New clients connecting to OpenClaw gateway dashboard are blocked with `device pairing required` error:
+
+![](https://github.com/user-attachments/assets/f670fa3e-5fe1-4cbb-8c74-9247f487207a)
+
+```sh
+openclaw devices list
+```
+
