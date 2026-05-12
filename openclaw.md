@@ -83,7 +83,7 @@ npm install -g @microsoft/teams.cli@preview
 
 The Teams CLI v3 includes options like [login](https://microsoft.github.io/teams-sdk/cli/commands/login/), [status](https://microsoft.github.io/teams-sdk/cli/commands/status/) and [app create](https://microsoft.github.io/teams-sdk/cli/commands/app/create)
 
-![](https://github.com/user-attachments/assets/61be52c0-170a-4a49-9acc-589b81164eb0)
+![](https://github.com/user-attachments/assets/9fedc0f1-8259-47c8-924a-db1626813e2d)
 
 #### 1.4.2. Login
 
