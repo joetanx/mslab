@@ -140,13 +140,17 @@ curl -fsSL https://openclaw.ai/install.sh | bash
 
 ![](https://github.com/user-attachments/assets/b8108796-8f88-437e-9ffe-0b476d9d2f13)
 
-> [!Tip]
-> 
-> If the first setup was aborted, it can be rerun with:
-> 
-> ```sh
-> openclaw onboard
-> ```
+Exit the setup with `Ctrl + C` and run below command to set gateway bind to `lan`:
+
+```sh
+openclaw config set gateway.bind lan
+```
+
+Run the onboarding wizard with `--install-daemon` option:
+
+```sh
+openclaw onboard --install-daemon
+```
 
 Select `QuickStart` to use defaults:
 
