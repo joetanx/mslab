@@ -206,6 +206,14 @@ Skip other configurations:
 
 ![](https://github.com/user-attachments/assets/ae5a80ab-d0ac-4569-bf74-a4044ce574f5)
 
-![](https://github.com/user-attachments/assets/f7d64b4f-77c3-40f7-bd2c-e545068e899a)
+![](https://github.com/user-attachments/assets/6a2c9c81-2449-4ef9-97c7-eb70b175fec4)
+
+> [!Tip]
+>
+> If reset/reinstall or troubleshooting is required, the OpenClaw gateway systemd daemon can be uninstalled with below command
+>
+> ```sh
+> openclaw gateway uninstall
+> ```
 
 ![](https://github.com/user-attachments/assets/07876b0c-9d7c-4bf5-8316-b80e144c9cea)
