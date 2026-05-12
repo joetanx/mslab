@@ -146,6 +146,12 @@ Exit the setup with `Ctrl + C` and run below command to set gateway bind to `lan
 openclaw config set gateway.bind lan
 ```
 
+Set `OPENCLAW_ALLOW_INSECURE_PRIVATE_WS` client-side parameter to `1` to allow connection with `ws://` instead of `wss://` (default) for the setup process:
+
+```sh
+export OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1
+```
+
 Run the onboarding wizard with `--install-daemon` option:
 
 ```sh
