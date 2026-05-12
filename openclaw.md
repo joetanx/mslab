@@ -10,7 +10,7 @@ Add role assignment for `Cognitive Services User` to the Azure VM system managed
 
 Teams CLI requires sideloading to be enabled in the policy applied to the sign-in user:
 
-![](https://github.com/user-attachments/assets/2ee0af13-53e4-4b70-9942-233cbb9ddee7)
+![](https://github.com/user-attachments/assets/880c15db-a16e-4c16-a609-e6a166df1c18)
 
 Teams Admin Center → Users → Find the user → Policies → App setup policy → "Upload custom apps"
 
@@ -83,7 +83,7 @@ npm install -g @microsoft/teams.cli@preview
 
 The Teams CLI v3 includes options like [login](https://microsoft.github.io/teams-sdk/cli/commands/login/), [status](https://microsoft.github.io/teams-sdk/cli/commands/status/) and [app create](https://microsoft.github.io/teams-sdk/cli/commands/app/create)
 
-![](https://github.com/user-attachments/assets/9fedc0f1-8259-47c8-924a-db1626813e2d)
+![](https://github.com/user-attachments/assets/a87472b3-abcb-44ba-9c0a-f328566d9710)
 
 #### 1.4.2. Login
 
@@ -100,13 +100,13 @@ or
 teams login --device-code
 ```
 
-![](https://github.com/user-attachments/assets/aacbdb79-c5e7-4480-a99f-41e7df33dcae)
+![](https://github.com/user-attachments/assets/03912198-18c8-4b9e-8fc9-e10550b21b9d)
 
 ```sh
 teams status
 ```
 
-![](https://github.com/user-attachments/assets/5472caa0-b703-477c-9d7f-d0669518667d)
+![](https://github.com/user-attachments/assets/d9e8bacf-d3fc-4bf6-ab4d-1be559b36c78)
 
 #### 1.4.3. Create Teams app
 
@@ -114,7 +114,7 @@ teams status
 teams app create --name OpenClaw --endpoint https://access-7f518691.azure-api.net/api/messages
 ```
 
-![](https://github.com/user-attachments/assets/e96f74e7-0bbe-49b6-b4d7-d47702be9694)
+![](https://github.com/user-attachments/assets/b31cf775-5f68-44b4-b717-9695d6db5fd5)
 
 The `teams app create` command creates a Teams app, a Teams-managed bot and an Entra ID app registration
 
@@ -138,7 +138,7 @@ Verify the Teams resources created on Teams developer portal: https://dev.teams.
 curl -fsSL https://openclaw.ai/install.sh | bash
 ```
 
-![](https://github.com/user-attachments/assets/3ed219b2-bd0e-42d5-9d5b-1752e7ccec33)
+![](https://github.com/user-attachments/assets/207d4752-1ea0-4439-8ba9-4009339b553e)
 
 Exit the setup with `Ctrl + C` and run below command to set gateway bind to `lan`:
 
