@@ -330,3 +330,35 @@ Restart OpenClaw gateway:
 ```
 systemctl --user restart openclaw-gateway
 ```
+
+### 2.6. Chat with OpenClaw over teams
+
+Get the app install link:
+
+```sh
+teams app get <APP_ID> --install-link
+```
+
+![](https://github.com/user-attachments/assets/fb8b7579-7c33-445f-be3d-64b340fb90a7)
+
+Open and send a message:
+
+![](https://github.com/user-attachments/assets/d42d4b2b-f54f-43be-a6d5-6c272741ca15)
+
+The default [DM access](https://docs.openclaw.ai/channels/msteams#access-control-dms-+-groups) is `channels.msteams.dmPolicy = "pairing"`: Unknown senders are ignored until approved.
+
+List pending pairings:
+
+```sh
+openclaw pairing list msteams
+```
+
+![](https://github.com/user-attachments/assets/7925cb69-aec0-43f5-bb8b-31ff1973e381)
+
+Approve pairing:
+
+```sh
+openclaw pairing approve msteams <code>
+```
+
+![](https://github.com/user-attachments/assets/09c9cac8-da60-4772-93b8-93f56a8b7e74)
