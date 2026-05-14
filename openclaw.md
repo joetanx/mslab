@@ -314,7 +314,9 @@ openclaw plugins install @openclaw/msteams
 
 ![](https://github.com/user-attachments/assets/f8d89e30-db21-4cba-88fe-76c47204d16b)
 
-### 2.5. Configure Teams channel
+### 2.5. Configure Teams channel and Tavily search provider
+
+Configure Teams channel:
 
 ```sh
 openclaw config set channels.msteams.enabled true
@@ -323,6 +325,16 @@ openclaw config set channels.msteams.tenantId <TENANT_ID>
 openclaw config set channels.msteams.authType federated
 openclaw config set channels.msteams.useManagedIdentity true
 openclaw config set channels.msteams.webhook '{ "port": 3978, "path": "/api/messages" }' --strict-json
+```
+
+> Get a free Tavily API key by signing up for an account: https://app.tavily.com/home
+
+Configure Tavily search provider:
+
+```sh
+openclaw config set plugins.entries.tavily.enabled true
+openclaw config set plugins.entries.tavily.config.webSearch.apiKey <tvly-your-api-key>
+openclaw config set tools.web.search.provider tavily
 ```
 
 Restart OpenClaw gateway:
@@ -362,3 +374,11 @@ openclaw pairing approve msteams <code>
 ```
 
 ![](https://github.com/user-attachments/assets/09c9cac8-da60-4772-93b8-93f56a8b7e74)
+
+Test messaging OpenClaw over Teams and asking it to retrieve latest information with Tavily:
+
+![](https://github.com/user-attachments/assets/e5fc2060-b60f-4ef9-a651-8aa9a4097931)
+
+The sessions is visible in the OpenClaw gateway dashboard, with details on the tools use:
+
+![](https://github.com/user-attachments/assets/c4136470-8c66-4896-9943-8251c852930e)
