@@ -66,10 +66,10 @@ Invoke-RestMethod $endpointuri -Headers $headers | Tee-Object -Variable managerU
 ### 0.5. Staging names
 
 ```pwsh
-$AgentIdBpName = 'episilon-AgentIdentityBlueprint'
-$AgentIdName = 'episilon-AgentIdentity'
-$AgentUserName = 'episilon-AgentUser'
-$AgentUserAlias = 'episilon-AgentUser'
+$AgentIdBpName = 'epsilon-AgentIdentityBlueprint'
+$AgentIdName = 'epsilon-AgentIdentity'
+$AgentUserName = 'epsilon-AgentUser'
+$AgentUserAlias = 'epsilon-AgentUser'
 $tenantDomain = 'MngEnvMCAP398230.onmicrosoft.com'
 ```
 
