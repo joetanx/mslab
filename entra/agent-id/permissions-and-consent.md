@@ -261,7 +261,7 @@ for ($i = 0; $i -lt $appRoleAssignments.value.Length; $i++) {
 
 To be eligible for inheritance, the agent blueprint service principal must already hold OAuth2PermissionGrants for those scopes to the target resource app.
 
-## 4.1. Configure inheritable permissions on agent blueprint [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-post-inheritablepermissions)
+### 4.1. Configure inheritable permissions on agent blueprint [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-post-inheritablepermissions)
 
 > [!Note]
 >
@@ -281,7 +281,7 @@ $body=@{
 Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $($body | ConvertTo-Json) -ContentType 'application/json'
 ```
 
-## 4.2. List inheritable permissions [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-list-inheritablepermissions)
+### 4.2. List inheritable permissions [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/agentidentityblueprint-list-inheritablepermissions)
 
 ```pwsh
 $endpointuri = "https://graph.microsoft.com/v1.0/applications/$($AgentIdBp.id)/microsoft.graph.agentIdentityBlueprint/inheritablePermissions"
@@ -369,4 +369,38 @@ foreach ( $PermissionName in $permissions ) {
   }
   Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $($body | ConvertTo-Json) -ContentType 'application/json'
 }
+```
+
+## 6. Agent user group membership
+
+### 6.1. Get target group object [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/group-list)
+
+Permission required: _GroupMember.Read.All_
+
+```pwsh
+$groupName = 'Delta Admins'
+$filter = "displayName eq '$groupName'"
+$endpointuri = 'https://graph.microsoft.com/v1.0/groups?$filter='+$filter
+$group = (Invoke-RestMethod $endpointuri -Headers $headers).value
+```
+
+### 6.2. Add agent user to group [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/group-post-members)
+
+Permission required: _GroupMember.ReadWrite.All_
+
+```pwsh
+$endpointuri = "https://graph.microsoft.com/v1.0/groups/$($group.id)/members/`$ref"
+$body=@{
+  '@odata.id' = "https://graph.microsoft.com/v1.0/directoryObjects/$($AgentUser.id)"
+}
+Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $($body | ConvertTo-Json) -ContentType 'application/json'
+```
+
+### 6.3. Remove agent user from group [ᵈᵒᶜ](https://learn.microsoft.com/en-us/graph/api/group-delete-members)
+
+Permission required: _GroupMember.ReadWrite.All_
+
+```pwsh
+$endpointuri = "https://graph.microsoft.com/v1.0/groups/$($group.id)/members/$($AgentUser.id)/`$ref"
+Invoke-RestMethod $endpointuri -Method Delete -Headers $headers -Body $($body | ConvertTo-Json) -ContentType 'application/json'
 ```
