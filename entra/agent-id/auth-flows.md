@@ -90,7 +90,7 @@ Notice:
   "nbf": 1772364461,
   "exp": 1772368361,
   "aio": "k2ZgYNg2pdm/lHebXKiZEWfd8yZvAA==",
-  "app_displayname": "episilon-AgentIdentityBlueprint",
+  "app_displayname": "epsilon-AgentIdentityBlueprint",
   "appid": "8a22dfd8-f315-4ee1-be84-c5f46a5b0b3c",
   "appidacr": "1",
   "idp": "https://sts.windows.net/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/",
@@ -233,7 +233,7 @@ Notice:
   "nbf": 1772365320,
   "exp": 1772369220,
   "aio": "k2ZgYKjf5Zu+4N8tLzd/iXnCdpO2T5zj2mlxI7vH20x6R7EKay0A",
-  "app_displayname": "episilon-AgentIdentity",
+  "app_displayname": "epsilon-AgentIdentity",
   "appid": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "appidacr": "2",
   "idp": "https://sts.windows.net/323626f5-1bfe-48cd-8902-ddfdfd44e1ce/",
@@ -358,12 +358,12 @@ Notice:
     "urn:user:registersecurityinfo"
   ],
   "aio": "AbQAS/8bAAAA/B30GZhgT6AivCNYiYAmD9OvoMQH+VKqp5ZgV31D5bMkZFff4SNPBBfgKdvO+dc7ZFHIwgi9MC7SYWoz21HCXJHjfuRuzMaqbKQ6HYZwsw7bzUbXLbUBmjVOCUILqbEnhlfYxAfxMbMDoF8ezl31r7m0OTav00wZFypp18ZvwjCJpv6+8E5OXgWLXOJeFaeenZYB+XPk9Cik6jRtcMNpVhSkgkOEbThybckGjhp+/oM=",
-  "app_displayname": "episilon-AgentIdentity",
+  "app_displayname": "epsilon-AgentIdentity",
   "appid": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "appidacr": "2",
   "idtyp": "user",
   "ipaddr": "175.156.74.57",
-  "name": "episilon-AgentUser",
+  "name": "epsilon-AgentUser",
   "oid": "956d09a9-5f97-458c-a410-417be7449d04",
   "platf": "3",
   "puid": "10032005A4F00AF8",
@@ -373,8 +373,8 @@ Notice:
   "sub": "jDRooRkrHByXnyz-djw0WZ1fTKZRhG6ZnEYNuJ3VRKE",
   "tenant_region_scope": "NA",
   "tid": "323626f5-1bfe-48cd-8902-ddfdfd44e1ce",
-  "unique_name": "episilon-AgentUser@MngEnvMCAP398230.onmicrosoft.com",
-  "upn": "episilon-AgentUser@MngEnvMCAP398230.onmicrosoft.com",
+  "unique_name": "epsilon-AgentUser@MngEnvMCAP398230.onmicrosoft.com",
+  "upn": "epsilon-AgentUser@MngEnvMCAP398230.onmicrosoft.com",
   "uti": "IFAI1eh4QkelZ35TgjMMAA",
   "ver": "1.0",
   "wids": [
@@ -414,10 +414,10 @@ $body = @{
     oauth2PermissionScopes = @(
       @{
         id = $accessagentscopeid
-        adminConsentDisplayName = 'episilon-AgentIdentityBlueprint'
-        adminConsentDescription = 'episilon Agent Identity Blueprint'
-        userConsentDisplayName = 'episilon-AgentIdentityBlueprint'
-        userConsentDescription = 'episilon Agent Identity Blueprint'
+        adminConsentDisplayName = 'epsilon-AgentIdentityBlueprint'
+        adminConsentDescription = 'epsilon Agent Identity Blueprint'
+        userConsentDisplayName = 'epsilon-AgentIdentityBlueprint'
+        userConsentDescription = 'epsilon Agent Identity Blueprint'
         value = 'access_agent'
         type = 'User'
         isEnabled = 'true'
@@ -601,7 +601,7 @@ Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variabl
 > ```json
 > {
 >   "error": "invalid_grant",
->   "error_description": "AADSTS65001: The user or administrator has not consented to use the application with ID 'f3526a0b-788e-4f6c-bb3e-9864b45a3074' named 'episilon-AgentIdentity'. Send an interactive authorization request for this user and resource. Trace ID: 9a55f72d-a1e9-4981-bd94-4ef3d7675c01 Correlation ID: f343ad39-0651-4165-9ee0-697d3eaca6ad Timestamp: 2026-03-01 13:08:48Z",
+>   "error_description": "AADSTS65001: The user or administrator has not consented to use the application with ID 'f3526a0b-788e-4f6c-bb3e-9864b45a3074' named 'epsilon-AgentIdentity'. Send an interactive authorization request for this user and resource. Trace ID: 9a55f72d-a1e9-4981-bd94-4ef3d7675c01 Correlation ID: f343ad39-0651-4165-9ee0-697d3eaca6ad Timestamp: 2026-03-01 13:08:48Z",
 >   "error_codes": [
 >     65001
 >   ],
@@ -641,7 +641,7 @@ Example agent identity obo token:
     "pwd",
     "mfa"
   ],
-  "app_displayname": "episilon-AgentIdentity",
+  "app_displayname": "epsilon-AgentIdentity",
   "appid": "f3526a0b-788e-4f6c-bb3e-9864b45a3074",
   "appidacr": "2",
   "idtyp": "user",
