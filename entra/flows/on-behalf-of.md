@@ -1,3 +1,40 @@
+## 0. Example applications configurations
+
+```mermaid
+flowchart LR
+  A(User) -->|Authorization code flow<br>aud: middle app| B(Client app)
+  B -->|JWT exchange<br>aud: target resource| C(Middle app)
+  C -->|Access| D(Target resources)
+```
+
+[Entra on-behalf-of flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) comprises of:
+1. User sign-in to client application via _authorization code flow_ to get client application token
+2. Client application token is then used to get middle-tier application token with `grant_type` of `urn:ietf:params:oauth:grant-type:jwt-bearer` from section `2.1. Using JWTs as Authorization Grants` of [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523)
+
+### 0.1. Middle app
+
+The middle app holds the actual delegated permissions required to access the target resources (permissions for Microsoft Graph Security APIs shown):
+
+![](https://github.com/user-attachments/assets/9e1106d0-6d16-4e0f-bc5a-64156d8cd5ce)
+
+The middle app must be exposed as an API with a specified scope name for the client app to access:
+
+![](https://github.com/user-attachments/assets/da445f6d-062d-4739-987b-f7cd16da0dec)
+
+> [!Note]
+>
+> The respective `display name` and `description` for `Admin` and `User` consents are presented to the user when listing the permissions requested during authorization code flow
+>
+> Give a meaningful name and description so that the user can understand what is granted
+> 
+> ![](https://github.com/user-attachments/assets/549f6cd7-8e36-4944-856c-61c36c6413bd)
+
+### 0.2. Client app
+
+The middle app's exposed API is then visible under `My APIs` to be added to the client app's API permissions:
+
+![](https://github.com/user-attachments/assets/04b7e3ad-dfee-44c5-8ea2-97b6408002bc)
+
 ## 1. Authorization code flow
 
 ### 1.1. Setup listener to capture authorization code
