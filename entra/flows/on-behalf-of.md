@@ -3,7 +3,7 @@
 ```mermaid
 flowchart LR
   A(User) -->|Authorization code flow<br>aud: middle app| B(Client app)
-  B -->|JWT exchange<br>aud: target resource| C(Middle app)
+  B -->|JWT bearer grant<br>aud: target resource| C(Middle app)
   C -->|Access| D(Target resources)
 ```
 
@@ -37,15 +37,72 @@ The middle app's exposed API is then visible under `My APIs` to be added to the 
 
 ## 1. Authorization code flow
 
+> [!Tip]
+>
+> This write-up uses PowerShell method to capture the authroziation code
+>
+> Postman can be used to simplify the request and browser interaction as written [here](https://github.com/joetanx/mslab/blob/main/entra/flows/authorization-code.md)
+
 ### 1.1. Setup listener to capture authorization code
+
+Run PowerShell **as administrator** and stage the tenant and application IDs:
+
+```pwsh
+$tenant = '323626f5-1bfe-48cd-8902-ddfdfd44e1ce'
+$clientappid='629f37fd-84c5-411c-b04d-a0ffb3ef56a1'
+$clientappsecret='<client-app-secret>'
+$middleappid='05417710-613b-483c-a5d6-f7a4120da964'
+$middleappsecret='<middle-app-secret>'
+$middleappscopename='access'
+```
+
+Start the HTTP listener: it will block until the redirect from the authorization code flow is received, then capture the `code` and respond to the browser
+
+```pwsh
+$listener = [System.Net.HttpListener]::new()
+$listener.Prefixes.Add('http://localhost/')
+$listener.Start()
+$context = $listener.GetContext()
+$request = $context.Request
+$code = $request.QueryString['code']
+# respond to browser
+$response = $context.Response
+$html = "<html><body>Login has completed. This window can be closed.</body></html>"
+$buffer = [System.Text.Encoding]::UTF8.GetBytes($html)
+$response.ContentLength64 = $buffer.Length
+$response.OutputStream.Write($buffer, 0, $buffer.Length)
+$response.OutputStream.Close()
+$listener.Stop()
+```
 
 ### 1.2. Trigger authorization code request with client app
 
+Open a **separate** PowerShell (the listener terminal is still blocked waiting for the redirect) and also stage the tenant and application IDs in this terminal
+
+Construct the authorization URL and open it in the browser:
+
+```pwsh
+$redirect_uri = 'http://localhost'
+$state = [guid]::NewGuid().ToString()
+$auth_url = "https://login.microsoftonline.com/$tenant/oauth2/v2.0/authorize" +
+  "?client_id=$clientappid" +
+  "&redirect_uri=$([uri]::EscapeDataString($redirect_uri))" +
+  "&response_type=code" +
+  "&response_mode=query" +
+  "&scope=$([uri]::EscapeDataString("api://$middleappid/$middleappscopename"))" +
+  "&state=$state"
+Start-Process $auth_url
+```
+
 ### 1.3. Authorize permissions requested
+
+The opened browser request lists the middle app (with the display name and description configured in the API scope)
 
 ![](https://github.com/user-attachments/assets/f3f68c41-f7f5-45c0-824a-3085365c5fd9)
 
 ![](https://github.com/user-attachments/assets/d6cf0615-3d85-41b9-8311-ce217da2798e)
+
+Upon accept, the code is sent to the listener terminal, which responds with `Login has completed. This window can be closed.`:
 
 ![](https://github.com/user-attachments/assets/7aea210a-074e-48b0-a670-2d796ba5626a)
 
@@ -58,6 +115,25 @@ To remove user granted permission, go to User object → Applications → Select
 ![](https://github.com/user-attachments/assets/db9b7d18-72bf-4a59-847d-b9f10c3943b5)
 
 ### 1.4. Redeem authorization code flow for client app token
+
+Switch back to the **listener terminal** (which now has `$code` populated)
+
+The scope requested here matches what was used in the authorization URL:
+
+```pwsh
+$token_endpoint = "https://login.microsoftonline.com/$tenant/oauth2/v2.0/token"
+$body = @{
+  client_id     = $clientappid
+  client_secret = $clientappsecret
+  scope         = "api://$middleappid/$middleappscopename"
+  code          = $code
+  redirect_uri  = 'http://localhost'
+  grant_type    = 'authorization_code'
+}
+Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable clientapptoken
+```
+
+The resulting `access_token` (decoded) has `aud` set to the middle app's application ID URI and `scp` set to the scope name exposed by the middle app:
 
 ```json
 {
@@ -93,6 +169,27 @@ To remove user granted permission, go to User object → Applications → Select
 ```
 
 ## 2. Exchange client app token for middle app token
+
+Use the client app's `access_token` as the `assertion` in a JWT-bearer grant to the token endpoint
+
+(still in the listener terminal which has the client-app token)
+
+The middle app authenticates with its own credentials and requests the delegated permissions it holds (`https://graph.microsoft.com/.default`):
+
+```pwsh
+$body = @{
+  client_id           = $middleappid
+  client_secret       = $middleappsecret
+  scope               = 'https://graph.microsoft.com/.default'
+  assertion           = $clientapptoken.access_token
+  grant_type          = 'urn:ietf:params:oauth:grant-type:jwt-bearer'
+  requested_token_use = 'on_behalf_of'
+}
+Invoke-RestMethod $token_endpoint -Method Post -Body $body | Tee-Object -Variable token
+$headers = @{ Authorization = 'Bearer ' + $token.access_token }
+```
+
+The resulting `access_token` (decoded) now has `aud` set to `https://graph.microsoft.com` and `scp` reflecting the Graph permissions delegated to the middle app:
 
 ```json
 {
@@ -149,4 +246,52 @@ To remove user granted permission, go to User object → Applications → Select
   "xms_tcdt": 1752658764,
   "xms_tnt_fct": "3 16"
 }
+```
+
+## 3. Troubleshooting
+
+### 3.1. on-behalf-of flow doesn't work to chain app token to another app
+
+```json
+{
+  "error": "unauthorized_client",
+  "error_description": "AADSTS7000114: Application '05417710-613b-483c-a5d6-f7a4120da964' is not allowed to make application on-behalf-of calls. Trace ID:9acd713c-b1ef-434e-80cb-f3fceac16f00 Correlation ID: e6d29475-c298-4ca1-bdb2-ac7656ed5df3 Timestamp: 2026-02-1907:34:48Z",
+  "error_codes": [
+    7000114
+  ],
+  "timestamp": "2026-02-19 07:34:48Z",
+  "trace_id": "9acd713c-b1ef-434e-80cb-f3fceac16f00",
+  "correlation_id": "e6d29475-c298-4ca1-bdb2-ac7656ed5df3",
+  "error_uri": "https://login.microsoftonline.com/error?code=7000114"
+}
+```
+
+### 3.2. possible bad configurations
+
+Parse errors presented in URLs with: https://www.freeformatter.com/url-parser-query-string-splitter.html
+
+#### 3.2.1. Middle app doesn't exist or API not exposed
+
+Raw error:
+
+```url
+http://localhost/?error=invalid_resource&error_description=AADSTS500011%3a+The+resource+principal+named+api%3a%2f%2f05417710-613b-483c-a5d6-f7a4120da964+was+not+found+in+the+tenant+named+Contoso.+This+can+happen+if+the+application+has+not+been+installed+by+the+administrator+of+the+tenant+or+consented+to+by+any+user+in+the+tenant.+You+might+have+sent+your+authentication+request+to+the+wrong+tenant.+Trace+ID%3a+712f08aa-0375-46de-9c23-bfa11f462600+Correlation+ID%3a+57946413-c07c-4507-a9cc-399ebfd01bd9+Timestamp%3a+2026-02-19+02%3a42%3a55Z&error_uri=https%3a%2f%2flogin.microsoftonline.com%2ferror%3fcode%3d500011&state=3400de10-9b9f-42a3-afab-507f2033383f#
+```
+
+```yaml
+'error':	invalid_resource
+'error_description':	AADSTS500011: The resource principal named api://05417710-613b-483c-a5d6-f7a4120da964 was not found in the tenant named Contoso. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You might have sent your authentication request to the wrong tenant. Trace ID: 712f08aa-0375-46de-9c23-bfa11f462600 Correlation ID: 57946413-c07c-4507-a9cc-399ebfd01bd9 Timestamp: 2026-02-19 02:42:55Z
+```
+
+#### 3.2.2. Client app doesn't have permissions to middle app
+
+Raw error:
+
+```url
+http://localhost/?error=invalid_client&error_description=AADSTS650057%3a+Invalid+resource.+The+client+has+requested+access+to+a+resource+which+is+not+listed+in+the+requested+permissions+in+the+client%27s+application+registration.+Client+app+ID%3a+629f37fd-84c5-411c-b04d-a0ffb3ef56a1(obo-client-app).+Resource+value+from+request%3a+api%3a%2f%2f05417710-613b-483c-a5d6-f7a4120da964.+Resource+app+ID%3a+05417710-613b-483c-a5d6-f7a4120da964.+List+of+valid+resources+from+app+registration%3a+00000003-0000-0000-c000-000000000000.+Trace+ID%3a+d72c1f9b-ecb0-478c-a353-8fdbc1159c00+Correlation+ID%3a+6fbb353e-da38-4b18-9d46-98a33184455d+Timestamp%3a+2026-02-19+02%3a44%3a13Z&state=f45ed4c9-effb-4f82-86bc-390cc9b2099e#
+```
+
+```yaml
+'error':	invalid_client
+'error_description':	AADSTS650057: Invalid resource. The client has requested access to a resource which is not listed in the requested permissions in the client's application registration. Client app ID: 629f37fd-84c5-411c-b04d-a0ffb3ef56a1(obo-client-app). Resource value from request: api://05417710-613b-483c-a5d6-f7a4120da964. Resource app ID: 05417710-613b-483c-a5d6-f7a4120da964. List of valid resources from app registration: 00000003-0000-0000-c000-000000000000. Trace ID: d72c1f9b-ecb0-478c-a353-8fdbc1159c00 Correlation ID: 6fbb353e-da38-4b18-9d46-98a33184455d Timestamp: 2026-02-19 02:44:13Z
 ```
