@@ -65,6 +65,8 @@ The `Agent 365 CLI` or _custom client app registration_ [requires seven permissi
 
 ![](https://github.com/user-attachments/assets/01097967-2bbc-43e0-b629-1bbd90b72b35)
 
+![](https://github.com/user-attachments/assets/3e287517-d53b-4bd3-898a-93a8254b5c22)
+
 ```cmd
 
 ```
