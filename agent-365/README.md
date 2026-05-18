@@ -1,6 +1,6 @@
-## 1. Setup [Agent 365 CLI](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/agent-365-cli)
+## 1. Setup Agent 365 CLI
 
-The Agent 365 CLI is a cross-platform tool that works on Windows, Linux and macOS with .NET 8.0 or later
+The [Agent 365 CLI](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/agent-365-cli) is a cross-platform tool that works on Windows, Linux and macOS with .NET 8.0 or later
 
 ### 1.1. Install .NET and Azure CLI (Windows example)
 
@@ -29,7 +29,7 @@ Agent 365 CLI automatically detects the tenant ID from Azure CLI
 
 > [!Note]
 >
-> It was originally possible to initialize the a365 configuration file with `a365 config init`, but the `config` option appears to have been [removed](https://github.com/microsoft/Agent365-devTools/issues/370#issuecomment-4331725685)
+> There was a `a365 config init` command to initialize a365 configuration file, but the `config` option appears to have been [removed](https://github.com/microsoft/Agent365-devTools/issues/370#issuecomment-4331725685)
 
 ![](https://github.com/user-attachments/assets/2bb1eacc-f7a1-4708-b5ad-6fab30816507)
 
@@ -37,7 +37,11 @@ Alternatively, use the `--tenant-id <tenant-id>` to skip auto detection
 
 Running a365 in Windows automatically opens the Windows Account Manager (other platforms open browser)
 
-![](https://github.com/user-attachments/assets/da04fd08-770f-4919-8e81-47917e514e0e)
+![](https://github.com/user-attachments/assets/127b4807-a0a3-49d7-9884-1cea046fc188)
+
+The Agent 365 CLI needs a custom client app registration in tenant to authenticate and manage agent identity blueprints
+
+It is also possible to use a [custom client app registration](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration)
 
 ```cmd
 
