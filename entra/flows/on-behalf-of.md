@@ -12,6 +12,14 @@
 
 ![](https://github.com/user-attachments/assets/7aea210a-074e-48b0-a670-2d796ba5626a)
 
+The client enterprise application object lists all user granted permissions:
+
+![](https://github.com/user-attachments/assets/497f27be-a738-4db3-98c7-04aaab38cf23)
+
+To remove user granted permission, go to User object → Applications → Select application → Remove:
+
+![](https://github.com/user-attachments/assets/db9b7d18-72bf-4a59-847d-b9f10c3943b5)
+
 ### 1.4. Redeem authorization code flow for client app token
 
 ```json
