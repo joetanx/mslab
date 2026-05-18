@@ -2,7 +2,7 @@
 
 The [Agent 365 CLI](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/agent-365-cli) is a cross-platform tool that works on Windows, Linux and macOS with .NET 8.0 or later
 
-### 1.1. Install .NET and Azure CLI (Windows example)
+### 1.1. Install .NET, Azure CLI and PowerShell 7+ (Windows example)
 
 ```cmd
 winget install Microsoft.DotNet.SDK.10 Microsoft.AzureCLI Microsoft.PowerShell
@@ -21,21 +21,45 @@ dotnet tool install --global Microsoft.Agents.A365.DevTools.Cli
 
 ![](https://github.com/user-attachments/assets/ac7d2118-c4a9-4d04-bf8f-c13632a36733)
 
-## 2. Prepare `Agent 365 CLI` app registration
+## 2. Setup Azure CLI
 
-The Agent 365 CLI uses the app registration named `Agent 365 CLI` to perform agent setup; otherwise, it prompts for the [custom client app registration](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration) to be used:
+Agent 365 CLI automatically detects the tenant ID from Azure CLI
 
-![](https://github.com/user-attachments/assets/3e7d8818-0c0b-4ea2-9538-5215123fffe5)
+> `a365 setup` commands fail without Azure CLI login
+>
+> ![](https://github.com/user-attachments/assets/2f72184b-f222-4f62-927b-e7128dd73c94)
+>
+> ![](https://github.com/user-attachments/assets/4c8aba57-9833-4c64-8fd9-ab773270b8ab)
 
-### 21. [Set the redirect URI](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration#2-set-the-redirect-uri)
+Login with `az login`:
 
+![](https://github.com/user-attachments/assets/bda42fd5-c151-433c-9cdf-6f064a07452d)
+
+![](https://github.com/user-attachments/assets/31010c6d-6891-49f4-bc91-8a45bf3034b7)
+
+![](https://github.com/user-attachments/assets/df51829e-a1f9-4bf0-9eb6-c79a3b4c3c9e)
+
+## 3. Setup `Agent 365 CLI` client app
+
+The CLI looks up the client app by the well-known display name `Agent 365 CLI` automatically; otherwise, it prompts for the [custom client app](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration) to be used:
+
+![](https://github.com/user-attachments/assets/914ee2ba-5dd3-42ed-b0ef-09cdd2123dda)
+
+### 3.1. Create the `Agent 365 CLI` client app
+
+[Register](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration#1-register-application) the `Agent 365 CLI` client app
+
+![](https://github.com/user-attachments/assets/0c57d6c9-bc80-4ef6-af0a-918771d92ed6)
+
+![](https://github.com/user-attachments/assets/638888a7-82af-414a-8a9c-0e587d3f354b)
+
+### 3.2. [Set the redirect URI](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration#2-set-the-redirect-uri)
 
 AADSTS500113: No reply address is registered for the application.
 
 ![](https://github.com/user-attachments/assets/39cfb949-25ea-43f8-9535-865a7f82f6d6)
 
-
-### 2.2. [Configure API permissions](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration#4-configure-api-permissions)
+### 3.3. [Configure API permissions](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration#4-configure-api-permissions)
 
 The `Agent 365 CLI` or _custom client app registration_ requires seven **delegated permissions**:
 
@@ -50,10 +74,6 @@ The `Agent 365 CLI` or _custom client app registration_ requires seven **delegat
 |`User.Read`|Read signed-in user profile for blueprint owner and sponsor assignment|
 
 ![](https://github.com/user-attachments/assets/01097967-2bbc-43e0-b629-1bbd90b72b35)
-
-## 3. Prepare Azure CLI
-
-![](https://github.com/user-attachments/assets/4c8aba57-9833-4c64-8fd9-ab773270b8ab)
 
 ## 4. Register agent with Agent 365 CLI
 
