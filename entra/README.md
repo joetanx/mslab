@@ -1,6 +1,4 @@
-## 1. Entra applications
-
-### 1.1. Entra identity endpoints
+## 1. Entra identity endpoints
 
 |Endpoint|URI prefix|Usage|
 |---|---|---|
@@ -15,7 +13,7 @@
 |`device_authorization_endpoint`|`…/oauth2/v2.0/devicecode`|
 |`end_session_endpoint`|`…/oauth2/v2.0/logout`|
 
-### 1.2. App registration
+## 2. App registration
 
 App registration is the **application object** which contains configurations like redirect URL, API permissions, credentials (client secrets, certificate, FIC) app roles, etc
 
@@ -26,9 +24,9 @@ App registration is the **application object** which contains configurations lik
 |Application (client) ID|Unique ID of the **application object** in the Entra directory<br>Also known as AppID or client ID|
 |Directory (tenant) ID|Unique ID of the Entra tenant|
 
-#### 1.2.1. Application credentials
+### 2.1. Application credentials
 
-##### Client secret:
+#### 2.1.1. Client secret:
 
 - The client secret is like an API key or client password
 - Used in the `client_secret` parameter during authentication
@@ -36,7 +34,7 @@ App registration is the **application object** which contains configurations lik
 
 ![](https://github.com/user-attachments/assets/8b1b0074-6190-4ffc-b22f-13b089e5bab3)
 
-##### Client certificate:
+#### 2.1.2. Client certificate:
 
 - The client certificate is used to sign the JWT that claims the application's identity
 - The signed JWT is used the `client_assertion` parameter during authentication
@@ -44,7 +42,7 @@ App registration is the **application object** which contains configurations lik
 
 ![](https://github.com/user-attachments/assets/5c6c604b-9a51-471e-aba2-ab43697a9de3)
 
-##### Federated identity credential (FIC)
+#### 2.1.3. Federated identity credential (FIC)
 
 - The FIC represents the trust relationship between an external identity provider (IdP) and an app in Microsoft Entra ID
 - Several scenarios of [workload identity federation](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation#supported-scenarios) are supported (example of managed identity shown below)
@@ -53,11 +51,11 @@ App registration is the **application object** which contains configurations lik
 
 ![](https://github.com/user-attachments/assets/469ce69d-7688-4f8e-a38b-ba8b7453991a)
 
-#### 1.2.2. API permissions
+### 2.2. API permissions
 
 Entra permission reference: https://learn.microsoft.com/en-us/graph/permissions-reference
 
-##### Application Permission
+#### 2.2.1. Application Permission
 
 [Application permissions](https://learn.microsoft.com/en-us/graph/permissions-overview#application-permissions), also called _app roles_, enables **non-interactive** access without a signed-in user
 
@@ -65,7 +63,7 @@ The application can access any data that the permission is associated with
 
 ![](https://github.com/user-attachments/assets/6610914e-0643-4c85-b6d0-e566bd278e9a)
 
-##### Delegated Permission
+#### 2.2.2. Delegated Permission
 
 [Delegated permissions](https://learn.microsoft.com/en-us/graph/permissions-overview#delegated-permissions), also called _scopes_, requires **interactive** user sign-in
 
@@ -75,16 +73,16 @@ The application **cannot** access anything the signed-in user couldn't access
 
 ![](https://github.com/user-attachments/assets/de7890e6-8f7c-42df-bc60-d117256a738b)
 
-#### 1.2.3. Authentication
+### 2.3. Authentication
 
-##### Redirect URI
+#### 2.3.1. Redirect URI
 
 - A [redirect URI](https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-redirect-uri) is where Entra sends tokens after authentication
 - Specifying the redirect URIs ensures Entra only sends authorization codes to the intended recipient
 
 ![](https://github.com/user-attachments/assets/e261171f-b18b-4ef9-9af9-6e430178c934)
 
-##### Public client flow
+#### 2.3.2. Public client flow
 
 - [Public client applications](https://learn.microsoft.com/en-us/entra/identity-platform/msal-client-applications) run on devices, such as desktop, browserless APIs, mobile or client-side browser apps
 - They are not trusted to safely keep application secrets, so they can only access web APIs on behalf of the user
@@ -112,13 +110,13 @@ If redirect url configured as `Web` instead of `Mobile and desktop applications`
 }
 ```
 
-### 1.3. Enterprise application
+## 3. Enterprise application
 
 Enterprise application is the **service principal object** (i.e. service account or machine identity) created from the _application object_
 
 ![](https://github.com/user-attachments/assets/7c0dc378-930a-470f-a569-18348dc373ff)
 
-#### 1.3.1. Permissions
+### 3.1. Permissions
 
 API permissions granted to the application object are used by the service principal:
 
@@ -128,14 +126,14 @@ For delegated permission, all user consents granted are tracked:
 
 ![](https://github.com/user-attachments/assets/9769f454-de32-476e-9db6-e89aef7787f6)
 
-#### 1.3.2. Group membership
+### 3.2. Group membership
 
 - Applications can be added to groups
 - Notice that the type is `Service principal` and the `Object Id` is `25baa229-e19d-4ab2-9618-9912575e4ce1`, which is the enterprise application
 
 ![](https://github.com/user-attachments/assets/c09a6599-4de2-4f34-a7ff-563d79a71135)
 
-#### 1.3.3. Azure RBAC roles
+### 3.3. Azure RBAC roles
 
 Application can also be [assigned to Azure RBAC roles](https://learn.microsoft.com/en-us/entra/identity-platform/howto-create-service-principal-portal#assign-a-role-to-the-application)
 
@@ -159,131 +157,3 @@ Notice that the type is `Service principal` and the `Object Id` is `25baa229-e19
 >   }
 > }
 > ```
-
-## 2. Authentication Flows
-
-### 2.1. Client credential
-
-[Entra client credential flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow) follows section `4.4. Client Credentials Grant` of [RFC 6749 OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749) and works with:
-1. Client secret: section `2.3.1. Client Password` of RFC 6749
-2. Client assertion (signed with application certificate): uses `client_assertion_type` of `urn:ietf:params:oauth:client-assertion-type:jwt-bearer` from section `2.2. Using JWTs for Client Authentication` of [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523)
-
-The [Entra on-behalf-of flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) is based on [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523):
-- `urn:ietf:params:oauth:grant-type:jwt-bearer`
-- `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`
-
-```mermaid
-sequenceDiagram
-  participant B as Application
-  participant C as Authorization<br>endpoint
-  note over C:Not used in client<br>credentials flow
-  participant D as Token<br>endpoint
-  participant E as Resource
-  B->>D:Request token with application credentials
-  D->>D:Verify application<br>credentials
-  D->>B:Access token
-  B->>E:Request resource with access token
-  E->>B:Response
-```
-
-### 2.2. Authorization code
-
-[Entra authorization code flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow) follows section `4.1. Authorization Code Grant` of [RFC 6749 OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
-
-#### 2.2.1. without Proof Key for Code Exchange (PKCE)
-
-```mermaid
-sequenceDiagram
-  actor A as User
-  participant B as Application
-  participant C as Authorization<br>endpoint
-  participant D as Token<br>endpoint
-  participant E as Resource
-  A->>B:Initiate login
-  B->>C:Authorization<br>code request
-  C->>A:Redirect to authorization page
-  A->>C:Authenticate and consent
-  C->>B:Authorization code
-  B->>D:Request token with authorization code
-  D->>B:Access token and refresh token
-  B->>E:Request resource with access token
-  E->>B:Response
-  loop Refresh access token
-    B->>D:Request new access token with<br>refresh token before expiry
-    D->>B:New access token and new refresh token
-    B->>E:Request resource with new access token
-  end
-```
-
-#### 2.2.2. with Proof Key for Code Exchange (PKCE)
-
-[RFC 7636 - Proof Key for Code Exchange by OAuth Public Clients](https://datatracker.ietf.org/doc/html/rfc7636)
-
-```mermaid
-sequenceDiagram
-  actor A as User
-  participant B as Application
-  participant C as Authorization<br>endpoint
-  participant D as Token<br>endpoint
-  participant E as Resource
-  A->>B:Initiate login
-  B->>B:Generate code_verifier<br>and code_challenge
-  note over B: code_challenge is a hash of code_verifier<br>using code_challenge_method
-  B->>C:Authorization code request<br>+ code_challenge<br>+ code_challenge_method
-  note over C,D:Stores code_challenge<br>+ code_challenge_method
-  C->>A:Redirect to authorization page
-  A->>C:Authenticate and consent
-  C->>B:Authorization code
-  B->>D:Request token with authorization code and code_verifier
-  D->>D:Hashes code_verfier with code_challenge_method<br>and validate against code_challenge
-  D->>B:Access token and refresh token
-  B->>E:Request resource with access token
-  E->>B:Response
-  loop Refresh access token
-    B->>D:Request new access token with<br>refresh token before expiry
-    D->>B:New access token and new refresh token
-    B->>E:Request resource with new access token
-  end
-```
-
-### 2.3. On-behalf-of
-
-[Entra on-behalf-of flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) comprises of:
-1. User sign-in to client application via authorization code flow to get client application token
-2. Client application token is then used to get middle-tier application token with `grant_type` of `urn:ietf:params:oauth:grant-type:jwt-bearer` from section `2.1. Using JWTs as Authorization Grants` of [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523)
-
-```mermaid
-sequenceDiagram
-  actor A as User
-  participant B as Application<br>(client)
-  participant C as Authorization<br>endpoint
-  participant D as Token<br>endpoint
-  participant E as Application<br>(middle-tier)
-  participant F as Resource
-  rect rgb(32, 32, 32)
-    note over A,D:Authorization code flow
-    A->>B:Initiate login
-    B->>C:Authorization<br>code request
-    C->>A:Redirect to authorization page
-    A->>C:Authenticate and consent
-    C->>B:Authorization code
-    B->>D:Request token (client) with authorization code
-    D->>B:Token (client)
-  end
-  rect rgb(32, 32, 32)
-    note over B,E:On-behalf-of flow
-    B->>E:Send token (client) to middle-tier app
-    E->>D:Request token (resource)<br>with token (client)
-    E->>B:Return token (resource)
-  end
-  E->>F:Request resource<br>with token (resource)
-  F->>E:Response
-```
-
-### 2.4. Federated identity credentials (FIC)
-
-Entra doesn't implement the [RFC 8693 - OAuth 2.0 Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693) (`urn:ietf:params:oauth:grant-type:token-exchange`)
-
-The Entra workload identity / FIC is a customized implementation (`aud`: `api://AzureADTokenExchange`)
-- https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview
-- https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation-create-trust
