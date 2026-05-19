@@ -41,7 +41,7 @@ Login with `az login`:
 
 ## 3. Setup `Agent 365 CLI` client app
 
-### 3.1. `a365 setup requirements`
+### 3.1. About the `Agent 365 CLI` client app
 
 The CLI looks up the client app by the well-known display name `Agent 365 CLI` automatically
 
@@ -73,6 +73,8 @@ The `Agent 365 CLI` or _custom client app registration_ requires seven **delegat
 
 #### 3.1.2. Redirect URIs
 
+The CLI requires three redirect URIs in total:
+
 |URI|Purpose|
 |---|---|
 |`http://localhost:8400/`|Microsoft Authentication Library (MSAL) interactive browser authentication|
@@ -86,6 +88,14 @@ The `Agent 365 CLI` or _custom client app registration_ requires seven **delegat
 #### 3.1.3. Public client flows
 
 `Allow public client flows` must be enabled
+
+### 3.2. Running `a365 setup requirements`
+
+> [!Important]
+>
+> Client app configuration requires Global Administrator:
+> 1. Run the CLI as a Global Administrator
+> 2. Get the consent URL from the CLI and approve using Global Administrator
 
 ## 4. Register agent with Agent 365 CLI
 
