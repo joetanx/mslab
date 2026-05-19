@@ -139,12 +139,32 @@ To setup an agent in Agent 365, run `a365 setup all --agent-name <agent-name>`
 
 ![](https://github.com/user-attachments/assets/0e80fd2b-9bc4-4438-be74-d0d9527912c3)
 
+### 4.1. Successful agent setup example
+
+Create agent blueprint application, service principal and client secret:
+
+![](https://github.com/user-attachments/assets/2e2699f8-58ed-4130-9330-e5e3eda20d5e)
+
+Create agent identity and registration:
+
+![](https://github.com/user-attachments/assets/0da50908-c111-4b64-9296-444d4412fba9)
+
+Setup summary:
+
+![](https://github.com/user-attachments/assets/04b0a1f8-7651-4199-bdd7-a9bafb17c969)
+
+Action required:
+
+![](https://github.com/user-attachments/assets/dffda62c-3b8a-4fdb-98e4-e1304ce46ab4)
+
+Warnings:
+
+![](https://github.com/user-attachments/assets/bfe24fcd-413c-4469-b205-b21b9b9a005b)
+
+### 4.2. Agent setup troubleshooting
+
+`setup all` performs different steps [depending on the role](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/reference/cli/setup#setup-all) held by the signed in user
+
+No `Global Administrator`, `Agent ID Administrator` or `Agent ID Developer` role:
+
 ![](https://github.com/user-attachments/assets/55103f3e-d0c2-4f65-99cd-aa78910fa00b)
-
-```cmd
-
-```
-
-```cmd
-
-```
