@@ -41,25 +41,21 @@ Login with `az login`:
 
 ## 3. Setup `Agent 365 CLI` client app
 
-The CLI looks up the client app by the well-known display name `Agent 365 CLI` automatically; otherwise, it prompts for the [custom client app](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration) to be used:
+### 3.1. `a365 setup requirements`
+
+The CLI looks up the client app by the well-known display name `Agent 365 CLI` automatically
+
+If this client app doesn't exist in the tenant, it prompts for the [custom client app](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration) to be used:
 
 ![](https://github.com/user-attachments/assets/914ee2ba-5dd3-42ed-b0ef-09cdd2123dda)
 
-### 3.1. Create the `Agent 365 CLI` client app
+[Register](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration#1-register-application) the `Agent 365 CLI` client app and run `a365 setup requirements`
 
-[Register](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration#1-register-application) the `Agent 365 CLI` client app
+`a365 setup requirements` prepares the client app with the following:
 
-![](https://github.com/user-attachments/assets/0c57d6c9-bc80-4ef6-af0a-918771d92ed6)
+![](https://github.com/user-attachments/assets/678c731c-2058-42ff-b96a-1b8f92b5faa0)
 
-![](https://github.com/user-attachments/assets/638888a7-82af-414a-8a9c-0e587d3f354b)
-
-### 3.2. [Set the redirect URI](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration#2-set-the-redirect-uri)
-
-AADSTS500113: No reply address is registered for the application.
-
-![](https://github.com/user-attachments/assets/39cfb949-25ea-43f8-9535-865a7f82f6d6)
-
-### 3.3. [Configure API permissions](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration#4-configure-api-permissions)
+#### 3.1.1. Permissions
 
 The `Agent 365 CLI` or _custom client app registration_ requires seven **delegated permissions**:
 
@@ -74,6 +70,22 @@ The `Agent 365 CLI` or _custom client app registration_ requires seven **delegat
 |`User.Read`|Read signed-in user profile for blueprint owner and sponsor assignment|
 
 ![](https://github.com/user-attachments/assets/01097967-2bbc-43e0-b629-1bbd90b72b35)
+
+#### 3.1.2. Redirect URIs
+
+|URI|Purpose|
+|---|---|
+|`http://localhost:8400/`|Microsoft Authentication Library (MSAL) interactive browser authentication|
+|`http://localhost`|Microsoft Graph PowerShell SDK Connect-MgGraph|
+|`ms-appx-web://Microsoft.AAD.BrokerPlugin/{client-id}`|Using Web Account Manager (WAM)|
+
+> `AADSTS500113: No reply address is registered for the application.` error occurs if the redirect URIs are not configured
+>
+> ![](https://github.com/user-attachments/assets/39cfb949-25ea-43f8-9535-865a7f82f6d6)
+
+#### 3.1.3. Public client flows
+
+`Allow public client flows` must be enabled
 
 ## 4. Register agent with Agent 365 CLI
 
