@@ -135,9 +135,11 @@ Changes made:
 
 To setup an agent in Agent 365, run `a365 setup all --agent-name <agent-name>`
 
-![](https://github.com/user-attachments/assets/e527a483-0f4b-48af-9958-f9097c52fba6)
+![](https://github.com/user-attachments/assets/d0f1eaa5-fa11-4925-8b18-97833395de96)
 
 ![](https://github.com/user-attachments/assets/0e80fd2b-9bc4-4438-be74-d0d9527912c3)
+
+![](https://github.com/user-attachments/assets/55103f3e-d0c2-4f65-99cd-aa78910fa00b)
 
 ```cmd
 
