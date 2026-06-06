@@ -14,7 +14,7 @@ Defender portal → Settings → Security for AI
 
 |Security for AI agents: not enabled|Security for AI agents: enabled|
 |---|---|
-|![](https://github.com/user-attachments/assets/4f72df25-457c-4142-ae79-930222934333)|![](https://github.com/user-attachments/assets/5d376646-bdb7-436c-ab00-1fbaec018865)|
+|![](https://github.com/user-attachments/assets/4f72df25-457c-4142-ae79-930222934333)|![](https://github.com/user-attachments/assets/11dbad64-8879-4b36-ac26-7811049813aa)|
 
 ## 2. Connect Agent 365
 
@@ -109,3 +109,15 @@ Open Power Platform Admin Center (https://admin.powerplatform.microsoft.com/secu
 The status of the connection changes from `Pending Power Platform Action` to `Connected`:
 
 ![](https://github.com/user-attachments/assets/0cbaa110-ef28-4e34-ac8e-49150498fb3b)
+
+## 4. Connect Microsoft 365
+
+![](https://github.com/user-attachments/assets/9607bda1-7a0b-49b6-977c-3740fe6654d8)
+
+Clicking `Connect` on the Microsft 365 section:
+
+(The settings pop-up pane is actually the App Connectors settings for Defender for Cloud App at https://security.microsoft.com/cloudapps/settings?tabid=appConnectors)
+
+![](https://github.com/user-attachments/assets/e8e0961d-4544-4fd8-81ff-6fd697778520)
+
+![](https://github.com/user-attachments/assets/8e1343ab-46f4-448f-801d-d8d831da48f6)
