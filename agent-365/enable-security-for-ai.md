@@ -42,17 +42,19 @@ Toggle: `Enable Microsoft Defender - For all Copilot Studio Agents in tenant`
 >
 > Connected status may take up to 1 hour after admin setup.
 
+![](https://github.com/user-attachments/assets/4cf5ced6-4fd2-4e6c-9281-b683cf159906)
+
 ### 3.2. AI real-time protection & investigation
 
-#### [Create App Registration](https://learn.microsoft.com/en-us/microsoft-copilot-studio/external-security-provider#step-1-configure-microsoft-entra-application)
+#### 3.2.1. [Create App Registration](https://learn.microsoft.com/en-us/microsoft-copilot-studio/external-security-provider#step-1-configure-microsoft-entra-application)
 
 ![](https://github.com/user-attachments/assets/c3960bbf-b1c8-4628-8812-20e6dca7895b)
 
-#### [Configure Federated Identity Credentials (FIC)](https://learn.microsoft.com/en-us/microsoft-copilot-studio/external-security-provider#step-2-configure-the-threat-detection-system)
+#### 3.2.2. [Configure Federated Identity Credentials (FIC)](https://learn.microsoft.com/en-us/microsoft-copilot-studio/external-security-provider#step-2-configure-the-threat-detection-system)
 
 Power Platform integration endpoint: `https://mcsaiagents.security.core.microsoft/v1/protection`
 
-![](https://github.com/user-attachments/assets/9bc94fc7-a4e8-4f7d-99d7-3ae5241b49cb)
+![](https://github.com/user-attachments/assets/791a1290-cec6-4d1b-a1f8-e3983c045653)
 
 |Parameter|Value|
 |---|---|
@@ -76,7 +78,25 @@ Write-Output $base64EncodedEndpointURL
 
 ![](https://github.com/user-attachments/assets/df593baa-3174-4738-9581-754de040493d)
 
-#### Configure Power Platform: Additional threat detection and protection for Copilot Studio agents
+#### 3.2.3. Save protection setting on Defender
+
+![](https://github.com/user-attachments/assets/7979c360-6aae-46a0-94a3-ec2ad61d0752)
+
+The status of the connection changes from `Not csonnected` to `Pending Power Platform Action`:
+
+![](https://github.com/user-attachments/assets/e1b6516a-0d36-4060-af56-5b27f1f0a732)
+
+#### 3.2.4. Configure Power Platform: Additional threat detection and protection for Copilot Studio agents
+
+> [!Important]
+>
+> The Defender setting above must be saved before the Power Platform setting
+>
+> Otherwise, below error will occur:
+>
+> ```
+> The application ID in your authentication token does not match the registered application for webhook access. Please ensure you are using the correct application credentials.
+> ```
 
 Open Power Platform Admin Center (https://admin.powerplatform.microsoft.com/security/threatdetection):
 
@@ -84,8 +104,8 @@ Open Power Platform Admin Center (https://admin.powerplatform.microsoft.com/secu
 
 ![](https://github.com/user-attachments/assets/2f872f4a-4e85-443f-8a56-0204b622c252)
 
-#### Save protection setting on Defender
+![](https://github.com/user-attachments/assets/33becf40-2dca-4491-ac37-3abda3013bb7)
 
-![](https://github.com/user-attachments/assets/7979c360-6aae-46a0-94a3-ec2ad61d0752)
+The status of the connection changes from `Pending Power Platform Action` to `Connected`:
 
-![](https://github.com/user-attachments/assets/e1b6516a-0d36-4060-af56-5b27f1f0a732)
+![](https://github.com/user-attachments/assets/0cbaa110-ef28-4e34-ac8e-49150498fb3b)
