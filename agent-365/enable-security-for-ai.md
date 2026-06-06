@@ -30,7 +30,7 @@ For AI real-time protection & investigation, simply click `Connect`, select `Aud
 
 ![](https://github.com/user-attachments/assets/0fb8487b-1336-4d85-96e4-26c306577835)
 
-Open Power Platform Admin Center (click on link or go to https://admin.powerplatform.microsoft.com/security/threatdetection):
+Open Power Platform Admin Center (https://admin.powerplatform.microsoft.com/security/threatdetection):
 
 ![](https://github.com/user-attachments/assets/c2bdcd3c-39f6-4352-b691-82fc52d4c9be)
 
@@ -46,17 +46,19 @@ Toggle: `Enable Microsoft Defender - For all Copilot Studio Agents in tenant`
 
 #### [Create App Registration](https://learn.microsoft.com/en-us/microsoft-copilot-studio/external-security-provider#step-1-configure-microsoft-entra-application)
 
-![](https://github.com/user-attachments/assets/d4f6f37a-1a69-40e3-9ccf-9fdbe8d38932)
+![](https://github.com/user-attachments/assets/c3960bbf-b1c8-4628-8812-20e6dca7895b)
 
 #### [Configure Federated Identity Credentials (FIC)](https://learn.microsoft.com/en-us/microsoft-copilot-studio/external-security-provider#step-2-configure-the-threat-detection-system)
 
+Power Platform integration endpoint: `https://mcsaiagents.security.core.microsoft/v1/protection`
+
+![](https://github.com/user-attachments/assets/9bc94fc7-a4e8-4f7d-99d7-3ae5241b49cb)
+
 |Parameter|Value|
 |---|---|
-|Federated credential scenario|Other issuer|
-|Issuer|https://login.microsoftonline.com/{tenantId}/v2.0|
-|Value|`/eid1/c/pub/t/{base 64 encoded tenantId}/a/m1WPnYRZpEaQKq1Cceg--g/{base 64 encoded endpoint}`|
-
-The `https://mcsaiagents.security.core.microsoft/v1/protection`
+|Federated credential scenario|`Other issuer`|
+|Issuer|`https://login.microsoftonline.com/{tenantId}/v2.0`|
+|Value|`/eid1/c/pub/t/{base64-encoded tenantId}/a/m1WPnYRZpEaQKq1Cceg--g/{base64-encoded endpoint}`|
 
 Example using PowerShell to get Base64 encoded values:
 
@@ -72,10 +74,18 @@ $base64EncodedEndpointURL = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetB
 Write-Output $base64EncodedEndpointURL
 ```
 
-#### Additional threat detection and protection for Copilot Studio agents (optional)
+![](https://github.com/user-attachments/assets/df593baa-3174-4738-9581-754de040493d)
 
-For integration to threat detection partner:
+#### Configure Power Platform: Additional threat detection and protection for Copilot Studio agents
+
+Open Power Platform Admin Center (https://admin.powerplatform.microsoft.com/security/threatdetection):
 
 ![](https://github.com/user-attachments/assets/a66ef35c-adc6-4fd4-84c2-07cebcbc9135)
 
-![](https://github.com/user-attachments/assets/a125544d-c667-4ec3-9a4d-fb5e7133edb4)
+![](https://github.com/user-attachments/assets/2f872f4a-4e85-443f-8a56-0204b622c252)
+
+#### Save protection setting on Defender
+
+![](https://github.com/user-attachments/assets/7979c360-6aae-46a0-94a3-ec2ad61d0752)
+
+![](https://github.com/user-attachments/assets/e1b6516a-0d36-4060-af56-5b27f1f0a732)
