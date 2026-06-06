@@ -44,3 +44,6 @@ For integration to threat detection partner:
 
 ### 2.2. AI real-time protection & investigation
 
+Create App Registration: https://learn.microsoft.com/en-us/microsoft-copilot-studio/external-security-provider#step-1-configure-microsoft-entra-application
+
+Example display name: `Copilot Security Integration - Production`
