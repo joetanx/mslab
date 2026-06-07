@@ -150,6 +150,13 @@ Exchange Online PowerShell can be used from Azure Cloud Shell with `Connect-Exch
 
 > [!Note]
 >
-> `Connect-EXOPSSession` was the old commandlet for Exchange Online PowerShell v2, use `Connect-ExchangeOnline` for v3
+> `Connect-EXOPSSession` was the old cmdlet for Exchange Online PowerShell v2, use `Connect-ExchangeOnline` for v3
 
-![](https://github.com/user-attachments/assets/582392ae-a7c2-4845-85f1-0f1935e88abd)
+|To...|Run...|
+|---|--|
+|Check current UAL setting|`Get-AdminAuditLogConfig \| Format-List UnifiedAuditLogIngestionEnabled`|
+|Enable UAL|`Set-AdminAuditLogConfig -UnifiedAuditLogIngestionEnabled $false`|
+|Check if audit setting at tenant level|`Get-OrganizationConfig \| Format-List AuditDisabled`|
+|Enable audit at tenant level|`Set-OrganizationConfig -AuditDisabled $false`|
+
+![](https://github.com/user-attachments/assets/77cee33f-3212-4cb3-878c-42b00ae45678)
