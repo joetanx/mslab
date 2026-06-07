@@ -121,3 +121,35 @@ Clicking `Connect` on the Microsft 365 section:
 ![](https://github.com/user-attachments/assets/e8e0961d-4544-4fd8-81ff-6fd697778520)
 
 ![](https://github.com/user-attachments/assets/8e1343ab-46f4-448f-801d-d8d831da48f6)
+
+### 4.1. Troubleshooting Microsoft 365 connection error
+
+![](https://github.com/user-attachments/assets/a8ff6d3d-e9ea-4f97-b012-b91642fb3cfa)
+
+![](https://github.com/user-attachments/assets/1d34c183-a376-445e-97f1-3caedd407e04)
+
+![](https://github.com/user-attachments/assets/9fbd08eb-d9e7-4d0a-9739-22aaf9679db8)
+
+This error occurs if unified auditing isn't enabled:
+
+`Microsoft.Office.Compliance.Audit: DataServiceException: Tenant <tenantID> does not exist.`
+
+![](https://github.com/user-attachments/assets/3387485c-8ab9-43b1-aa52-844a19329348)
+
+[Unified auditing can be turned on or off](https://docs.microsoft.com/en-us/office365/securitycompliance/turn-audit-log-search-on-or-off) via [Purview portal](https://purview.microsoft.com/audit/auditsearch) or Exchange Online PowerShell
+
+> [!Tip]
+>
+> Using Exchange Online PowerShell can be more reliable as Purview portal can some times show:
+> 
+> `Sorry, we're having trouble figuring out if activity is being recorded. Try refreshing the page`
+>
+> ![](https://github.com/user-attachments/assets/ce80a1d5-47f9-4d94-aa28-81454c496d75)
+
+Exchange Online PowerShell can be used from Azure Cloud Shell with `Connect-ExchangeOnline`
+
+> [!Note]
+>
+> `Connect-EXOPSSession` was the old commandlet for Exchange Online PowerShell v2, use `Connect-ExchangeOnline` for v3
+
+![](https://github.com/user-attachments/assets/582392ae-a7c2-4845-85f1-0f1935e88abd)
