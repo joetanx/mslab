@@ -84,13 +84,23 @@ Select users:
 
 Apply template:
 
-![](https://github.com/user-attachments/assets/e3fe4e74-fbdd-40e6-834f-a4cd224de557)
+![](https://github.com/user-attachments/assets/e4936736-ca52-48cc-a2e3-641702c16522)
 
 > [!Note]
 >
 > Only default policies are available without Agent 365 license, adding of policy template is locked 🔒
 > 
 > ![](https://github.com/user-attachments/assets/69fcb3ac-a429-41a2-b48d-a05e8577519d)
+
+> [!Note]
+> 
+> Agent 365 license is required to add access package for agents:
+> 
+> ![](https://github.com/user-attachments/assets/cd7a09a2-f7bf-4bd7-8519-87c4158353ac)
+> 
+> Agent options are grayed out without Agent 365 license:
+> 
+> ![](https://github.com/user-attachments/assets/848056f6-797d-4525-994b-3ad847597eaf)
 
 Accept permissions:
 
@@ -100,4 +110,4 @@ Review and finish:
 
 ![](https://github.com/user-attachments/assets/140f2ea9-f8f3-49b7-a187-9d8c7312fed0)
 
-<img width="1482" height="589" alt="image" src="https://github.com/user-attachments/assets/b958b716-7bb0-4947-acdd-edd80146cc9e" />
+![](https://github.com/user-attachments/assets/b958b716-7bb0-4947-acdd-edd80146cc9e)
