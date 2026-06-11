@@ -16,14 +16,14 @@ Azure Function App  ────────────────────
 │  └── _FuncRequest shim ──► start_agent_process()                             │
 │                                    │                                         │
 │                                    ▼                                         │
-│  bot/teams_bot.py            CloudAdapter (Microsoft 365 Agents SDK)         │
+│  bot.py            CloudAdapter (Microsoft 365 Agents SDK)                   │
 │  └── AGENT_APP               │  • validates incoming JWT from Teams          │
 │      ├── on_members_added()  │  • calls AGENT_APP.on_turn()                  │
 │      ├── on_message()  ◄─────┘                                               │
 │      └── on_error()                                                          │
 │          │                                                                   │
 │          ▼                                                                   │
-│  bot/agent.py                LangGraph react agent (create_react_agent)      │
+│  agent.py                    LangGraph react agent (create_react_agent)      │
 │  └── ensure_agent()          │                                               │
 │      ├── ManagedIdentityCredential ──► Azure AI Foundry model                │
 │      ├── trim_messages() modifier ── limits history to MAX_HISTORY_TOKENS    │
@@ -220,15 +220,14 @@ teams app publish
 
 ```
 langchain-teams-bot/
-├── function_app.py          # Azure Functions entry point (HTTP trigger)
-├── bot/
-│   ├── __init__.py
-│   ├── agent.py             # LangGraph agent, PostgreSQL checkpointer, trim_messages
-│   └── teams_bot.py         # Microsoft 365 Agents SDK setup + activity handlers
-├── requirements.txt
+├── .funcignore
+├── agent.py               # LangGraph agent, PostgreSQL checkpointer, trim_messages
+├── bot.py                 # Microsoft 365 Agents SDK setup + activity handlers
+├── function_app.py        # Azure Functions entry point (HTTP trigger)
 ├── host.json
-├── local.settings.json      # Local dev settings (not committed)
-└── .funcignore
+├── local.settings.json    # Local dev settings (not committed)
+├── README.md              # This README file
+└── requirements.txt
 ```
 
 ## 6. Alternative: client-secret auth
