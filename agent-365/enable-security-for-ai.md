@@ -160,3 +160,11 @@ Exchange Online PowerShell can be used from Azure Cloud Shell with `Connect-Exch
 |Enable audit at tenant level|`Set-OrganizationConfig -AuditDisabled $false`|
 
 ![](https://github.com/user-attachments/assets/77cee33f-3212-4cb3-878c-42b00ae45678)
+
+## 5. Sending Agent 365 data to Sentinel
+
+![](https://github.com/user-attachments/assets/ec6d1365-18c2-4777-bbdd-05c1af968a99)
+
+![](https://github.com/user-attachments/assets/9f0f6c34-2c5a-4b87-a9f0-59b4e0c48e59)
+
+![](https://github.com/user-attachments/assets/f2fb4870-92e6-4b84-b9e4-c137cc6fb609)
