@@ -221,12 +221,12 @@ teams app publish
 ```
 langchain-teams-bot/
 ├── .funcignore
+├── README.md              # This README file
 ├── agent.py               # LangGraph agent, PostgreSQL checkpointer, trim_messages
 ├── bot.py                 # Microsoft 365 Agents SDK setup + activity handlers
 ├── function_app.py        # Azure Functions entry point (HTTP trigger)
 ├── host.json
 ├── local.settings.json    # Local dev settings (not committed)
-├── README.md              # This README file
 └── requirements.txt
 ```
 
