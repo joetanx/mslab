@@ -1,0 +1,23 @@
+# ── Microsoft 365 Agents SDK ──────────────────────────────────────────────
+microsoft-agents-hosting-aiohttp>=1.0.0
+microsoft-agents-hosting-teams>=1.0.0
+microsoft-agents-authentication-msal>=1.0.0
+
+# ── Azure Functions runtime ────────────────────────────────────────────────
+azure-functions>=1.21.0
+
+# ── Azure identity (Managed Identity credential) ──────────────────────────
+azure-identity>=1.15.0
+
+# ── LangChain / LangGraph ─────────────────────────────────────────────────
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-azure-ai>=0.1.0
+langgraph>=0.3.0
+
+# ── PostgreSQL (psycopg3 + connection pool for AsyncPostgresSaver) ─────────
+psycopg[binary]>=3.1.0
+psycopg-pool>=3.1.0
+
+# ── Local development helpers ─────────────────────────────────────────────
+python-dotenv>=1.0.0
