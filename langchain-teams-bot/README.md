@@ -225,7 +225,6 @@ langchain-teams-bot/
 │   ├── __init__.py
 │   ├── agent.py             # LangGraph agent, PostgreSQL checkpointer, trim_messages
 │   └── teams_bot.py         # Microsoft 365 Agents SDK setup + activity handlers
-├── cli-chat-agent.py        # Original CLI agent (reference)
 ├── requirements.txt
 ├── host.json
 ├── local.settings.json      # Local dev settings (not committed)
