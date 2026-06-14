@@ -111,5 +111,5 @@ Connect to database and pass token value as password:
 
 ```
 apt update && apt -y install postgresql-client
-psql -h agentrun.postgres.database.azure.com -p 5432 -U agentrun postgres
+psql -h agentrun.postgres.database.azure.com -p 5432 -U agentrun teams_bot
 ```
