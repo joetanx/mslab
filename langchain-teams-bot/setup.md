@@ -113,3 +113,19 @@ Connect to database and pass token value as password:
 apt update && apt -y install postgresql-client
 psql -h agentrun.postgres.database.azure.com -p 5432 -U agentrun teams_bot
 ```
+
+## 3. Foundry
+
+Get the foundry project endpoint:
+
+![](https://github.com/user-attachments/assets/21ae86ca-30e3-4953-8432-a7b10983013e)
+
+Get the name of the deployment to be used:
+
+![](https://github.com/user-attachments/assets/5586e5ae-f475-4edd-92f6-2885c9b9a396)
+
+Give `Cognitive Services User` permission to function MI:
+
+> Notice that recently created MIs has agent 365 logo
+
+![](https://github.com/user-attachments/assets/50a9043b-78ac-4afe-8782-2d79f52907e6)
