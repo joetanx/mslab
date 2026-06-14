@@ -47,3 +47,40 @@ Select the subnet created earlier:
 > This subnet will be delegated for use only with PostgreSQL Flexible Server (`Microsoft.DBforPostgreSQL/flexibleServers`).
 
 ![](https://github.com/user-attachments/assets/9efd1b95-63b6-434e-9d21-798264cf1c2d)
+
+### 2.3. Connecting to the database
+
+Example connection commands are provide under Settings → Connect:
+
+![](https://github.com/user-attachments/assets/8031caf6-c225-4580-9b4b-d2f5b776d6ee)
+
+#### 2.3.1. Test user login
+
+[Install Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) and `az login` 
+
+Get access token:
+
+```
+az account get-access-token --resource https://ossrdbms-aad.database.windows.net --query accessToken --output tsv
+```
+
+Connect to database and pass token value as password:
+
+```
+psql -h agentrun.postgres.database.azure.com -p 5432 -U admin@MngEnvMCAP398230.onmicrosoft.com postgres
+```
+
+#### 2.3.2. Test function MI login
+
+Function defines `IDENTITY_ENDPOINT` and `IDENTITY_HEADER` environment variables for the app to connect to the [endpoint](https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity#rest-endpoint-reference)
+
+```
+curl "$IDENTITY_ENDPOINT?api-version=2019-08-01&resource=https://ossrdbms-aad.database.windows.net" -H "X-Identity-Header: $IDENTITY_HEADER"
+```
+
+Connect to database and pass token value as password:
+
+```
+apt update && apt -y install postgresql-client
+psql -h agentrun.postgres.database.azure.com -p 5432 -U agentrun postgres
+```
