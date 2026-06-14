@@ -54,8 +54,6 @@ Connecting to the database - example connection commands are provide under Setti
 
 ![](https://github.com/user-attachments/assets/8031caf6-c225-4580-9b4b-d2f5b776d6ee)
 
-#### 2.3.1. Login to `postgres` database as admin
-
 [Install Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) and `az login` 
 
 Get access token:
@@ -70,47 +68,35 @@ Connect to `postgres` database and pass `access_token` value as password:
 psql -h agentrun.postgres.database.azure.com -p 5432 -U admin@MngEnvMCAP398230.onmicrosoft.com postgres
 ```
 
-#### 2.3.2. Create PostgreSQL role for function MI
+[Create PostgreSQL role](https://learn.microsoft.com/en-us/azure/postgresql/security/security-connect-with-managed-identity#create-an-azure-database-for-postgresql--user-for-your-managed-identity):
 
 ```sql
 SELECT * FROM pgaadauth_create_principal('agentrun', false, false);
 ```
 
-> [!Tip]
->
-> The three arguments are: (`role_name`, `is_admin`, `can_create_roles`)
-> 
-> The role name is the display name of the function (e.g. `agentrun`)
-
-#### 2.3.3. Create database
+Create database and grant permissions to function MI:
 
 ```sql
+-- Create the database
 CREATE DATABASE teams_bot;
-```
 
-Allow the identity to connect to the new database:
-
-```sql
-GRANT CONNECT ON DATABASE teams_bot TO "agentrun";
-```
-
-#### 2.3.4. Connect to database and grant schema-level permissions to function MI
-
-```sql
+-- Switch to the newly created database
 \c teams_bot
-```
 
-Allow the identity to use the public schema and create the checkpointer tables (`checkpoints`, `checkpoint_blobs`, `checkpoint_writes`, `checkpoint_migrations`) that `AsyncPostgresSaver.setup()` creates:
+-- Allow function MI to connect to database
+GRANT CONNECT ON DATABASE teams_bot TO agentrun;
 
-```sql
-GRANT USAGE, CREATE ON SCHEMA public TO "agentrun";
-```
+-- Allow function MI to use the public schema and create the checkpointer tables (`checkpoints`, `checkpoint_blobs`, `checkpoint_writes`, `checkpoint_migrations`) that `AsyncPostgresSaver.setup()` creates
 
-Ensure the identity gets permissions on sequences and tables created in the future:
+GRANT USAGE, CREATE ON SCHEMA public TO agentrun;
 
-```sql
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "agentrun";
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "agentrun";
+-- Grant only data modification permissions on existing objects
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO agentrun;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO agentrun;
+
+-- Ensure future objects inherit these restricted permissions
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO agentrun;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO agentrun;
 ```
 
 ### 2.4. Test function MI login
