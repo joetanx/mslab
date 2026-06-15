@@ -33,7 +33,7 @@ SSH to the function app container: Development Tools → SSH
 ![](https://github.com/user-attachments/assets/e9fdbb4a-e5f2-47c9-8ae5-8adc39ba766b)
 
 ```sh
-touch /home/site/wwwroot/{agent.py,bot.py,function_app,requirements.txt}
+touch /home/site/wwwroot/{agent.py,bot.py,function_app.py,requirements.txt}
 ```
 
 Paste in the function code: Functions → App files → select each file iteratively → paste content of respective files
