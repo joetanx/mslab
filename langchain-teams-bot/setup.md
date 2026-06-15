@@ -129,3 +129,56 @@ Give `Cognitive Services User` permission to function MI:
 > Notice that recently created MIs has agent 365 logo
 
 ![](https://github.com/user-attachments/assets/50a9043b-78ac-4afe-8782-2d79f52907e6)
+
+## 4. Teams app
+
+### 4.1. Install [Teams CLI v3](https://microsoft.github.io/teams-sdk/cli/)
+
+```cmd
+winget install -e --id OpenJS.NodeJS.LTS
+npm install -g @microsoft/teams.cli
+```
+
+The Teams CLI v3 includes options like [login](https://microsoft.github.io/teams-sdk/cli/commands/login/), [status](https://microsoft.github.io/teams-sdk/cli/commands/status/) and [app create](https://microsoft.github.io/teams-sdk/cli/commands/app/create)
+
+![](https://github.com/user-attachments/assets/c09756b1-172c-45ad-aa44-3503585f1261)
+
+### 4.2. Login
+
+```cmd
+teams login
+```
+
+![](https://github.com/user-attachments/assets/419ac5b7-25be-4192-aad5-9879b07146ae)
+
+![](https://github.com/user-attachments/assets/6d228f2e-db3e-4b49-918e-ca6950b5aaae)
+
+```cmd
+teams status
+```
+
+![](https://github.com/user-attachments/assets/90eef191-b96e-462c-a240-38be714857a0)
+
+### 4.3. Create Teams app
+
+```
+teams app create --name "LangChain Agent" --endpoint https://agentrun.azurewebsites.net/api/messages
+```
+
+![](https://github.com/user-attachments/assets/a72726dd-527f-409d-ba5d-808d1cb10f67)
+
+The `teams app create` command creates a Teams app, a Teams-managed bot and an Entra ID app registration
+
+Verify the Teams resources created on Teams developer portal: https://dev.teams.microsoft.com/
+
+![](https://github.com/user-attachments/assets/aa018c89-a02e-4bea-a993-b10074917544)
+
+![](https://github.com/user-attachments/assets/54ec7198-559e-4ab7-8db1-65bd4283cc98)
+
+### 4.4. Setup federated identity credential to LangChain Agent app registration
+
+The Teams CLI created a client secret for the app, which can be discarded since FIC is used
+
+![](https://github.com/user-attachments/assets/030ebd3d-6094-40c3-a397-a7375a179042)
+
+![](https://github.com/user-attachments/assets/00e953d0-456a-4a10-bd0a-6dcf836834f9)
