@@ -15,7 +15,7 @@ import traceback
 from os import environ
 
 from dotenv import load_dotenv
-from microsoft_agents.activity import load_configuration_from_env
+from microsoft_agents.activity import Activity, load_configuration_from_env
 from microsoft_agents.authentication.msal import MsalConnectionManager
 from microsoft_agents.hosting.aiohttp import CloudAdapter
 from microsoft_agents.hosting.core import (
