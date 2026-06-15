@@ -132,7 +132,19 @@ Give `Cognitive Services User` permission to function MI:
 
 ## 4. Teams app
 
-### 4.1. Install [Teams CLI v3](https://microsoft.github.io/teams-sdk/cli/)
+### 4.1. Enable sideloading in Teams
+
+Teams CLI requires sideloading to be enabled in the policy applied to the sign-in user:
+
+![](https://github.com/user-attachments/assets/880c15db-a16e-4c16-a609-e6a166df1c18)
+
+Teams Admin Center → Users → Find the user → Policies → App setup policy → "Upload custom apps"
+
+![](https://github.com/user-attachments/assets/ed911e99-d387-4666-9783-ab405b1b181c)
+
+![](https://github.com/user-attachments/assets/707dc008-28bd-4306-906d-15819bda4c4c)
+
+### 4.2. Install [Teams CLI v3](https://microsoft.github.io/teams-sdk/cli/)
 
 ```cmd
 winget install -e --id OpenJS.NodeJS.LTS
@@ -143,7 +155,7 @@ The Teams CLI v3 includes options like [login](https://microsoft.github.io/teams
 
 ![](https://github.com/user-attachments/assets/c09756b1-172c-45ad-aa44-3503585f1261)
 
-### 4.2. Login
+### 4.3. Login
 
 ```cmd
 teams login
@@ -159,7 +171,7 @@ teams status
 
 ![](https://github.com/user-attachments/assets/90eef191-b96e-462c-a240-38be714857a0)
 
-### 4.3. Create Teams app
+### 4.4. Create Teams app
 
 ```
 teams app create --name "LangChain Agent" --endpoint https://agentrun.azurewebsites.net/api/messages
