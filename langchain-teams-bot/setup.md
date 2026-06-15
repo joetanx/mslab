@@ -20,6 +20,56 @@ Enable system-assigned managed identity - the agent code uses this MI to authent
 
 ![](https://github.com/user-attachments/assets/0a6800b0-d1b0-412b-98a2-861d3028ee19)
 
+### 1.2. Setup function app
+
+> [!Tip]
+>
+> It is also possible to use VS Code to deploy all files and let Kudo handle the deployment
+>
+> But it's simpler to just use manual setup and the Azure code editor for demo
+
+SSH to the function app container: Development Tools → SSH
+
+![](https://github.com/user-attachments/assets/e9fdbb4a-e5f2-47c9-8ae5-8adc39ba766b)
+
+```sh
+touch /home/site/wwwroot/{agent.py,bot.py,function_app,requirements.txt}
+```
+
+Paste in the function code: Functions → App files → select each file iteratively → paste content of respective files
+
+Install dependent packages at `/home/site/wwwroot/.python_packages/lib/site-packages` (which persists container restarts)
+
+```sh
+pip install -r /home/site/wwwroot/requirements.txt --target /home/site/wwwroot/.python_packages/lib/site-packages
+```
+
+<details><summary>work in progress</summary>
+
+> [!Warning]
+>
+> Review the code before deploying - the code provides functional agent setup, but it doesn't have production-ready practices like error handling
+
+![](https://github.com/user-attachments/assets/db216953-1bfb-44ad-95ec-e6a391a2dd8c)
+
+Populate the following environment variables:
+- `ASSIGNEE_IN_PROGRESS`
+- `ASSIGNEE_RESOLVED`
+- `ENTRA_AGENT_BLUEPRINT_ID`
+- `ENTRA_AGENT_IDENTITY_ID`
+- `ENTRA_AGENT_USER_ID`
+- `ENTRA_TENANT_ID`
+- `FOUNDRY_MODEL`
+- `FOUNDRY_PROJECT_ENDPOINT`
+
+> [!Tip]
+>
+> The environment variables can also be edited as json under `advanced edit`
+
+![](https://github.com/user-attachments/assets/c7f0cfa1-080f-43e6-b0e6-bd8ea2b70e22)
+
+</details>
+
 ## 2. Azure database for PostgreSQL flexible server
 
 ### 2.1. Create delegated subnet for database
