@@ -1,6 +1,12 @@
 ## 1. Function app
 
-### 1.1. Create function app
+### 1.1. Create user-assigned managed identity
+
+The agent code uses UAMI to authenticate to Foundry and PostgreSQL, and as federated identity credential (FIC) to the teams bot app
+
+![](https://github.com/user-attachments/assets/d93bf613-5baa-44cb-aeb7-edca90c18380)
+
+### 1.2. Create function app
 
 Select `App Service` hosting plan:
 
@@ -16,11 +22,17 @@ Configure VNet integration for private access from function to database:
 
 ![](https://github.com/user-attachments/assets/f1db2163-3531-46a6-a9b4-2a89cf83a7f8)
 
-Enable system-assigned managed identity - the agent code uses this MI to authenticate to Foundry and databasee
+Select managed identity authentication type and the UAMI
 
-![](https://github.com/user-attachments/assets/0a6800b0-d1b0-412b-98a2-861d3028ee19)
+![](https://github.com/user-attachments/assets/4229daad-378a-43a1-a870-daa5fc488725)
 
-### 1.2. Setup function app
+### 1.3. Storage account permissions
+
+Ensure UAMI has Storage Blob/Queue/Table Data Contributor access to storage account
+
+![](https://github.com/user-attachments/assets/3b512c25-34c0-478f-8a6f-05d19e35f84c)
+
+### 1.4. Setup function app
 
 > [!Tip]
 >
@@ -178,7 +190,7 @@ Give `Cognitive Services User` permission to function MI:
 
 > Notice that recently created MIs has agent 365 logo
 
-![](https://github.com/user-attachments/assets/50a9043b-78ac-4afe-8782-2d79f52907e6)
+![](https://github.com/user-attachments/assets/9f5f1393-ddb9-430c-b7a4-38ceca746f8c)
 
 ## 4. Teams app
 
@@ -223,7 +235,9 @@ teams status
 
 ### 4.4. Create Teams app
 
-```
+Use `teams app create` to create the Teams app (add `--no-secret` to skip client secret creation)
+
+```cmd
 teams app create --name "LangChain Agent" --endpoint https://agentrun.azurewebsites.net/api/messages
 ```
 
@@ -237,10 +251,32 @@ Verify the Teams resources created on Teams developer portal: https://dev.teams.
 
 ![](https://github.com/user-attachments/assets/54ec7198-559e-4ab7-8db1-65bd4283cc98)
 
-### 4.4. Setup federated identity credential to LangChain Agent app registration
+### 4.5. Setup federated identity credential to LangChain Agent app registration
 
 The Teams CLI created a client secret for the app, which can be discarded since FIC is used
 
-![](https://github.com/user-attachments/assets/030ebd3d-6094-40c3-a397-a7375a179042)
+![](https://github.com/user-attachments/assets/5f0ab5ce-58b6-4fab-9540-1d6e0f285ae1)
 
-![](https://github.com/user-attachments/assets/00e953d0-456a-4a10-bd0a-6dcf836834f9)
+![](https://github.com/user-attachments/assets/6e4fdb54-d857-495e-b17b-6f78542b3412)
+
+### 4.6. Open app in teams
+
+Get the app install link:
+
+```cmd
+teams app get <APP_ID> --install-link
+```
+
+Or select `Preview in Teams` at Teams Developer Portal (https://dev.teams.microsoft.com)
+
+![](https://github.com/user-attachments/assets/cca9f306-a13d-4005-ad5d-61a964e2ca15)
+
+![](https://github.com/user-attachments/assets/6f0c1d8a-526d-40c4-8544-37ebd4c423cc)
+
+#### Optionally, publish the app for all users
+
+![](https://github.com/user-attachments/assets/17d14776-9506-4526-b72a-6c3dc2124641)
+
+![](https://github.com/user-attachments/assets/2f1eb494-cb73-4e83-a738-a51982b80691)
+
+![](https://github.com/user-attachments/assets/1149e7d9-35f4-49f9-a37f-218f0eae8ccb)
