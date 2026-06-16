@@ -28,7 +28,10 @@ Select managed identity authentication type and the UAMI
 
 ### 1.3. Storage account permissions
 
-Ensure UAMI has Storage Blob/Queue/Table Data Contributor access to storage account
+Assign the follow storage roles to the UAMI:
+1. Storage Blob Data Owner
+2. Storage Queue Data Contributor
+3. Storage Table Data Contributor
 
 ![](https://github.com/user-attachments/assets/3b512c25-34c0-478f-8a6f-05d19e35f84c)
 
