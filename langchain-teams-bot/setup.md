@@ -164,12 +164,47 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO agentrun;
 ```
 
+#### 2.3.1. Changing MI
+
+In event that the MI is changed, the object ID needs to be updated
+
+##### Dropping existing role and recreate
+
+Repeat both `REASSIGN` and `DROP` commands on both `\c postgres` and `\c teams_bot`
+
+```sql
+-- Reassign owned objects to a safe role (e.g., your admin)
+REASSIGN OWNED BY agentrun TO "admin@MngEnvMCAP398230.onmicrosoft.com";
+
+-- Drop all privileges held by the role
+DROP OWNED BY agentrun;
+```
+
+Then drop the role:
+
+```sql
+DROP ROLE agentrun;
+```
+
+##### Or just change the oid security label
+
+```sql
+SECURITY LABEL FOR pgaadauth ON ROLE agentrun IS 'aadauth,oid=48d6b874-c66a-47ab-9126-d6b1452f7325,type=service';
+```
+
+Then check the updated label:
+
+```sql
+SELECT * FROM pg_shseclabel WHERE objoid = (SELECT oid FROM pg_roles WHERE rolname = 'agentrun');
+```
+
+
 ### 2.4. Test function MI login
 
 Function defines `IDENTITY_ENDPOINT` and `IDENTITY_HEADER` environment variables for the app to connect to the [endpoint](https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity#rest-endpoint-reference)
 
 ```
-curl "$IDENTITY_ENDPOINT?api-version=2019-08-01&resource=https://ossrdbms-aad.database.windows.net" -H "X-Identity-Header: $IDENTITY_HEADER"
+curl "$IDENTITY_ENDPOINT?api-version=2019-08-01&resource=https://ossrdbms-aad.database.windows.net&client_id=43d9eeee-5654-433c-b428-6cdf12e8b4d9" -H "X-Identity-Header: $IDENTITY_HEADER"
 ```
 
 Connect to database and pass token value as password:
