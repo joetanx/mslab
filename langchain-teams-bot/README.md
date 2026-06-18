@@ -1,252 +1,298 @@
-## 1. Introduction
+## 1. Overview
 
-A **Microsoft Teams** chatbot that uses **LangGraph** to run a conversational AI agent
+This is a **Microsoft Teams bot** deployed as an **Azure Function** that uses a **LangGraph ReAct agent** backed by an **Azure AI Foundry** language model. Conversation history is persisted per-session in **Azure PostgreSQL**, and authentication to both PostgreSQL and the LLM uses **Azure Managed Identity** (no secrets/passwords required at runtime).
 
-The agent deployed as an **Azure Functions** v2 python app and uses **Managed Identity** for all authentication
 
-### 1.1. Architecture
+### 1.1. Project Structure
 
-```
-Teams user
-   │  (HTTPS POST /api/messages — JWT-signed by Teams)
-   ▼
-Azure Function App  ───────────────────────────────────────────────────────────┐
-│                                                                              │
-│  function_app.py                                                             │
-│  └── _FuncRequest shim ──► start_agent_process()                             │
-│                                    │                                         │
-│                                    ▼                                         │
-│  bot.py            CloudAdapter (Microsoft 365 Agents SDK)                   │
-│  └── AGENT_APP               │  • validates incoming JWT from Teams          │
-│      ├── on_members_added()  │  • calls AGENT_APP.on_turn()                  │
-│      ├── on_message()  ◄─────┘                                               │
-│      └── on_error()                                                          │
-│          │                                                                   │
-│          ▼                                                                   │
-│  agent.py                    LangGraph react agent (create_react_agent)      │
-│  └── ensure_agent()          │                                               │
-│      ├── ManagedIdentityCredential ──► Azure AI Foundry model                │
-│      ├── trim_messages() modifier ── limits history to MAX_HISTORY_TOKENS    │
-│      └── AsyncPostgresSaver ──► Azure Database for PostgreSQL                │
-│                                 (session keyed by Teams conversation.id)     │
-│                                                                              │
-│  System-managed identity ────► Bot App Registration (federated credential)   │
-│  System-managed identity ────► Azure AI Foundry (token audience)             │
-│  System-managed identity ────► Azure PostgreSQL (AAD auth, no password)      │
-└──────────────────────────────────────────────────────────────────────────────┘
-```
-
-### 1.2. Request flow (step by step)
-
-1. The Teams client sends an activity (message, `@mention`, group-chat event, etc.) as a signed JWT POST to `https://<func-app>.azurewebsites.net/api/messages`.
-2. `function_app.py` wraps the Azure Functions `HttpRequest` in a thin `_FuncRequest` shim and calls `start_agent_process()` from the Microsoft 365 Agents SDK.
-3. `CloudAdapter` validates the bearer JWT against Microsoft's public keys (audience = bot client ID).
-4. The SDK dispatches the activity to the matching handler in `bot/teams_bot.py` (e.g. `on_message`).
-5. `on_message` strips any `@mention` text, derives a **session ID** from `activity.conversation.id`, and calls `ensure_agent()`.
-6. `ensure_agent()` lazily initialises (once per worker process):
-   - A **psycopg3 connection pool** authenticated via a managed-identity token for `ossrdbms-aad.database.windows.net`.
-   - An **`AsyncPostgresSaver`** checkpointer that stores per-session LangGraph state.
-   - An **`init_chat_model`** client pointing to the Azure AI Foundry deployment, authenticated via the same managed identity.
-7. The **`trim_messages` modifier** ensures the conversation history passed to the model never exceeds `MAX_HISTORY_TOKENS`, keeping older turns but always retaining the system message and the most recent human turn(s).
-8. The agent streams model events; the reply text is assembled and sent back to Teams through `context.send_activity()`.
-
-### 1.3. Session isolation
-
-| Teams conversation type | `thread_id` format |
+| File | Responsibility |
 |---|---|
-| Personal (1:1 DM) | `personal:<conversation.id>` |
-| Group chat | `groupchat:<conversation.id>` |
-| Channel thread | `channel:<team_id>:<conversation.id>` |
+| function_app.py | Azure Functions HTTP entry point - receives Teams webhook POSTs |
+| bot.py | Microsoft Agents SDK - activity routing and Teams event handling |
+| agent.py | LangGraph agent lifecycle - lazy init, token refresh, conversation management |
+| requirements.txt | Python dependencies |
 
-Each value maps to an isolated LangGraph checkpoint in PostgreSQL, so histories never cross session boundaries.
 
-### 1.4. Token / credential lifecycle
+### 1.2. High-Level Architecture
 
-| Credential | Usage | Refresh strategy |
+```mermaid
+flowchart TD
+    Teams["Microsoft Teams Client"]
+    BotConnector["Bot Connector Service\n(Microsoft Cloud)"]
+    AzFunc["Azure Functions\nPOST /messages\nfunction_app.py"]
+    BotLayer["Bot Activity Router\nbot.py"]
+    AgentLayer["LangGraph Agent\nagent.py"]
+    AOAI["Azure AI Foundry\nLLM (chat model)"]
+    PG["Azure PostgreSQL\nConversation Checkpoints"]
+    UAMI["Managed Identity\n(UAMI)"]
+
+    Teams -->|User sends message| BotConnector
+    BotConnector -->|JWT-signed HTTP POST| AzFunc
+    AzFunc -->|Wraps & dispatches activity| BotLayer
+    BotLayer -->|Routes to handler| AgentLayer
+    AgentLayer -->|Streams tokens| AOAI
+    AgentLayer -->|Read / write checkpoints| PG
+    UAMI -->|AAD tokens| AgentLayer
+    UAMI -->|AAD tokens| AOAI
+    AgentLayer -->|Streamed reply| BotLayer
+    BotLayer -->|send_activity| BotConnector
+    BotConnector -->|Delivers reply| Teams
+```
+
+## 2. Components
+
+### 2.1. [function_app.py](function_app.py) - Azure Functions Entry Point
+
+Receives HTTP POSTs from the Bot Connector, validates the JSON body, and delegates to the SDK.
+
+**Key design decisions:**
+- `AuthLevel.ANONYMOUS` is intentional - JWT validation is handled by the Microsoft Agents SDK inside `start_agent_process`, not by the Functions host.
+- `_CIHeaders` provides a case-insensitive header wrapper so the aiohttp-flavoured SDK works against the Azure Functions `HttpRequest`.
+- `_FuncRequest` is a lightweight shim that makes an `HttpRequest` look like an `aiohttp` request (required by `start_agent_process`).
+
+```mermaid
+sequenceDiagram
+    participant Teams as Bot Connector
+    participant AF as Azure Function (messages)
+    participant Shim as _FuncRequest shim
+    participant SDK as start_agent_process (SDK)
+    participant Bot as AGENT_APP (bot.py)
+
+    Teams->>AF: POST /messages (JSON body + JWT header)
+    AF->>AF: req.get_json() - parse body
+    alt Invalid JSON
+        AF-->>Teams: 400 Bad Request
+    end
+    AF->>Shim: wrap body + headers in _FuncRequest
+    AF->>SDK: await start_agent_process(mock_req, AGENT_APP, ADAPTER)
+    SDK->>SDK: Validate JWT bearer token
+    SDK->>Bot: Dispatch Activity to registered handlers
+    Bot-->>SDK: Handler completes (replies sent via Bot Connector)
+    SDK-->>AF: returns
+    AF-->>Teams: 200 OK (acknowledgement)
+```
+
+### 2.2. [bot.py](bot.py) - Activity Routing & Teams Handlers
+
+Sets up the `AgentApplication` and registers three activity handlers.
+
+**Module-level singletons (initialised at import time):**
+
+| Object | Type | Purpose |
 |---|---|---|
-| `ManagedIdentityCredential` (azure-identity) | Foundry model API calls | Cached internally; refreshed automatically on near-expiry |
-| PostgreSQL MI token (`ossrdbms-aad.database.windows.net`) | psycopg3 connection pool DSN | Pool is rebuilt when token is within 5 min of expiry (checked on every `ensure_agent()` call) |
-| Bot connector token (Agents SDK) | Sending replies to Teams via Bot Connector | Managed by `MsalConnectionManager` with `SystemManagedIdentity` auth type |
+| `STORAGE` | `MemoryStorage` | In-process state store for the SDK |
+| `CONNECTION_MANAGER` | `MsalConnectionManager` | MSAL-based auth for outbound calls to Bot Connector |
+| `ADAPTER` | `CloudAdapter` | Handles sending/receiving activities |
+| `AUTHORIZATION` | `Authorization` | Token validation pipeline |
+| `AGENT_APP` | `AgentApplication` | Activity router (decorator-based) |
 
-## 2. Prerequisites
+**Registered handlers:**
 
-| Tool | Version |
+```mermaid
+flowchart LR
+    Activity["Incoming Activity"]
+    Activity -->|type = conversationUpdate\nmembersAdded| WelcomeHandler["on_members_added\nSend greeting to new members"]
+    Activity -->|type = message| MessageHandler["on_message\nStrip mention → route to agent"]
+    Activity -->|unhandled exception| ErrorHandler["on_error\nLog + send fallback reply"]
+```
+
+#### Message Handler Flow (`on_message`)
+
+```mermaid
+flowchart TD
+    Start([Incoming message activity])
+    Strip["_strip_mention_text()\nRemove @Bot mention tokens"]
+    Empty{Text empty?}
+    Session["get_session_id()\nDerive thread_id"]
+    ClearCmd{text == '/clear'?}
+    ClearOp["clear_conversation(session_id)\nDelete PG checkpoints"]
+    SendClear["send_activity: ✅ Cleared"]
+    EnsureAgent["ensure_agent()\nGet/init LangGraph agent"]
+    Typing["send_activity: typing indicator"]
+    Stream["agent.astream_events()\nHumanMessage → LLM stream"]
+    Collect["Collect on_chat_model_stream chunks"]
+    Reply{Reply non-empty?}
+    SendReply["send_activity(reply)"]
+    Warn["Log warning: empty reply"]
+    End([Done])
+
+    Start --> Strip --> Empty
+    Empty -->|yes| End
+    Empty -->|no| Session --> ClearCmd
+    ClearCmd -->|yes| ClearOp --> SendClear --> End
+    ClearCmd -->|no| EnsureAgent --> Typing --> Stream --> Collect --> Reply
+    Reply -->|yes| SendReply --> End
+    Reply -->|no| Warn --> End
+```
+
+### 2.3. [agent.py](agent.py) - LangGraph Agent Lifecycle
+
+This module owns all AI infrastructure: the Managed Identity credential, the PostgreSQL connection pool, the LangGraph checkpointer, and the compiled agent graph. Everything is initialised lazily and refreshed when the AAD token is near expiry.
+
+#### Module-Level Singletons
+
+| Variable | Description |
 |---|---|
-| Python | 3.11+ |
-| Azure Functions Core Tools | v4 |
-| Azure CLI (`az`) | latest |
-| Teams CLI (`teams`) | v3 preview — `npm install -g @microsoft/teams-toolkit` |
+| `_credential` | `ManagedIdentityCredential` - single AAD credential instance |
+| `_pool` | `AsyncConnectionPool` - psycopg3 async pool to PostgreSQL |
+| `_checkpointer` | `AsyncPostgresSaver` - LangGraph PG checkpointer |
+| `_agent` | Compiled LangGraph `StateGraph` (the ReAct agent) |
+| `_token_expires_at` | Unix timestamp of the current AAD token's expiry |
+| `_init_lock` | `asyncio.Lock` - prevents concurrent cold-starts |
 
-## 3. Setup
+#### `ensure_agent()` - Double-Checked Locking Pattern
 
-### 3.1. Create the Teams bot app
+This is the central initialisation function. It uses a **double-checked lock** to handle concurrent coroutines safely without over-serialising.
 
-Use the Teams CLI v3 to create the App Registration and Teams app in a single command.
+```mermaid
+flowchart TD
+    Call([ensure_agent called])
+    FastCheck{"_agent exists AND\ntoken valid for >5 min?"}
+    ReturnCached1["Return cached agent"]
+    AcquireLock["Acquire asyncio.Lock"]
+    DoubleCheck{"_agent exists AND\ntoken valid for >5 min?"}
+    ReturnCached2["Return cached agent\n(another coroutine already init'd)"]
+    InitCred{"_credential is None?"}
+    CreateCred["Create ManagedIdentityCredential\n(UAMI_CLIENT_ID)"]
+    ClosePool{"Old _pool exists?"}
+    CloseOldPool["Close stale pool"]
+    OpenPool["_open_pool()\nFetch AAD token → build DSN\nOpen AsyncConnectionPool"]
+    SetupCP["AsyncPostgresSaver(_pool)\ncheckpointer.setup()"]
+    InitModel["init_chat_model()\nazure_ai:{FOUNDRY_MODEL}"]
+    BuildPrompt["ChatPromptTemplate\nsystem prompt + MessagesPlaceholder"]
+    CreateAgent["create_react_agent(model, tools=[], prompt, checkpointer)"]
+    Return["Return compiled agent"]
 
-The `--no-secret` flag skips secret generation because the Function App's managed identity is used as a federated credential instead.
-
-```bash
-teams app create \
-  --name "My LangChain Bot" \
-  --azure \
-  --subscription <azure-subscription-id> \
-  --resource-group <resource-group> \
-  --endpoint https://<func-app>.azurewebsites.net/api/messages \
-  --no-secret \
-  --env .env.bot
+    Call --> FastCheck
+    FastCheck -->|yes| ReturnCached1
+    FastCheck -->|no| AcquireLock --> DoubleCheck
+    DoubleCheck -->|yes| ReturnCached2
+    DoubleCheck -->|no| InitCred
+    InitCred -->|yes| CreateCred --> ClosePool
+    InitCred -->|no| ClosePool
+    ClosePool -->|yes| CloseOldPool --> OpenPool
+    ClosePool -->|no| OpenPool
+    OpenPool --> SetupCP --> InitModel --> BuildPrompt --> CreateAgent --> Return
 ```
 
-The command outputs:
+#### Token-Aware Connection Pool (`_open_pool` / `_build_dsn`)
 
-```
-CLIENT_ID=<app-registration-client-id>
-TENANT_ID=<azure-ad-tenant-id>
-```
+PostgreSQL on Azure with AAD authentication requires a **short-lived token** as the password. The pool DSN is rebuilt on every `ensure_agent()` call where the token is within 5 minutes of expiry.
 
-Keep these values for use in [3.3. Configure Azure Database for PostgreSQL](#33-configure-azure-database-for-postgresql)
+```mermaid
+sequenceDiagram
+    participant EA as ensure_agent()
+    participant BD as _build_dsn()
+    participant UAMI as ManagedIdentityCredential
+    participant AAD as Azure AD (OIDC)
+    participant PG as Azure PostgreSQL
 
-### 3.2. Configure the federated identity credential
-
-The Function App's **system-assigned managed identity** is added as a federated credential on the bot's App Registration so it can authenticate without a stored secret.
-
-```bash
-# Obtain the managed identity's object ID
-MI_OBJECT_ID=$(az functionapp identity show \
-  --name <func-app-name> \
-  --resource-group <resource-group> \
-  --query principalId -o tsv)
-
-# Add the federated identity credential
-az ad app federated-credential create \
-  --id <CLIENT_ID-from-step-1> \
-  --parameters "{
-    \"name\": \"func-mi-federation\",
-    \"issuer\": \"https://login.microsoftonline.com/<TENANT_ID>/v2.0\",
-    \"subject\": \"${MI_OBJECT_ID}\",
-    \"audiences\": [\"api://AzureADTokenExchange\"]
-  }"
+    EA->>BD: _build_dsn()
+    BD->>UAMI: get_token("ossrdbms-aad.../.default")
+    UAMI->>AAD: Managed Identity token request
+    AAD-->>UAMI: JWT access token + expires_on
+    UAMI-->>BD: TokenCredential
+    BD-->>EA: (dsn_string, expires_at)
+    EA->>PG: AsyncConnectionPool.open() using token as password
+    PG-->>EA: Connection pool ready
 ```
 
-> [!Note]
->
-> **Why this works:**
->
-> `MsalConnectionManager` with `TYPE=SystemManagedIdentity` instructs the Agents SDK to acquire a token for `api://AzureADTokenExchange` via the Function App's managed identity and exchange it for a Bot Connector service token via the federated credential.
+#### `get_session_id()` - Conversation Scoping
 
-### 3.3. Configure Azure Database for PostgreSQL
+Maps Teams conversation context to a stable `thread_id` used by LangGraph to isolate conversation history:
 
-**Enable Azure AD authentication** on the server and add the managed identity as an AAD administrator or a named PostgreSQL role:
+```mermaid
+flowchart LR
+    CT{conversation_type}
+    CT -->|channel| CID["channel:{team_id}:{conv.id}"]
+    CT -->|groupchat| GID["groupchat:{conv.id}"]
+    CT -->|personal / other| PID["personal:{conv.id}"]
+```
+
+#### `clear_conversation()` - Reset History
+
+Deletes all LangGraph checkpoint rows for a session from PostgreSQL:
 
 ```sql
--- Run in psql as the AAD admin
-SELECT * FROM pgaadauth_create_principal('<managed-identity-display-name>', false, false);
-GRANT CONNECT ON DATABASE teams_bot TO "<managed-identity-display-name>";
-GRANT USAGE, CREATE ON SCHEMA public TO "<managed-identity-display-name>";
+DELETE FROM checkpoints        WHERE thread_id = <session_id>
+DELETE FROM checkpoint_blobs   WHERE thread_id = <session_id>
+DELETE FROM checkpoint_writes  WHERE thread_id = <session_id>
 ```
 
-The managed identity's display name in Azure AD (usually the Function App
-name) becomes the `POSTGRES_USER` value.
+## 3. End-to-End Message Flow (Happy Path)
 
-### 3.4. Configure Azure AI Foundry
+```mermaid
+sequenceDiagram
+    actor User as Teams User
+    participant BC as Bot Connector
+    participant AF as Azure Function
+    participant Bot as bot.py (on_message)
+    participant Ag as agent.py (ensure_agent)
+    participant PG as PostgreSQL
+    participant LLM as Azure AI Foundry
 
-Assign the **Cognitive Services User** (or equivalent) role to the Function App's managed identity on the Foundry project:
-
-```bash
-az role assignment create \
-  --role "Cognitive Services User" \
-  --assignee <MI_OBJECT_ID> \
-  --scope /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.CognitiveServices/accounts/<foundry-account>
+    User->>BC: Send message "@Bot Hello!"
+    BC->>AF: POST /messages (JWT signed)
+    AF->>AF: Parse JSON, create _FuncRequest
+    AF->>Bot: start_agent_process → on_message
+    Bot->>Bot: Strip @-mention → "Hello!"
+    Bot->>Bot: get_session_id() → "personal:xxxx"
+    Bot->>Ag: ensure_agent()
+    alt Cold start or token expiry
+        Ag->>Ag: Get AAD token, open PG pool
+        Ag->>PG: checkpointer.setup()
+        Ag->>Ag: init_chat_model + create_react_agent
+    end
+    Ag-->>Bot: compiled agent
+    Bot->>BC: send_activity(typing)
+    Bot->>Ag: agent.astream_events(HumanMessage("Hello!"), thread_id)
+    Ag->>PG: Load prior checkpoint (conversation history)
+    PG-->>Ag: Previous messages
+    Ag->>LLM: Stream chat completion
+    LLM-->>Ag: Token chunks (on_chat_model_stream)
+    Ag->>PG: Save new checkpoint
+    Ag-->>Bot: Collected reply text
+    Bot->>BC: send_activity("Hi! How can I help?")
+    BC->>User: Deliver reply
 ```
 
-### 3.5. Deploy the Function App
+## 4. Environment Variables Reference
 
-```bash
-# From the workspace root
-pip install -r requirements.txt           # install locally for a local build
-func azure functionapp publish <func-app-name> --python
-```
+| Variable | Used In | Description |
+|---|---|---|
+| `UAMI_CLIENT_ID` | agent.py | Client ID of the User-Assigned Managed Identity |
+| `POSTGRES_HOST` | agent.py | PostgreSQL server hostname |
+| `POSTGRES_PORT` | agent.py | PostgreSQL port (default: `5432`) |
+| `POSTGRES_DB` | agent.py | Database name |
+| `POSTGRES_USER` | agent.py | AAD username for PostgreSQL |
+| `POSTGRES_POOL_MAX` | agent.py | Max pool connections (default: `5`) |
+| `FOUNDRY_MODEL` | agent.py | Azure AI Foundry model deployment name |
+| `FOUNDRY_PROJECT_ENDPOINT` | agent.py | Azure AI Foundry project endpoint URL |
+| `AGENT_SYSTEM_PROMPT` | agent.py | System prompt (default: `"You are a helpful assistant."`) |
+| `AGENTS_SDK_LOG_LEVEL` | function_app.py | Log level for the Microsoft Agents SDK (default: `WARNING`) |
 
-### 3.6. Set application settings
+### 4.1. Microsoft 365 Agents SDK environment variables
 
-In the Azure Portal (or via `az functionapp config appsettings set`):
+Authentication for the M365 agents SDK uses app registration credentials loaded by `load_configuration_from_env` in bot.py.
+- Support for `FederatedCredentials` auth type is released in [v0.9.0](https://github.com/microsoft/Agents-for-python/blob/main/changelog.md#microsoft-365-agents-sdk-for-python---release-notes-v090).
+- At the point of writing, `FederatedCredentials` auth type is yet to be updated in the [python doc](https://learn.microsoft.com/en-us/microsoft-365/agents-sdk/configure-authentication-msal?pivots=python).
+- The [node.js doc for FederatedCredentials](https://learn.microsoft.com/en-us/microsoft-365/agents-sdk/configure-authentication-msal?pivots=nodejs#federatedcredentials) provides the environment variables for `FederatedCredentials` auth type, with difference that python SDK seems to use `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID` instead of `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FICCLIENTID`
 
-| Setting | Value |
+| Variable | Value |
 |---|---|
-| `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID` | `CLIENT_ID` from step 1 |
-| `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID` | `TENANT_ID` from step 1 |
-| `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TYPE` | `SystemManagedIdentity` |
-| `FOUNDRY_MODEL` | Foundry deployment name (e.g. `gpt-4o`) |
-| `FOUNDRY_PROJECT_ENDPOINT` | Foundry project endpoint URL |
-| `AGENT_SYSTEM_PROMPT` | System prompt text (optional) |
-| `MAX_HISTORY_TOKENS` | Token budget for conversation history (default `4096`) |
-| `POSTGRES_HOST` | PostgreSQL server FQDN |
-| `POSTGRES_DB` | Database name |
-| `POSTGRES_USER` | Managed identity display name (PostgreSQL role) |
-| `POSTGRES_PORT` | `5432` (default) |
-| `POSTGRES_POOL_MAX` | Max pool connections per worker (default `5`) |
-| `AGENTS_SDK_LOG_LEVEL` | `WARNING` (production) / `INFO` (debug) |
+| `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHTYPE` | `FederatedCredentials `|
+| `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID` | `{app-id-guid} `|
+| `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID` | `{tenant-id-guid} `|
+| `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHORITY` | `https://login.microsoftonline.com/{tenant-id-guid} `|
+| `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID` | `{managed-identity-client-id} `|
+| `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__SCOPE` | `https://api.botframework.com `|
 
-### 3.7. Upload the Teams app manifest
+## 5. Key Design Patterns
 
-The Teams CLI created a manifest in the current directory.  Upload it to Teams Admin Center or use the CLI:
+**Lazy singleton with double-checked locking** - `ensure_agent()` avoids re-initialising the expensive LangGraph agent on every request while remaining safe under `asyncio` concurrency.
 
-```bash
-teams app publish
-```
+**Token rotation without restart** - The 5-minute pre-expiry window means the pool and agent are silently rebuilt before the AAD token expires, avoiding `authentication failed` errors mid-conversation.
 
-## 4. Local development
+**Stateless Azure Function + stateful checkpointer** - The Azure Function itself is stateless and horizontally scalable. All conversation state lives in PostgreSQL, keyed by `thread_id`, so any function instance can continue any conversation.
 
-1. Copy `local.settings.json`, fill in your values, and set `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TYPE=ClientSecret` with a temporary client secret for local testing.
-
-2. Create a dev tunnel:
-
-  ```bash
-  devtunnel host -p 7071 --allow-anonymous
-  ```
-
-3. Update the Teams bot messaging endpoint to the tunnel URL + `/api/messages`.
-
-4. Start the function app:
-
-  ```bash
-  func start
-  ```
-
-> [!Tip]
-> 
-> For local development the Agents SDK can be set to anonymous mode (no JWT validation) by setting `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__ANONYMOUS_ALLOWED=True`.
-
-## 5. Project structure
-
-```
-langchain-teams-bot/
-├── .funcignore
-├── README.md              # This README file
-├── agent.py               # LangGraph agent, PostgreSQL checkpointer, trim_messages
-├── bot.py                 # Microsoft 365 Agents SDK setup + activity handlers
-├── function_app.py        # Azure Functions entry point (HTTP trigger)
-├── host.json
-├── local.settings.json    # Local dev settings (not committed)
-└── requirements.txt
-```
-
-## 6. Alternative: client-secret auth
-
-If managed-identity federation is not suitable for your environment, generate a client secret with:
-
-```bash
-teams app auth secret create --app-id <CLIENT_ID>
-```
-
-Then set:
-
-```
-CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TYPE=ClientSecret
-CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTSECRET=<secret-value>
-```
-
-Store the secret in **Azure Key Vault** and reference it from app settings via the Key Vault reference syntax:
-
-```
-CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTSECRET=@Microsoft.KeyVault(SecretUri=https://...)
-```
+**aiohttp shim** - `_FuncRequest` and `_CIHeaders` bridge the Azure Functions `HttpRequest` interface to what the Microsoft Agents SDK's `start_agent_process` expects from an `aiohttp` request, avoiding a hard dependency on aiohttp as the host.
