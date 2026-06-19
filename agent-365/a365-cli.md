@@ -168,3 +168,9 @@ Warnings:
 No `Global Administrator`, `Agent ID Administrator` or `Agent ID Developer` role:
 
 ![](https://github.com/user-attachments/assets/55103f3e-d0c2-4f65-99cd-aa78910fa00b)
+
+## 5. Clean-up agent
+
+The `a365 cleanup` command deletes all resources related to the specified agent
+
+![](https://github.com/user-attachments/assets/0a68245e-adc6-443b-9cdf-9206331b0399)
