@@ -133,33 +133,31 @@ Changes made:
 
 ## 4. Register agent with Agent 365 CLI
 
-To setup an agent in Agent 365, run `a365 setup all --agent-name <agent-name>`
+To setup an agent in Agent 365, run `a365 setup all --agent-name <agent-name> [--m365] [--messaging-endpoint <messaging-endpoint>]`
 
-![](https://github.com/user-attachments/assets/d0f1eaa5-fa11-4925-8b18-97833395de96)
+![](https://github.com/user-attachments/assets/1b95e56d-c085-401b-b2b0-859dcb0e14c6)
 
-![](https://github.com/user-attachments/assets/0e80fd2b-9bc4-4438-be74-d0d9527912c3)
+> Grant consent for first use of `Agent 365 CLI` app
+>
+> ![](https://github.com/user-attachments/assets/0e80fd2b-9bc4-4438-be74-d0d9527912c3)
 
 ### 4.1. Successful agent setup example
 
 Create agent blueprint application, service principal and client secret:
 
-![](https://github.com/user-attachments/assets/2e2699f8-58ed-4130-9330-e5e3eda20d5e)
+![](https://github.com/user-attachments/assets/8be78e7b-f073-48ad-b0dc-0289686df07f)
+
+Configure permissions:
+
+![](https://github.com/user-attachments/assets/a242da7a-cb01-4845-b8be-63c463c76dad)
 
 Create agent identity and registration:
 
-![](https://github.com/user-attachments/assets/0da50908-c111-4b64-9296-444d4412fba9)
+![](https://github.com/user-attachments/assets/bd402e4e-9dda-47ac-a0a3-ad2072073aa5)
 
 Setup summary:
 
-![](https://github.com/user-attachments/assets/04b0a1f8-7651-4199-bdd7-a9bafb17c969)
-
-Action required:
-
-![](https://github.com/user-attachments/assets/dffda62c-3b8a-4fdb-98e4-e1304ce46ab4)
-
-Warnings:
-
-![](https://github.com/user-attachments/assets/bfe24fcd-413c-4469-b205-b21b9b9a005b)
+![](https://github.com/user-attachments/assets/733d72a8-6783-48f0-a149-e87927a34529)
 
 ### 4.2. Agent setup troubleshooting
 
@@ -171,6 +169,6 @@ No `Global Administrator`, `Agent ID Administrator` or `Agent ID Developer` role
 
 ## 5. Clean-up agent
 
-The `a365 cleanup` command deletes all resources related to the specified agent
+To clean-up (delete) all resources related to an agent: `a365 cleanup --agent-name <agent-name>`
 
 ![](https://github.com/user-attachments/assets/0a68245e-adc6-443b-9cdf-9206331b0399)
