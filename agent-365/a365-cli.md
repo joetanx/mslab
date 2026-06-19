@@ -151,6 +151,10 @@ Configure permissions:
 
 ![](https://github.com/user-attachments/assets/a242da7a-cb01-4845-b8be-63c463c76dad)
 
+Admin consent request for the permissions grant:
+
+![](https://github.com/user-attachments/assets/d030d390-6a59-495d-83e1-2a5739707f06)
+
 Create agent identity and registration:
 
 ![](https://github.com/user-attachments/assets/bd402e4e-9dda-47ac-a0a3-ad2072073aa5)
