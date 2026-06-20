@@ -175,4 +175,4 @@ No `Global Administrator`, `Agent ID Administrator` or `Agent ID Developer` role
 
 To clean-up (delete) all resources related to an agent: `a365 cleanup --agent-name <agent-name>`
 
-![](https://github.com/user-attachments/assets/0a68245e-adc6-443b-9cdf-9206331b0399)
+![](https://github.com/user-attachments/assets/05a4e6a9-8ebc-4f9a-8e34-9cf7eea705c5)
