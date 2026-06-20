@@ -8,18 +8,18 @@ The [Agent 365 CLI](https://learn.microsoft.com/en-us/microsoft-agent-365/develo
 winget install Microsoft.DotNet.SDK.10 Microsoft.AzureCLI Microsoft.PowerShell
 ```
 
-![](https://github.com/user-attachments/assets/daaa11e0-bc29-4d50-b098-abfa90650b83)
+![](https://github.com/user-attachments/assets/91476883-ce0c-46e5-b0c8-90475d45ad13)
 
-![](https://github.com/user-attachments/assets/132ac0e6-3ce8-4bf9-9704-2cdafd83567d)
+![](https://github.com/user-attachments/assets/3ee64450-eb38-4ff5-b011-9751187270f5)
 
 ### 1.2. Install Agent 365 CLI
 
 ```cmd
 dotnet tool install --global Microsoft.Agents.A365.DevTools.Cli
 ```
-![](https://github.com/user-attachments/assets/a9a7b3b0-3da7-4933-9863-29d1b594ce22)
+![](https://github.com/user-attachments/assets/62c5e157-23d1-4a7a-9526-ae0e7f6b3308)
 
-![](https://github.com/user-attachments/assets/ac7d2118-c4a9-4d04-bf8f-c13632a36733)
+![](https://github.com/user-attachments/assets/398391bb-5920-4ce0-9e08-3d73d06d06d0)
 
 ## 2. Agent 365 CLI authentication
 
@@ -27,21 +27,17 @@ dotnet tool install --global Microsoft.Agents.A365.DevTools.Cli
 
 Agent 365 CLI automatically detects the tenant ID from Azure CLI
 
-> [!Note]
->
 > There was a `a365 config init` command to initialize a365 configuration file, but the `config` option appears to have been [removed](https://github.com/microsoft/Agent365-devTools/issues/370#issuecomment-4331725685)
 >
-> ![](https://github.com/user-attachments/assets/be93a7e5-79dd-44e4-9d67-e80a25640fbd)
+> ![](https://github.com/user-attachments/assets/9c89d84e-7ae7-49c6-89c1-a8a78a7edd46)
 
-#### 2.1.1. `a365 setup` commands fail without Azure CLI login
-
-![](https://github.com/user-attachments/assets/2f72184b-f222-4f62-927b-e7128dd73c94)
-
-![](https://github.com/user-attachments/assets/4c8aba57-9833-4c64-8fd9-ab773270b8ab)
+> `a365` commands fail if PowerShell 7+ is not installed or Azure CLI is not logged in
+>
+> ![](https://github.com/user-attachments/assets/c39fde80-f60a-4d1e-89bf-b2043cd03b27)
 
 #### 2.1.2. Login to Azure CLI with `az login`
 
-![](https://github.com/user-attachments/assets/bda42fd5-c151-433c-9cdf-6f064a07452d)
+![](https://github.com/user-attachments/assets/ce276a7d-52a5-481d-b575-88a704d5806e)
 
 ![](https://github.com/user-attachments/assets/31010c6d-6891-49f4-bc91-8a45bf3034b7)
 
@@ -49,7 +45,7 @@ Agent 365 CLI automatically detects the tenant ID from Azure CLI
 
 ### 2.2. Login to Agent 365 CLI
 
-![](https://github.com/user-attachments/assets/ef149708-31c8-4616-a4e6-0f0ac9108acd)
+![](https://github.com/user-attachments/assets/f22d232c-8516-4c22-af8d-c250ea2be9f7)
 
 ![](https://github.com/user-attachments/assets/df51829e-a1f9-4bf0-9eb6-c79a3b4c3c9e)
 
@@ -63,19 +59,21 @@ Agent 365 CLI uses MSAL and the token cache location is at: `%LocalAppData%\Micr
 
 ### 3.1. About the `Agent 365 CLI` client app
 
-The CLI looks up the client app by the well-known display name `Agent 365 CLI` automatically
+The CLI looks up the client app by the _well-known_ display name `Agent 365 CLI` automatically
 
 If this client app doesn't exist in the tenant, it prompts for the [custom client app](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration) to be used:
 
-![](https://github.com/user-attachments/assets/914ee2ba-5dd3-42ed-b0ef-09cdd2123dda)
+![](https://github.com/user-attachments/assets/144c525d-4f75-4580-84c5-dd6c82fdc037)
 
-[Register](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration#1-register-application) the `Agent 365 CLI` client app and run `a365 setup requirements`
+[Create an app registration](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration#1-register-application) for `Agent 365 CLI` in Entra
+
+### 3.2. Running `a365 setup requirements`
 
 `a365 setup requirements` prepares the client app with the following:
 
-![](https://github.com/user-attachments/assets/678c731c-2058-42ff-b96a-1b8f92b5faa0)
+![](https://github.com/user-attachments/assets/2a9b4ccd-b7ac-4480-b9cd-21acc1cb9a13)
 
-#### 3.1.1. Permissions
+#### 3.2.1. Permissions
 
 The `Agent 365 CLI` or _custom client app registration_ requires seven **delegated permissions**:
 
@@ -89,7 +87,7 @@ The `Agent 365 CLI` or _custom client app registration_ requires seven **delegat
 |`Application.Read.All`|Service principal lookup by app ID (narrower replacement for Directory.Read.All)|
 |`User.Read`|Read signed-in user profile for blueprint owner and sponsor assignment|
 
-#### 3.1.2. Redirect URIs
+#### 3.2.2. Redirect URIs
 
 The CLI requires three redirect URIs in total:
 
@@ -103,11 +101,9 @@ The CLI requires three redirect URIs in total:
 >
 > ![](https://github.com/user-attachments/assets/39cfb949-25ea-43f8-9535-865a7f82f6d6)
 
-#### 3.1.3. Public client flows
+#### 3.2.3. Public client flows
 
 `Allow public client flows` must be enabled
-
-### 3.2. Running `a365 setup requirements`
 
 > [!Important]
 >
@@ -115,15 +111,15 @@ The CLI requires three redirect URIs in total:
 > 1. Run the CLI as a Global Administrator
 > 2. Get the consent URL from the CLI and approve using Global Administrator
 >
-> ![](https://github.com/user-attachments/assets/678c731c-2058-42ff-b96a-1b8f92b5faa0)
+> ![](https://github.com/user-attachments/assets/2a9b4ccd-b7ac-4480-b9cd-21acc1cb9a13)
 >
 > ![](https://github.com/user-attachments/assets/31663d3e-9e07-45d6-b7ed-91e942bf061c)
 
 Example successful `a365 setup requirements` run:
 
-![](https://github.com/user-attachments/assets/7e26ec7f-4fb8-4455-b118-0550852dcf9b)
+![](https://github.com/user-attachments/assets/1bbeb560-24dc-4034-bd04-ea623ce7a52e)
 
-Changes made:
+Changes made by `a365 setup requirements`:
 
 |||
 |---|---|
