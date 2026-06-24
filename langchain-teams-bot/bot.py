@@ -17,18 +17,6 @@ from agent import clear_conversation, ensure_agent, get_session_id
 
 logger = logging.getLogger(__name__)
 
-def _strip_mention_text(activity, recipient_id: str) -> str:
-    # Remove @-mention entities directed at *recipient_id* from the activity text.
-    text = activity.text or ''
-    for entity in activity.entities or []:
-        if getattr(entity, 'type', None) == 'mention':
-            mentioned = getattr(entity, 'mentioned', None)
-            if mentioned and getattr(mentioned, 'id', None) == recipient_id:
-                mention_text = getattr(entity, 'text', None)
-                if mention_text:
-                    text = text.replace(mention_text, '')
-    return text.strip()
-
 agents_sdk_config = load_configuration_from_env(environ)
 
 STORAGE = MemoryStorage()
@@ -68,16 +56,9 @@ async def on_clear(context: TurnContext, state: TurnState) -> None:
 @AGENT_APP.activity('message')
 async def on_message(context: TurnContext, _state: TurnState) -> None:
     # Handle an incoming message activity.
-    # Strips @-mentions, then streams the LLM reply.
-
-    text = _strip_mention_text(context.activity, context.activity.recipient.id)
-
-    if not text:
-        logger.debug('Received empty message after mention strip; ignoring')
-        return
 
     session_id = get_session_id(context)
-    logger.info(f"Received message (len={len(text)}); routing to agent; session={session_id}")
+    logger.info(f"Received message (len={len(context.activity.text)}); routing to agent; session={session_id}")
 
     agent = await ensure_agent()
     config = {'configurable': {'thread_id': session_id}}
@@ -86,7 +67,7 @@ async def on_message(context: TurnContext, _state: TurnState) -> None:
     await context.send_activity(Activity(type='typing'))
     logger.debug(f"Streaming agent response; session={session_id}")
     async for event in agent.astream_events(
-        {'messages': [HumanMessage(content=text)]},
+        {'messages': [HumanMessage(content=context.activity.text)]},
         config=config,
         version='v2',
     ):
