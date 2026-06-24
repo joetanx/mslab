@@ -63,25 +63,6 @@ async def _open_pool() -> AsyncConnectionPool:
     logger.info(f"PostgreSQL pool opened (max_size={max_size}); token expires at {expires_at}")
     return pool
 
-def get_session_id(context) -> str:
-    # Derive a stable LangGraph thread_id from the Bot Framework TurnContext.
-    # Returns a namespaced string:
-    # - channel:<team_id>:<conversation_id>  for channel posts
-    # - groupchat:<conversation_id>          for group chats
-    # - personal:<conversation_id>           for 1-to-1 chats
-    conv_type = context.activity.conversation.conversation_type
-    conv_id = context.activity.conversation.id
-    match conv_type:
-        case 'channel':
-            team_id = context.activity.channel_data.get('team', {}).get('id', '')
-            session_id = f"channel:{team_id}:{conv_id}"
-        case 'groupChat':
-            session_id = f"groupChat:{conv_id}"
-        case _:
-            session_id = f"personal:{conv_id}"
-    logger.debug(f"Resolved session_id={session_id} (conv_type={conv_type})")
-    return session_id
-
 async def ensure_agent():
     # Return the compiled LangGraph agent, initialising or refreshing it as needed.
     # Uses a double-checked lock so only one coroutine performs cold-start.
