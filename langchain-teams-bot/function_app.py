@@ -15,38 +15,17 @@ _sdk_logger.setLevel(
 
 logger = logging.getLogger(__name__)
 
-class _CIHeaders:
-    # Case-insensitive header mapping compatible with the aiohttp request interface.
-
-    def __init__(self, raw):
-        self._data = {k.lower(): v for k, v in raw.items()}
-
-    def get(self, key: str, default: str = '') -> str:
-        return self._data.get(key.lower(), default)
-
-    def __getitem__(self, key: str) -> str:
-        return self._data[key.lower()]
-
-    def __contains__(self, key: str) -> bool:
-        return key.lower() in self._data
-
-class _FuncRequest:
-    # Minimal aiohttp-style request shim wrapping an Azure Functions HttpRequest.
-    # Exposes only the interface required by start_agent_process: headers (case-insensitive), json(), method, and get().
-    # Query-string access via get() returns None because the agent SDK does not use query parameters.
-
-    method = 'POST'
-
-    def __init__(self, body: dict, headers):
+class _func_aiohttp_shim:
+    def __init__(self, body: dict, headers, method):
         self._body = body
-        self.headers = _CIHeaders(headers)
+        self.headers = headers
+        self.method = method
 
     def get(self, key: str, default=None):
         # Return None for all query-string keys (not used by the agent SDK).
         return default
 
-    async def json(self) -> dict:
-        # Return the pre-parsed JSON body.
+    async def json(self):
         return self._body
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
@@ -67,12 +46,14 @@ async def messages(req: func.HttpRequest) -> func.HttpResponse:
     activity_type = body.get('type', '<unknown>') if isinstance(body, dict) else '<non-dict>'
     logger.info(f"Processing Teams activity type={activity_type}")
 
-    mock_req = _FuncRequest(body, req.headers)
-
     try:
         # start_agent_process validates the JWT bearer token, creates the Activity, and dispatches to the registered AGENT_APP handlers.
         # The SDK sends replies back to Teams through the Bot Connector service; the HTTP response here is just an acknowledgement.
-        await start_agent_process(mock_req, AGENT_APP, ADAPTER)
+        await start_agent_process(
+            request=_func_aiohttp_shim(body, req.headers, req.method),
+            agent_application=AGENT_APP,
+            adapter=ADAPTER
+        )
     except Exception as exc:  # noqa: BLE001
         logger.exception(f"Error processing Teams activity type={activity_type}: {exc}")
         return func.HttpResponse('Internal Server Error', status_code=500)
