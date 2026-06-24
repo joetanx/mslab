@@ -69,23 +69,16 @@ def get_session_id(context) -> str:
     # - channel:<team_id>:<conversation_id>  for channel posts
     # - groupchat:<conversation_id>          for group chats
     # - personal:<conversation_id>           for 1-to-1 chats
-
-    activity = context.activity
-    conv = activity.conversation
-    conv_type = (conv.conversation_type or '').lower()
-
-    if conv_type == 'channel':
-        channel_data = getattr(activity, 'channel_data', None) or {}
-        team_id = ''
-        if isinstance(channel_data, dict):
-            team = channel_data.get('team') or {}
-            team_id = team.get('id', '') if isinstance(team, dict) else ''
-        session_id = f"channel:{team_id}:{conv.id}"
-    elif conv_type == 'groupchat':
-        session_id = f"groupchat:{conv.id}"
-    else:
-        session_id = f"personal:{conv.id}"
-
+    conv_type = context.activity.conversation.conversation_type
+    conv_id = context.activity.conversation.id
+    match conv_type:
+        case 'channel':
+            team_id = context.activity.channel_data.get('team', {}).get('id', '')
+            session_id = f"channel:{team_id}:{conv_id}"
+        case 'groupChat':
+            session_id = f"groupChat:{conv_id}"
+        case _:
+            session_id = f"personal:{conv_id}"
     logger.debug(f"Resolved session_id={session_id} (conv_type={conv_type})")
     return session_id
 
