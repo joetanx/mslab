@@ -13,7 +13,7 @@ from microsoft_agents.hosting.core import (
     TurnState,
 )
 
-from agent import clear_conversation, ensure_agent, get_session_id
+from agent import clear_conversation, ensure_agent
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,25 @@ AGENT_APP = AgentApplication[TurnState](
     **agents_sdk_config,
 )
 
+def _get_session_id(context: TurnContext) -> str:
+    # Derive a stable LangGraph thread_id from the Bot Framework TurnContext.
+    # Returns a namespaced string:
+    # - channel:<team_id>:<conversation_id>  for channel posts
+    # - groupchat:<conversation_id>          for group chats
+    # - personal:<conversation_id>           for 1-to-1 chats
+    conv_type = context.activity.conversation.conversation_type
+    conv_id = context.activity.conversation.id
+    match conv_type:
+        case 'channel':
+            team_id = context.activity.channel_data.get('team', {}).get('id', '')
+            session_id = f"channel:{team_id}:{conv_id}"
+        case 'groupChat':
+            session_id = f"groupChat:{conv_id}"
+        case _:
+            session_id = f"personal:{conv_id}"
+    logger.debug(f"Resolved session_id={session_id} (conv_type={conv_type})")
+    return session_id
+
 @AGENT_APP.conversation_update('membersAdded')
 async def on_members_added(context: TurnContext, _state: TurnState) -> bool:
     # Send a welcome message to each newly added member (excluding the bot itself).
@@ -41,9 +60,9 @@ async def on_members_added(context: TurnContext, _state: TurnState) -> bool:
     return True
 
 @AGENT_APP.message('/clear')
-async def on_clear(context: TurnContext, state: TurnState) -> None:
+async def on_clear(context: TurnContext, _state: TurnState) -> None:
     # Handles the /clear command
-    session_id = get_session_id(context)
+    session_id = _get_session_id(context)
     logger.info(f"Processing /clear command; session={session_id}")
     try:
         await clear_conversation(session_id)
@@ -57,7 +76,7 @@ async def on_clear(context: TurnContext, state: TurnState) -> None:
 async def on_message(context: TurnContext, _state: TurnState) -> None:
     # Handle an incoming message activity.
 
-    session_id = get_session_id(context)
+    session_id = _get_session_id(context)
     logger.info(f"Received message (len={len(context.activity.text)}); routing to agent; session={session_id}")
 
     agent = await ensure_agent()
