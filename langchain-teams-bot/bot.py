@@ -52,10 +52,23 @@ async def on_members_added(context: TurnContext, _state: TurnState) -> bool:
             await context.send_activity('Hello! 👋 I am here to help!')
     return True
 
+@AGENT_APP.message('/clear')
+async def on_clear(context: TurnContext, state: TurnState) -> None:
+    # Handles the /clear command
+    session_id = get_session_id(context)
+    logger.info(f"Processing /clear command; session={session_id}")
+    try:
+        await clear_conversation(session_id)
+        await context.send_activity('✅ Conversation history cleared! Starting fresh.')
+        logger.info(f"Conversation history cleared successfully; session={session_id}")
+    except Exception as exc:
+        logger.error(f"Failed to clear conversation; session={session_id} error={exc}", exc_info=True)
+        await context.send_activity('❌ Failed to clear conversation history. Please try again.')
+
 @AGENT_APP.activity('message')
 async def on_message(context: TurnContext, _state: TurnState) -> None:
     # Handle an incoming message activity.
-    # Strips @-mentions, handles the /clear command, then streams the LLM reply.
+    # Strips @-mentions, then streams the LLM reply.
 
     text = _strip_mention_text(context.activity, context.activity.recipient.id)
 
@@ -64,18 +77,6 @@ async def on_message(context: TurnContext, _state: TurnState) -> None:
         return
 
     session_id = get_session_id(context)
-
-    if text.lower() == '/clear':
-        logger.info(f"Processing /clear command; session={session_id}")
-        try:
-            await clear_conversation(session_id)
-            await context.send_activity('✅ Conversation history cleared! Starting fresh.')
-            logger.info(f"Conversation history cleared successfully; session={session_id}")
-        except Exception as exc:
-            logger.error(f"Failed to clear conversation; session={session_id} error={exc}", exc_info=True)
-            await context.send_activity('❌ Failed to clear conversation history. Please try again.')
-        return
-
     logger.info(f"Received message (len={len(text)}); routing to agent; session={session_id}")
 
     agent = await ensure_agent()
