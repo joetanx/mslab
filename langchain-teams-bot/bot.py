@@ -13,10 +13,11 @@ from microsoft_agents.hosting.core import (
     TurnState,
 )
 
-from agent import clear_conversation, ensure_agent
+from agent import agent_manager
 
 logger = logging.getLogger(__name__)
 
+# Microsoft Agents SDK setup
 agents_sdk_config = load_configuration_from_env(environ)
 
 STORAGE = MemoryStorage()
@@ -31,14 +32,14 @@ AGENT_APP = AgentApplication[TurnState](
     **agents_sdk_config,
 )
 
-def _get_session_id(context: TurnContext) -> str:
-    # Derive a stable LangGraph thread_id from the Bot Framework TurnContext.
-    # Returns a namespaced string:
-    # - channel:<team_id>:<conversation_id>  for channel posts
-    # - groupchat:<conversation_id>          for group chats
-    # - personal:<conversation_id>           for 1-to-1 chats
-    conv_type = context.activity.conversation.conversation_type
-    conv_id = context.activity.conversation.id
+def get_session_id(context: TurnContext) -> str:
+    # Convert Teams/Bot Framework conversation identity into a stable
+    # LangGraph thread_id for checkpointed memory.
+
+    conversation = context.activity.conversation
+    conv_type = conversation.conversation_type
+    conv_id = conversation.id
+
     match conv_type:
         case 'channel':
             team_id = context.activity.channel_data.get('team', {}).get('id', '')
@@ -50,22 +51,25 @@ def _get_session_id(context: TurnContext) -> str:
     logger.debug(f"Resolved session_id={session_id} (conv_type={conv_type})")
     return session_id
 
-@AGENT_APP.conversation_update('membersAdded')
+@AGENT_APP.conversation_update("membersAdded")
 async def on_members_added(context: TurnContext, _state: TurnState) -> bool:
-    # Send a welcome message to each newly added member (excluding the bot itself).
+    # Send a simple welcome message when the bot is added.
+
     for member in context.activity.members_added:
         if member.id != context.activity.recipient.id:
-            logger.info(f"Welcoming new member id={member.id}")
-            await context.send_activity('Hello! 👋 I am here to help!')
+            await context.send_activity("Hello! 👋 I am here to help!")
+
     return True
 
 @AGENT_APP.message('/clear')
 async def on_clear(context: TurnContext, _state: TurnState) -> None:
-    # Handles the /clear command
-    session_id = _get_session_id(context)
-    logger.info(f"Processing /clear command; session={session_id}")
+    # Clear LangGraph checkpoint history for the current Teams conversation.
+
+    session_id = get_session_id(context)
+    logger.info(f"Clearing conversation history; session={session_id}")
+
     try:
-        await clear_conversation(session_id)
+        await agent_manager.clear_conversation(session_id)
         await context.send_activity('✅ Conversation history cleared! Starting fresh.')
         logger.info(f"Conversation history cleared successfully; session={session_id}")
     except Exception as exc:
@@ -74,38 +78,26 @@ async def on_clear(context: TurnContext, _state: TurnState) -> None:
 
 @AGENT_APP.activity('message')
 async def on_message(context: TurnContext, _state: TurnState) -> None:
-    # Handle an incoming message activity.
+    # Handle normal user messages.
 
-    session_id = _get_session_id(context)
-    logger.info(f"Received message (len={len(context.activity.text)}); routing to agent; session={session_id}")
+    text = context.activity.text
+    session_id = get_session_id(context)
+    logger.info(f"Received message (len={len(text)}); routing to agent; session={session_id}")
 
-    agent = await ensure_agent()
-    config = {'configurable': {'thread_id': session_id}}
-
-    reply_parts: list[str] = []
     await context.send_activity(Activity(type='typing'))
-    logger.debug(f"Streaming agent response; session={session_id}")
-    async for event in agent.astream_events(
-        {'messages': [HumanMessage(content=context.activity.text)]},
-        config=config,
-        version='v2',
-    ):
-        if event['event'] == 'on_chat_model_stream':
-            for item in event['data']['chunk'].content:
-                if isinstance(item, dict) and item.get('type') == 'text':
-                    reply_parts.append(item['text'])
-                elif isinstance(item, str):
-                    reply_parts.append(item)
 
-    reply = ''.join(reply_parts).strip()
-    if reply:
-        logger.info(f"Sending reply (len={len(reply)}); session={session_id}")
-        await context.send_activity(reply)
-    else:
-        logger.warning(f"Agent returned empty reply; session={session_id}")
+    agent = await agent_manager.get_agent()
+
+    response = await agent.ainvoke(
+        {'messages': [HumanMessage(content=text)]},
+        config={'configurable': {'thread_id': session_id}},
+    )
+
+    await context.send_activity(response['messages'][-1].content[-1]['text'])
 
 @AGENT_APP.error
 async def on_error(context: TurnContext, error: Exception) -> None:
-    # Log unhandled bot errors and send a user-facing fallback message.
+    # Global bot error handler.
+
     logger.error(f"Unhandled bot error: {error}", exc_info=True)
-    await context.send_activity('Something went wrong on my end. Please try again in a moment.')
+    await context.send_activity("Something went wrong on my end. Please try again.")
