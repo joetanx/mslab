@@ -1,5 +1,5 @@
 import logging
-import os
+from os import environ
 
 import azure.functions as func
 from microsoft_agents.hosting.aiohttp import start_agent_process
@@ -7,7 +7,7 @@ from microsoft_agents.hosting.aiohttp import start_agent_process
 from bot import ADAPTER, AGENT_APP
 
 logging.getLogger('microsoft_agents').setLevel(
-    logging.getLevelName(os.environ.get('AGENTS_SDK_LOG_LEVEL', 'WARNING'))
+    logging.getLevelName(environ.get('AGENTS_SDK_LOG_LEVEL', 'WARNING'))
 )
 
 logger = logging.getLogger(__name__)
