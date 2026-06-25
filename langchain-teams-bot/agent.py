@@ -1,10 +1,8 @@
 import asyncio
-import logging
 import os
 import time
-from typing import Optional
+import logging
 
-import psycopg  # noqa: F401  (psycopg must be importable for AsyncPostgresSaver)
 from azure.identity.aio import ManagedIdentityCredential
 from langchain.chat_models import init_chat_model
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -14,133 +12,109 @@ from psycopg_pool import AsyncConnectionPool
 
 logger = logging.getLogger(__name__)
 
-# Module-level singletons
-_credential: Optional[ManagedIdentityCredential] = None
-_pool: Optional[AsyncConnectionPool] = None
-_checkpointer: Optional[AsyncPostgresSaver] = None
-_agent = None  # compiled LangGraph graph
-_token_expires_at: float = 0.0
-_init_lock: Optional[asyncio.Lock] = None
+class AgentManager:
+    # Manages the lifecycle of a ReAct agent, including connection pooling to a PostgreSQL database and token management for Azure authentication.
 
-def _get_lock() -> asyncio.Lock:
-    # Return the module-level asyncio lock, creating it lazily on first call.
-    global _init_lock
-    if _init_lock is None:
-        _init_lock = asyncio.Lock()
-    return _init_lock
+    def __init__(self):
+        # Initializes the AgentManager with a lock for thread safety, a credential for Azure Managed Identity, and placeholders for the connection pool and agent.
 
-async def _build_dsn() -> tuple[str, float]:
-    # Fetch a fresh AAD token and return a psycopg connection string with its expiry.
-    assert _credential is not None
-    token = await _credential.get_token('https://ossrdbms-aad.database.windows.net/.default')
-    dsn = (
-        f"host={os.environ['POSTGRES_HOST']} "
-        f"port={os.environ.get('POSTGRES_PORT', '5432')} "
-        f"dbname={os.environ['POSTGRES_DB']} "
-        f"user={os.environ['POSTGRES_USER']} "
-        f"password={token.token} "
-        'sslmode=require'
-    )
-    logger.debug(f"Built DSN for host={os.environ['POSTGRES_HOST']} db={os.environ['POSTGRES_DB']} user={os.environ['POSTGRES_USER']}"
-)
-    return dsn, float(token.expires_on)
+        self.lock = asyncio.Lock()
+        self.credential = ManagedIdentityCredential(client_id=os.environ['UAMI_CLIENT_ID'])
+        self.pool = None
+        self.agent = None
+        self.token_expiry = 0
 
-async def _open_pool() -> AsyncConnectionPool:
-    # Open a psycopg async connection pool authenticated via AAD token.
-    dsn, expires_at = await _build_dsn()
-    global _token_expires_at
-    _token_expires_at = expires_at
+    async def _build_pool(self):
+        # Builds a new async connection pool to the PostgreSQL database using an access token for authentication.
 
-    max_size = int(os.environ.get('POSTGRES_POOL_MAX', '5'))
-    pool = AsyncConnectionPool(
-        conninfo=dsn,
-        min_size=1,
-        max_size=max_size,
-        open=False,
-        kwargs={'autocommit': True, 'prepare_threshold': 0},
-    )
-    await pool.open()
-    logger.info(f"PostgreSQL pool opened (max_size={max_size}); token expires at {expires_at}")
-    return pool
+        logger.debug('Building new PostgreSQL connection pool')
+        token = await self.credential.get_token('https://ossrdbms-aad.database.windows.net/.default')
+        self.token_expiry = token.expires_on
 
-async def ensure_agent():
-    # Return the compiled LangGraph agent, initialising or refreshing it as needed.
-    # Uses a double-checked lock so only one coroutine performs cold-start.
-    # Re-initialises (including a fresh AAD token and connection pool) when the current token is within 5 minutes of expiry.
+        dsn = (
+            f"host={os.environ['POSTGRES_HOST']} "
+            f"port={os.getenv('POSTGRES_PORT', '5432')} "
+            f"dbname={os.environ['POSTGRES_DB']} "
+            f"user={os.environ['POSTGRES_USER']} "
+            f"password={token.token} "
+            "sslmode=require"
+        )
 
-    global _credential, _pool, _checkpointer, _agent
+        pool = AsyncConnectionPool(
+            conninfo=dsn,
+            min_size=1,
+            max_size=int(os.getenv('POSTGRES_POOL_MAX', '5')),
+            open=False,
+            kwargs={'autocommit': True, 'prepare_threshold': 0},
+        )
 
-    if _agent is not None and time.time() < _token_expires_at - 300:
-        logger.debug(f"Returning cached agent (token valid for {_token_expires_at - time.time():.0f}s)")
-        return _agent
+        await pool.open()
+        logger.info('PostgreSQL connection pool established')
 
-    async with _get_lock():
-        if _agent is not None and time.time() < _token_expires_at - 300:
-            logger.debug('Cached agent valid after lock acquisition; skipping re-init')
-            return _agent
+        return pool
 
-        logger.info('Initialising LangGraph agent (cold-start or token refresh)')
+    async def get_agent(self):
+        # Returns the ReAct agent, creating it if necessary. Refreshes the token if it's close to expiry.
 
-        if _credential is None:
-            _credential = ManagedIdentityCredential(
-                client_id=os.environ.get('UAMI_CLIENT_ID')
+        TOKEN_REFRESH_BUFFER_SECONDS = int(os.getenv('TOKEN_REFRESH_BUFFER_SECONDS', '300'))
+
+        if self.agent and time.time() < self.token_expiry - TOKEN_REFRESH_BUFFER_SECONDS:
+            # Check if the agent already exists and the token is still valid. If so, return the existing agent instance.
+            logger.debug('Returning existing agent instance')
+            return self.agent
+
+        async with self.lock:
+
+            if self.agent and time.time() < self.token_expiry - TOKEN_REFRESH_BUFFER_SECONDS:
+                # Check again after acquiring the lock
+                logger.debug('Returning existing agent instance after acquiring lock')
+                return self.agent
+
+            if self.pool is not None:
+                # Close the existing pool before creating a new one to avoid resource leaks.
+                await self.pool.close()
+
+            self.pool = await self._build_pool()
+
+            checkpointer = AsyncPostgresSaver(self.pool)
+            await checkpointer.setup()
+            logger.debug('Checkpointer setup completed')
+
+            model = init_chat_model(
+                f"azure_ai:{os.environ['FOUNDRY_MODEL']}",
+                project_endpoint=os.environ['FOUNDRY_PROJECT_ENDPOINT'],
+                credential=self.credential,
             )
-            logger.debug(f"Created ManagedIdentityCredential (client_id={os.environ.get('UAMI_CLIENT_ID')})")
+            logger.debug('Chat model initialized')
 
-        if _pool is not None:
-            try:
-                await _pool.close()
-                logger.debug('Closed stale connection pool')
-            except Exception:  # noqa: BLE001
-                logger.warning('Failed to close stale pool cleanly; proceeding with new pool')
+            prompt = ChatPromptTemplate.from_messages([
+                ('system', os.getenv('AGENT_SYSTEM_PROMPT', 'You are a helpful assistant.')),
+                MessagesPlaceholder(variable_name='messages'),
+            ])
 
-        _pool = await _open_pool()
+            self.agent = create_react_agent(
+                model=model,
+                tools=[],
+                prompt=prompt,
+                checkpointer=checkpointer
+            )
+            logger.info('ReAct agent created successfully')
 
-        _checkpointer = AsyncPostgresSaver(_pool)
-        await _checkpointer.setup()
-        logger.debug('AsyncPostgresSaver checkpointer ready')
+            return self.agent
 
-        model = init_chat_model(
-            f"azure_ai:{os.environ['FOUNDRY_MODEL']}",
-            project_endpoint=os.environ['FOUNDRY_PROJECT_ENDPOINT'],
-            credential=_credential,
-        )
-        logger.debug(f"Chat model initialised: azure_ai/{os.environ['FOUNDRY_MODEL']}")
+    async def clear_conversation(self, session_id: str):
+        # Clears the conversation history for a given session ID by deleting related records from the database.
 
-        system_prompt = os.environ.get('AGENT_SYSTEM_PROMPT', 'You are a helpful assistant.')
+        await self.get_agent()
 
-        prompt = ChatPromptTemplate.from_messages([
-            ('system', system_prompt),
-            MessagesPlaceholder(variable_name='messages'),
-        ])
+        async with self.pool.connection() as conn:
+            for table in (
+                'checkpoint_writes',
+                'checkpoint_blobs',
+                'checkpoints',
+            ):
+                await conn.execute(f"DELETE FROM {table} WHERE thread_id = %s", (session_id,))
+                logger.info(f"Deleted records from table {table} for session_id={session_id}")
 
-        _agent = create_react_agent(
-            model=model,
-            tools=[],
-            prompt=prompt,
-            checkpointer=_checkpointer,
-        )
-
-        logger.info(f"Agent initialisation complete (model=azure_ai/{os.environ['FOUNDRY_MODEL']})")
-        return _agent
-
-async def clear_conversation(session_id: str) -> None:
-    # Delete all LangGraph checkpoint data for *session_id* from PostgreSQL.
-    # Removes rows from checkpoints, checkpoint_blobs, and checkpoint_writes, which together constitute the full conversation state stored by LangGraph.
-    # Ensures the agent (and pool) is initialised before attempting the deletion.
-
-    await ensure_agent()
-    if _pool is None:
-        logger.warning(f"Cannot clear conversation: pool not available; session={session_id}")
-        return
-
-    logger.info(f"Clearing checkpoint data for session={session_id}")
-    try:
-        async with _pool.connection() as conn:
-            await conn.execute("DELETE FROM checkpoints WHERE thread_id = %s", (session_id,))
-            await conn.execute("DELETE FROM checkpoint_blobs WHERE thread_id = %s", (session_id,))
-            await conn.execute("DELETE FROM checkpoint_writes WHERE thread_id = %s", (session_id,))
-        logger.info(f"Checkpoint data cleared for session={session_id}")
-    except Exception as exc:
-        logger.error(f"Failed to clear checkpoint data for session={session_id}: {exc}", exc_info=True)
-        raise
+# Singleton instance shared across the application.
+agent_manager = AgentManager()
