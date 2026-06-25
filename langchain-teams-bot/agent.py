@@ -1,5 +1,5 @@
 import asyncio
-import os
+from os import environ
 import time
 import logging
 
@@ -19,7 +19,7 @@ class AgentManager:
         # Initializes the AgentManager with a lock for thread safety, a credential for Azure Managed Identity, and placeholders for the connection pool and agent.
 
         self.lock = asyncio.Lock()
-        self.credential = ManagedIdentityCredential(client_id=os.environ['UAMI_CLIENT_ID'])
+        self.credential = ManagedIdentityCredential(client_id=environ['UAMI_CLIENT_ID'])
         self.pool = None
         self.agent = None
         self.token_expiry = 0
@@ -32,10 +32,10 @@ class AgentManager:
         self.token_expiry = token.expires_on
 
         dsn = (
-            f"host={os.environ['POSTGRES_HOST']} "
-            f"port={os.getenv('POSTGRES_PORT', '5432')} "
-            f"dbname={os.environ['POSTGRES_DB']} "
-            f"user={os.environ['POSTGRES_USER']} "
+            f"host={environ['POSTGRES_HOST']} "
+            f"port={environ.get('POSTGRES_PORT', '5432')} "
+            f"dbname={environ['POSTGRES_DB']} "
+            f"user={environ['POSTGRES_USER']} "
             f"password={token.token} "
             "sslmode=require"
         )
@@ -43,7 +43,7 @@ class AgentManager:
         pool = AsyncConnectionPool(
             conninfo=dsn,
             min_size=1,
-            max_size=int(os.getenv('POSTGRES_POOL_MAX', '5')),
+            max_size=int(environ.get('POSTGRES_POOL_MAX', '5')),
             open=False,
             kwargs={'autocommit': True, 'prepare_threshold': 0},
         )
@@ -56,7 +56,7 @@ class AgentManager:
     async def get_agent(self):
         # Returns the ReAct agent, creating it if necessary. Refreshes the token if it's close to expiry.
 
-        TOKEN_REFRESH_BUFFER_SECONDS = int(os.getenv('TOKEN_REFRESH_BUFFER_SECONDS', '300'))
+        TOKEN_REFRESH_BUFFER_SECONDS = int(environ.get('TOKEN_REFRESH_BUFFER_SECONDS', '300'))
 
         if self.agent and time.time() < self.token_expiry - TOKEN_REFRESH_BUFFER_SECONDS:
             # Check if the agent already exists and the token is still valid. If so, return the existing agent instance.
@@ -81,14 +81,14 @@ class AgentManager:
             logger.debug('Checkpointer setup completed')
 
             model = init_chat_model(
-                f"azure_ai:{os.environ['FOUNDRY_MODEL']}",
-                project_endpoint=os.environ['FOUNDRY_PROJECT_ENDPOINT'],
+                f"azure_ai:{environ['FOUNDRY_MODEL']}",
+                project_endpoint=environ['FOUNDRY_PROJECT_ENDPOINT'],
                 credential=self.credential,
             )
             logger.debug('Chat model initialized')
 
             prompt = ChatPromptTemplate.from_messages([
-                ('system', os.getenv('AGENT_SYSTEM_PROMPT', 'You are a helpful assistant.')),
+                ('system', environ.get('AGENT_SYSTEM_PROMPT', 'You are a helpful assistant.')),
                 MessagesPlaceholder(variable_name='messages'),
             ])
 
