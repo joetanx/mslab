@@ -9,7 +9,7 @@ RG="rg-$APP_NAME"
 ENV_NAME="cae-$APP_NAME"
 SUBSCRIPTION_ID='<subscription-id>'
 
-az group create --name $RG --location $LOCATION
+az group create --name $RG --location $LOCATION --subscription $SUBSCRIPTION_ID
 ```
 
 ## 1. Method 1: Vanilla `python:alpine` + Azure Files Mount
