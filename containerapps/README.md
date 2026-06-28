@@ -17,21 +17,24 @@ az group create --name $RG --location $LOCATION --subscription $SUBSCRIPTION_ID
 ### 1.1. Create Resources
 
 ```sh
-SA_NAME="sa-$APP_NAME-$RANDOM"
+SA_NAME="sa$APP_NAME$RANDOM"
 SHARE_NAME="$APP_NAME-share"
 
 # Storage account + file share
 az storage account create \
   --name $SA_NAME --resource-group $RG \
-  --location $LOCATION --sku Standard_LRS
+  --location $LOCATION --subscription $SUBSCRIPTION_ID \
+  --sku Standard_LRS --tags SecurityControl=Ignore
 
 CONN_STR=$(az storage account show-connection-string \
   --name $SA_NAME --resource-group $RG \
-  --query connectionString -o tsv)
+  --subscription $SUBSCRIPTION_ID --query connectionString -o tsv)
 
 az storage share create --name $SHARE_NAME --connection-string "$CONN_STR"
 
-# Upload app files
+# Download app files from GitHub and upload to storage account
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/requirements.txt
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/app.py
 az storage file upload --share-name $SHARE_NAME \
   --source requirements.txt --connection-string "$CONN_STR"
 az storage file upload --share-name $SHARE_NAME \
@@ -39,16 +42,17 @@ az storage file upload --share-name $SHARE_NAME \
 
 # Container Apps environment
 az containerapp env create \
-  --name $ENV_NAME --resource-group $RG --location $LOCATION
+  --name $ENV_NAME --resource-group $RG \
+  --location $LOCATION --subscription $SUBSCRIPTION_ID
 
 # Register Azure Files storage in the environment
 SA_KEY=$(az storage account keys list \
-  --name $SA_NAME --resource-group $RG \
-  --query "[0].value" -o tsv)
+  --account-name $SA_NAME --resource-group $RG \
+  --subscription $SUBSCRIPTION_ID --query "[0].value" -o tsv)
 
 az containerapp env storage set \
-  --name $ENV_NAME --resource-group $RG \
-  --storage-name appcode \
+  --name $ENV_NAME --storage-name $SHARE_NAME \
+  --resource-group $RG --subscription $SUBSCRIPTION_ID \
   --azure-file-account-name $SA_NAME \
   --azure-file-account-key "$SA_KEY" \
   --azure-file-share-name $SHARE_NAME \
@@ -78,11 +82,12 @@ Deploy container app with edited manifest file:
 ```sh
 # Inject the real environment resource ID first
 ENV_ID=$(az containerapp env show \
-  --name $ENV_NAME --resource-group $RG --query id -o tsv)
+  --name $ENV_NAME --resource-group $RG \
+  --subscription $SUBSCRIPTION_ID --query id -o tsv)
 
 az containerapp create \
-  --name $APP_NAME \
-  --resource-group $RG \
+  --name $APP_NAME --resource-group $RG \
+  --subscription $SUBSCRIPTION_ID \
   --yaml manifest-vanilla.yaml
 ```
 
@@ -180,10 +185,8 @@ az containerapp create \
 
 ```sh
 az containerapp show \
-  --name $APP_NAME \
-  --resource-group $RG \
-  --query properties.configuration.ingress.fqdn \
-  -o tsv
+  --name $APP_NAME --resource-group $RG --subscription $SUBSCRIPTION_ID \
+  --query properties.configuration.ingress.fqdn -o tsv
 ```
 
 Prefix with `https://`, ingress is always TLS on Container Apps.
@@ -192,7 +195,7 @@ Or inline to `curl` immediately:
 
 ```sh
 URL=$(az containerapp show \
-  --name $APP_NAME --resource-group $RG \
+  --name $APP_NAME --resource-group $RG --subscription $SUBSCRIPTION_ID \
   --query properties.configuration.ingress.fqdn -o tsv)
 
 curl "https://$URL/whoami"
