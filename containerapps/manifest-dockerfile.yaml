@@ -23,4 +23,4 @@ properties:
           memory: 1Gi
     scale:
       minReplicas: 1
-      maxReplicas: 3
+      maxReplicas: 1
