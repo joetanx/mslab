@@ -185,6 +185,21 @@ Deploy container app with edited manifest file:
 az containerapp create --name $APP_NAME --resource-group $RG --yaml manifest-dockerfile.yaml
 ```
 
+> [!Tip]
+>
+> In event that `AcrPull` is not granted to the container app managed identity:
+>
+> ```sh
+> # 1. Get the Principal ID of the Container App identity
+> ACA_MI_ID=$(az containerapp show --name $APP_NAME --resource-group $RG --query "identity.principalId" -o tsv)
+> 
+> # 2. Get the Scope ID of your ACR
+> ACR_ID=$(az acr show --name $ACR_NAME --query id -o tsv)
+> 
+> # 3. Grant AcrPull role
+> az role assignment create --assignee $ACA_MI_ID --role AcrPull --scope $ACR_ID
+> ```
+
 ## 3. Get Container Apps application URL
 
 ```sh
