@@ -1,0 +1,25 @@
+location: <LOCATION>
+resourceGroup: <RG>
+name: <APP_NAME>
+identity:
+  type: SystemAssigned
+properties:
+  managedEnvironmentId: /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RG>/providers/Microsoft.App/managedEnvironments/<ENV_NAME>
+  configuration:
+    registries:
+      - server: <ACR_NAME>.azurecr.io
+        identity: system              # uses the SystemAssigned identity above
+    ingress:
+      external: true
+      targetPort: 8080
+      transport: auto
+  template:
+    containers:
+      - name: <APP_NAME>
+        image: <ACR_NAME>.azurecr.io/<APP_NAME>:latest
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+    scale:
+      minReplicas: 1
+      maxReplicas: 3
