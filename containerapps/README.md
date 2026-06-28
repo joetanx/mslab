@@ -1,6 +1,6 @@
 ## Azure Container Apps Walkthrough: Vanilla vs Dockerfile Deployment
 
-### Common Setup
+Prepare variables and create resource group (common step for both methods):
 
 ```sh
 LOCATION='southeastasia'
@@ -9,54 +9,56 @@ RG="rg-$APP_NAME"
 ENV_NAME="cae-$APP_NAME"
 SUBSCRIPTION_ID='<subscription-id>'
 
-az group create --name $RG --location $LOCATION --subscription $SUBSCRIPTION_ID
+az account set --subscription $SUBSCRIPTION_ID
+az group create --name $RG --location $LOCATION
 ```
 
 ## 1. Method 1: Vanilla `python:alpine` + Azure Files Mount
 
 ### 1.1. Create Resources
 
+Prepare variables (storage account name cannot contain dashes):
+
 ```sh
 SA_NAME="sa$APP_NAME$RANDOM"
 SHARE_NAME="$APP_NAME-share"
+```
 
-# Storage account + file share
+Storage account + file share:
+
+```sh
 az storage account create \
-  --name $SA_NAME --resource-group $RG \
-  --location $LOCATION --subscription $SUBSCRIPTION_ID \
+  --name $SA_NAME --resource-group $RG --location $LOCATION \
   --sku Standard_LRS --tags SecurityControl=Ignore
-
 CONN_STR=$(az storage account show-connection-string \
-  --name $SA_NAME --resource-group $RG \
-  --subscription $SUBSCRIPTION_ID --query connectionString -o tsv)
-
+  --name $SA_NAME --resource-group $RG --query connectionString -o tsv)
 az storage share create --name $SHARE_NAME --connection-string "$CONN_STR"
+```
 
-# Download app files from GitHub and upload to storage account
+Download app files from GitHub and upload to storage account:
+
+```sh
 curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/requirements.txt
 curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/app.py
-az storage file upload --share-name $SHARE_NAME \
-  --source requirements.txt --connection-string "$CONN_STR"
-az storage file upload --share-name $SHARE_NAME \
-  --source app.py --connection-string "$CONN_STR"
+az storage file upload --share-name $SHARE_NAME --source requirements.txt --connection-string "$CONN_STR"
+az storage file upload --share-name $SHARE_NAME --source app.py --connection-string "$CONN_STR"
+```
 
-# Container Apps environment
-az containerapp env create \
-  --name $ENV_NAME --resource-group $RG \
-  --location $LOCATION --subscription $SUBSCRIPTION_ID
+Create Container Apps environment:
 
-# Register Azure Files storage in the environment
-SA_KEY=$(az storage account keys list \
-  --account-name $SA_NAME --resource-group $RG \
-  --subscription $SUBSCRIPTION_ID --query "[0].value" -o tsv)
+```sh
+az containerapp env create --name $ENV_NAME --resource-group $RG --location $LOCATION
+```
+
+Register Azure Files storage in the environment:
+
+```sh
+SA_KEY=$(az storage account keys list --account-name $SA_NAME --resource-group $RG --query "[0].value" -o tsv)
 
 az containerapp env storage set \
-  --name $ENV_NAME --storage-name $SHARE_NAME \
-  --resource-group $RG --subscription $SUBSCRIPTION_ID \
-  --azure-file-account-name $SA_NAME \
-  --azure-file-account-key "$SA_KEY" \
-  --azure-file-share-name $SHARE_NAME \
-  --access-mode ReadOnly
+  --name $ENV_NAME --storage-name $SHARE_NAME --resource-group $RG \
+  --azure-file-account-name $SA_NAME --azure-file-account-key "$SA_KEY" \
+  --azure-file-share-name $SHARE_NAME --access-mode ReadOnly
 ```
 
 ### 1.2. Deploy Container App
@@ -77,18 +79,16 @@ sed -i "s/<SUBSCRIPTION_ID>/$SUBSCRIPTION_ID/" manifest-vanilla.yaml
 sed -i "s/<SHARE_NAME>/$SHARE_NAME/" manifest-vanilla.yaml
 ```
 
+Verify container app environment ID:
+
+```sh
+ENV_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
+```
+
 Deploy container app with edited manifest file:
 
 ```sh
-# Inject the real environment resource ID first
-ENV_ID=$(az containerapp env show \
-  --name $ENV_NAME --resource-group $RG \
-  --subscription $SUBSCRIPTION_ID --query id -o tsv)
-
-az containerapp create \
-  --name $APP_NAME --resource-group $RG \
-  --subscription $SUBSCRIPTION_ID \
-  --yaml manifest-vanilla.yaml
+az containerapp create --name $APP_NAME --resource-group $RG --yaml manifest-vanilla.yaml
 ```
 
 > [!Tip]
@@ -97,34 +97,40 @@ az containerapp create \
 
 ## 2. Method 2: Dockerfile + ACR
 
-### 2.1. Create Resources
-
-Prepare:
+### 2.0. Register subscription for `Microsoft.ContainerRegistry`
 
 ```sh
-ACR_NAME="acr-$APP_NAME-$RANDOM"
+az provider register --namespace Microsoft.ContainerRegistry
+az provider show --namespace Microsoft.ContainerRegistry --query "registrationState"
+```
+
+### 2.1. Create Resources
+
+Download app files:
+
+```sh
 curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/requirements.txt
 curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/app.py
 curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/DOCKERFILE
 ```
 
-Create:
+Create Azure Container Registry (ACR name cannot contain dashes):
 
 ```sh
-# ACR
-az acr create \
-  --name $ACR_NAME --resource-group $RG \
-  --location $LOCATION --sku Basic
+ACR_NAME="acr$APP_NAME$RANDOM"
+az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku Basic --tags SecurityControl=Ignore
+```
 
-# Build image directly in ACR (no local Docker needed)
-az acr build \
-  --registry $ACR_NAME \
-  --image $APP_NAME:latest \
-  --file Dockerfile .
+Build image directly in ACR (no local Docker needed):
 
-# Container Apps environment (skip if already created above)
-az containerapp env create \
-  --name $ENV_NAME --resource-group $RG --location $LOCATION
+```sh
+az acr build --registry $ACR_NAME --image $APP_NAME:latest --file DOCKERFILE .
+```
+
+Create Container Apps environment (skip if already created above):
+
+```sh
+az containerapp env create --name $ENV_NAME --resource-group $RG --location $LOCATION
 ```
 
 ### 2.2. Deploy Container App
@@ -133,24 +139,18 @@ az containerapp env create \
 
 ```sh
 ACR_SERVER="$ACR_NAME.azurecr.io"
-
 az containerapp create \
-  --name $APP_NAME \
-  --resource-group $RG \
-  --environment $ENV_NAME \
-  --image "$ACR_SERVER/myapp:latest" \
-  --registry-server $ACR_SERVER \
-  --registry-identity system \       # creates system MI + assigns AcrPull automatically
-  --target-port 8080 \
-  --ingress external \
-  --min-replicas 1 \
-  --max-replicas 3 \
-  --cpu 0.5 --memory 1Gi
+  --name $APP_NAME --resource-group $RG --environment $ENV_NAME --image "$ACR_SERVER/myapp:latest" --registry-server $ACR_SERVER \
+  --registry-identity system --target-port 8080 --ingress external --min-replicas 1 --max-replicas 1 --cpu 0.5 --memory 1Gi
 ```
 
 > [!Tip]
 >
-> `--registry-identity system` requires **Owner** or **User Access Administrator** on the subscription so Azure can assign the `AcrPull` role to the container app's managed identity. Otherwise, enable ACR admin instead:
+> `-registry-identity system` creates system MI + assigns AcrPull automatically
+>
+> This requires **Owner** or **User Access Administrator** on the subscription so Azure can assign the `AcrPull` role to the container app's managed identity.
+> 
+> Otherwise, enable ACR admin instead:
 >
 > ```sh
 > az acr update --name $ACR_NAME --admin-enabled true
@@ -169,24 +169,26 @@ sed -i "s/<LOCATION>/$LOCATION/" manifest-dockerfile.yaml
 sed -i "s/<APP_NAME>/$APP_NAME/" manifest-dockerfile.yaml
 sed -i "s/<RG>/$RG/" manifest-dockerfile.yaml
 sed -i "s/<ENV_NAME>/$ENV_NAME/" manifest-dockerfile.yaml
+sed -i "s/<ACR_NAME>/$ACR_NAME/" manifest-dockerfile.yaml
 sed -i "s/<SUBSCRIPTION_ID>/$SUBSCRIPTION_ID/" manifest-dockerfile.yaml
+```
+
+Verify container app environment ID:
+
+```sh
+ENV_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
 ```
 
 Deploy container app with edited manifest file:
 
 ```sh
-az containerapp create \
-  --name $APP_NAME \
-  --resource-group $RG \
-  --yaml manifest-dockerfile.yaml
+az containerapp create --name $APP_NAME --resource-group $RG --yaml manifest-dockerfile.yaml
 ```
 
 ## 3. Get Container Apps application URL
 
 ```sh
-az containerapp show \
-  --name $APP_NAME --resource-group $RG --subscription $SUBSCRIPTION_ID \
-  --query properties.configuration.ingress.fqdn -o tsv
+az containerapp show --name $APP_NAME --resource-group $RG --query properties.configuration.ingress.fqdn -o tsv
 ```
 
 Prefix with `https://`, ingress is always TLS on Container Apps.
@@ -194,10 +196,7 @@ Prefix with `https://`, ingress is always TLS on Container Apps.
 Or inline to `curl` immediately:
 
 ```sh
-URL=$(az containerapp show \
-  --name $APP_NAME --resource-group $RG --subscription $SUBSCRIPTION_ID \
-  --query properties.configuration.ingress.fqdn -o tsv)
-
+URL=$(az containerapp show --name $APP_NAME --resource-group $RG --query properties.configuration.ingress.fqdn -o tsv)
 curl "https://$URL/whoami"
 ```
 
