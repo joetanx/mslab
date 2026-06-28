@@ -14,7 +14,7 @@ async def whoami(request: web.Request) -> web.Response:
         content_type="application/json",
     )
 
-async def handle(health):
+async def health(health):
     return web.json_response({"status": "running", "framework": "aiohttp"})
 
 app = web.Application()
