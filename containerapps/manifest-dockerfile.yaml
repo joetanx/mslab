@@ -11,6 +11,7 @@ properties:
         identity: system              # uses the SystemAssigned identity above
     ingress:
       external: true
+      allowInsecure: false
       targetPort: 8080
       transport: auto
   template:
