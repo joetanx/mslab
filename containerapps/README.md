@@ -1,57 +1,24 @@
 ## Azure Container Apps Walkthrough: Vanilla vs Dockerfile Deployment
 
-### 0.1. Example whoami app.py
-
-```python
-from aiohttp import web
-import json
-
-async def whoami(request: web.Request) -> web.Response:
-    data = {
-        "method": request.method,
-        "path": str(request.rel_url),
-        "remote": request.remote,
-        "headers": dict(request.headers),
-        "query": dict(request.rel_url.query),
-    }
-    return web.Response(
-        text=json.dumps(data, indent=2),
-        content_type="application/json",
-    )
-
-app = web.Application()
-app.router.add_route("*", "/whoami", whoami)
-
-if __name__ == "__main__":
-    web.run_app(app, host="0.0.0.0", port=8080)
-```
-
-### 0.2. Common Setup
+### Common Setup
 
 ```sh
-RG="rg-myapp"
-LOCATION="eastus"
-ENV_NAME="cae-myapp"
-APP_NAME="myapp"
+LOCATION='southeastasia'
+APP_NAME='myapp'
+RG="rg-$APP_NAME"
+ENV_NAME="cae-$APP_NAME"
+SUBSCRIPTION_ID='<subscription-id>'
 
 az group create --name $RG --location $LOCATION
 ```
-
-> [!Note]
->
-> The `app.py` must bind aiohttp to `0.0.0.0`, not `127.0.0.1`, for container networking to work:
->
-> ```python
-> web.run_app(app, host="0.0.0.0", port=8080)
-> ```
 
 ## 1. Method 1: Vanilla `python:alpine` + Azure Files Mount
 
 ### 1.1. Create Resources
 
 ```sh
-SA_NAME="samyapp$RANDOM"
-SHARE_NAME="appcode"
+SA_NAME="sa-$APP_NAME-$RANDOM"
+SHARE_NAME="$APP_NAME-share"
 
 # Storage account + file share
 az storage account create \
@@ -90,9 +57,23 @@ az containerapp env storage set \
 
 ### 1.2. Deploy Container App
 
-Volume mounts cannot be expressed as inline CLI flags, both methods below use a YAML manifest. The difference is where that manifest lives.
+> [!Note]
+>
+> Volume mounts cannot be expressed as inline `az containerapps create` CLI flags
 
-#### 1.2.1. Option 1: az CLI (deploy from YAML file)
+Download [manifest-vanilla.yaml](manifest-vanilla.yaml) and replace variables:
+
+```sh
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/manifest-vanilla.yaml
+sed -i "s/<LOCATION>/$LOCATION/" manifest-vanilla.yaml
+sed -i "s/<APP_NAME>/$APP_NAME/" manifest-vanilla.yaml
+sed -i "s/<RG>/$RG/" manifest-vanilla.yaml
+sed -i "s/<ENV_NAME>/$ENV_NAME/" manifest-vanilla.yaml
+sed -i "s/<SUBSCRIPTION_ID>/$SUBSCRIPTION_ID/" manifest-vanilla.yaml
+sed -i "s/<SHARE_NAME>/$SHARE_NAME/" manifest-vanilla.yaml
+```
+
+Deploy container app with edited manifest file:
 
 ```sh
 # Inject the real environment resource ID first
@@ -102,43 +83,7 @@ ENV_ID=$(az containerapp env show \
 az containerapp create \
   --name $APP_NAME \
   --resource-group $RG \
-  --yaml containerapp-vanilla.yaml
-```
-
-#### 1.2.2. Option 2: YAML Manifest - `containerapp-vanilla.yaml`
-
-```yaml
-location: eastus
-resourceGroup: rg-myapp
-name: myapp
-properties:
-  managedEnvironmentId: /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-myapp/providers/Microsoft.App/managedEnvironments/cae-myapp
-  configuration:
-    ingress:
-      external: true
-      targetPort: 8080
-      transport: auto
-  template:
-    volumes:
-      - name: appcode-vol
-        storageType: AzureFile
-        storageName: appcode        # must match the name used in env storage set
-    containers:
-      - name: myapp
-        image: python:alpine
-        command:
-          - /bin/sh
-          - "-c"
-          - "pip install --no-cache-dir -r /app/requirements.txt && python /app/app.py"
-        volumeMounts:
-          - volumeName: appcode-vol
-            mountPath: /app
-        resources:
-          cpu: 0.5
-          memory: 1Gi
-    scale:
-      minReplicas: 1
-      maxReplicas: 3
+  --yaml manifest-vanilla.yaml
 ```
 
 > [!Tip]
@@ -147,23 +92,20 @@ properties:
 
 ## 2. Method 2: Dockerfile + ACR
 
-### 2.1. Dockerfile
+### 2.1. Create Resources
 
-```dockerfile
-FROM python:alpine
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py .
-EXPOSE 8080
-CMD ["python", "app.py"]
-```
-
-### 2.2. Create Resources
+Prepare:
 
 ```sh
-ACR_NAME="acrmyapp$RANDOM"
+ACR_NAME="acr-$APP_NAME-$RANDOM"
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/requirements.txt
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/app.py
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/DOCKERFILE
+```
 
+Create:
+
+```sh
 # ACR
 az acr create \
   --name $ACR_NAME --resource-group $RG \
@@ -172,7 +114,7 @@ az acr create \
 # Build image directly in ACR (no local Docker needed)
 az acr build \
   --registry $ACR_NAME \
-  --image myapp:latest \
+  --image $APP_NAME:latest \
   --file Dockerfile .
 
 # Container Apps environment (skip if already created above)
@@ -180,9 +122,9 @@ az containerapp env create \
   --name $ENV_NAME --resource-group $RG --location $LOCATION
 ```
 
-### 2.3. Deploy Container App
+### 2.2. Deploy Container App
 
-#### 2.3.1. Option 1: az CLI
+#### 2.2.1. Option 1: az CLI
 
 ```sh
 ACR_SERVER="$ACR_NAME.azurecr.io"
@@ -212,42 +154,26 @@ az containerapp create \
 > --registry-password $(az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv)
 > ```
 
-#### 2.3.2. Option 2: YAML Manifest - `containerapp-dockerfile.yaml`
+#### 2.2.2. Option 2: YAML Manifest
 
-```yaml
-location: eastus
-resourceGroup: rg-myapp
-name: myapp
-identity:
-  type: SystemAssigned
-properties:
-  managedEnvironmentId: /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-myapp/providers/Microsoft.App/managedEnvironments/cae-myapp
-  configuration:
-    registries:
-      - server: <ACR_NAME>.azurecr.io
-        identity: system              # uses the SystemAssigned identity above
-    ingress:
-      external: true
-      targetPort: 8080
-      transport: auto
-  template:
-    containers:
-      - name: myapp
-        image: <ACR_NAME>.azurecr.io/myapp:latest
-        resources:
-          cpu: 0.5
-          memory: 1Gi
-    scale:
-      minReplicas: 1
-      maxReplicas: 3
+Download [manifest-dockerfile.yaml](manifest-dockerfile.yaml) and replace variables:
+
+```sh
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/manifest-dockerfile.yaml
+sed -i "s/<LOCATION>/$LOCATION/" manifest-dockerfile.yaml
+sed -i "s/<APP_NAME>/$APP_NAME/" manifest-dockerfile.yaml
+sed -i "s/<RG>/$RG/" manifest-dockerfile.yaml
+sed -i "s/<ENV_NAME>/$ENV_NAME/" manifest-dockerfile.yaml
+sed -i "s/<SUBSCRIPTION_ID>/$SUBSCRIPTION_ID/" manifest-dockerfile.yaml
 ```
 
-Deploy via CLI:
+Deploy container app with edited manifest file:
+
 ```sh
 az containerapp create \
   --name $APP_NAME \
   --resource-group $RG \
-  --yaml containerapp-dockerfile.yaml
+  --yaml manifest-dockerfile.yaml
 ```
 
 ## 3. Get Container Apps application URL
