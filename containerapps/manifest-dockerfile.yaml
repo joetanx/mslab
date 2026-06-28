@@ -2,13 +2,15 @@ location: <LOCATION>
 resourceGroup: <RG>
 name: <APP_NAME>
 identity:
-  type: SystemAssigned
+  type: UserAssigned
+  userAssignedIdentities:
+    /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RG>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<UAMI_ID>: {}
 properties:
   managedEnvironmentId: /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RG>/providers/Microsoft.App/managedEnvironments/<ENV_NAME>
   configuration:
     registries:
       - server: <ACR_NAME>.azurecr.io
-        identity: system              # uses the SystemAssigned identity above
+        identity: /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RG>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<UAMI_ID>
     ingress:
       external: true
       allowInsecure: false
