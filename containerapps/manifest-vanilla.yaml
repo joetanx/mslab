@@ -1,0 +1,31 @@
+location: <LOCATION>
+resourceGroup: <RG>
+name: <APP_NAME>
+properties:
+  managedEnvironmentId: /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RG>/providers/Microsoft.App/managedEnvironments/<ENV_NAME>
+  configuration:
+    ingress:
+      external: true
+      targetPort: 8080
+      transport: auto
+  template:
+    volumes:
+      - name: <SHARE_NAME>-vol
+        storageType: AzureFile
+        storageName: <SHARE_NAME>
+    containers:
+      - name: <APP_NAME>
+        image: python:alpine
+        command:
+          - /bin/sh
+          - "-c"
+          - "pip install --no-cache-dir -r /app/requirements.txt && python /app/app.py"
+        volumeMounts:
+          - volumeName: <SHARE_NAME>-vol
+            mountPath: /app
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+    scale:
+      minReplicas: 1
+      maxReplicas: 1
