@@ -2,7 +2,7 @@ location: <LOCATION>
 resourceGroup: <RG>
 name: <APP_NAME>
 properties:
-  managedEnvironmentId: /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RG>/providers/Microsoft.App/managedEnvironments/<ENV_NAME>
+  managedEnvironmentId: <ENV_ID>
   configuration:
     ingress:
       external: true
