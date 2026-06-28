@@ -6,6 +6,7 @@ properties:
   configuration:
     ingress:
       external: true
+      allowInsecure: false
       targetPort: 8080
       transport: auto
   template:
