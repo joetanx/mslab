@@ -154,28 +154,6 @@ az containerapp create \
 
 #### 2.2.2. Option 2: YAML Manifest
 
-Creating container apps via yaml manifest requires use of **user-assigned managed identity** (UAMI)
-
-> The system-assigned managed identity (SAMI) doesn't get the `AcrPull` role at creation time.
->
-> Somehow adding `AcrPull` role to the SAMI after creation doesn't work either, UAMI is the way to go
-
-Create UAMI:
-
-```sh
-UAMI_NAME="id-$APP_NAME-acrpull"
-az identity create --name $UAMI_NAME --resource-group $RG
-UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query "principalId" -o tsv)
-UAMI_RSC_ID="/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$UAMI_NAME"
-```
-
-Grant `AcrPull` to UAMI:
-
-```sh
-ACR_ID=$(az acr show --name $ACR_NAME --query id -o tsv)
-az role assignment create --assignee $UAMI_ID --role AcrPull --scope $ACR_ID
-```
-
 Download [manifest-dockerfile.yaml](manifest-dockerfile.yaml) and replace variables:
 
 ```sh
@@ -184,7 +162,6 @@ sed -i "s/<LOCATION>/$LOCATION/" manifest-dockerfile.yaml
 sed -i "s/<APP_NAME>/$APP_NAME/" manifest-dockerfile.yaml
 sed -i "s/<RG>/$RG/" manifest-dockerfile.yaml
 sed -i "s|<ENV_ID>|$ENV_ID|" manifest-dockerfile.yaml
-sed -i "s|<UAMI_RSC_ID>|$UAMI_RSC_ID|" manifest-dockerfile.yaml
 sed -i "s/<ACR_NAME>/$ACR_NAME/" manifest-dockerfile.yaml
 ```
 
@@ -194,9 +171,9 @@ Deploy container app with edited manifest file:
 az containerapp create --name $APP_NAME --resource-group $RG --yaml manifest-dockerfile.yaml
 ```
 
-> [!Tip]
+> [!Important]
 >
-> In event that `AcrPull` is not granted to the container app managed identity:
+> Creation by yaml manifest doesn't assign `AcrPull` to the container app managed identity for some reason:
 >
 > ```sh
 > # 1. Get the Principal ID of the Container App identity
