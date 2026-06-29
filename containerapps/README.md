@@ -13,6 +13,18 @@ az account set --subscription $SUBSCRIPTION_ID
 az group create --name $RG --location $LOCATION
 ```
 
+Create Container Apps environment:
+
+```sh
+az containerapp env create --name $ENV_NAME --resource-group $RG --location $LOCATION
+```
+
+Verify container app environment ID:
+
+```sh
+ENV_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
+```
+
 ## 1. Method 1: Vanilla `python:alpine` + Azure Files Mount
 
 ### 1.1. Create Resources
@@ -44,12 +56,6 @@ az storage file upload --share-name $SHARE_NAME --source requirements.txt --conn
 az storage file upload --share-name $SHARE_NAME --source app.py --connection-string "$CONN_STR"
 ```
 
-Create Container Apps environment:
-
-```sh
-az containerapp env create --name $ENV_NAME --resource-group $RG --location $LOCATION
-```
-
 Register Azure Files storage in the environment:
 
 ```sh
@@ -74,15 +80,8 @@ curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/man
 sed -i "s/<LOCATION>/$LOCATION/" manifest-vanilla.yaml
 sed -i "s/<APP_NAME>/$APP_NAME/" manifest-vanilla.yaml
 sed -i "s/<RG>/$RG/" manifest-vanilla.yaml
-sed -i "s/<ENV_NAME>/$ENV_NAME/" manifest-vanilla.yaml
-sed -i "s/<SUBSCRIPTION_ID>/$SUBSCRIPTION_ID/" manifest-vanilla.yaml
+sed -i "s/<ENV_ID>/$ENV_ID/" manifest-vanilla.yaml
 sed -i "s/<SHARE_NAME>/$SHARE_NAME/" manifest-vanilla.yaml
-```
-
-Verify container app environment ID:
-
-```sh
-ENV_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
 ```
 
 Deploy container app with edited manifest file:
@@ -127,12 +126,6 @@ Build image directly in ACR (no local Docker needed):
 az acr build --registry $ACR_NAME --image $APP_NAME:latest --file DOCKERFILE .
 ```
 
-Create Container Apps environment (skip if already created above):
-
-```sh
-az containerapp env create --name $ENV_NAME --resource-group $RG --location $LOCATION
-```
-
 ### 2.2. Deploy Container App
 
 #### 2.2.1. Option 1: az CLI
@@ -161,6 +154,28 @@ az containerapp create \
 
 #### 2.2.2. Option 2: YAML Manifest
 
+Creating container apps via yaml manifest requires use of **user-assigned managed identity** (UAMI)
+
+> The system-assigned managed identity (SAMI) doesn't get the `AcrPull` role at creation time.
+>
+> Somehow adding `AcrPull` role to the SAMI after creation doesn't work either, UAMI is the way to go
+
+Create UAMI:
+
+```sh
+UAMI_NAME="id-$APP_NAME-acrpull"
+az identity create --name $UAMI_NAME --resource-group $RG
+UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query "principalId" -o tsv)
+UAMI_RSC_ID="/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$UAMI_NAME"
+```
+
+Grant `AcrPull` to UAMI:
+
+```sh
+ACR_ID=$(az acr show --name $ACR_NAME --query id -o tsv)
+az role assignment create --assignee $UAMI_ID --role AcrPull --scope $ACR_ID
+```
+
 Download [manifest-dockerfile.yaml](manifest-dockerfile.yaml) and replace variables:
 
 ```sh
@@ -168,15 +183,9 @@ curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/man
 sed -i "s/<LOCATION>/$LOCATION/" manifest-dockerfile.yaml
 sed -i "s/<APP_NAME>/$APP_NAME/" manifest-dockerfile.yaml
 sed -i "s/<RG>/$RG/" manifest-dockerfile.yaml
-sed -i "s/<ENV_NAME>/$ENV_NAME/" manifest-dockerfile.yaml
+sed -i "s|<ENV_ID>|$ENV_ID|" manifest-dockerfile.yaml
+sed -i "s|<UAMI_RSC_ID>|$UAMI_RSC_ID|" manifest-dockerfile.yaml
 sed -i "s/<ACR_NAME>/$ACR_NAME/" manifest-dockerfile.yaml
-sed -i "s/<SUBSCRIPTION_ID>/$SUBSCRIPTION_ID/" manifest-dockerfile.yaml
-```
-
-Verify container app environment ID:
-
-```sh
-ENV_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
 ```
 
 Deploy container app with edited manifest file:
