@@ -110,7 +110,7 @@ Download app files:
 ```sh
 curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/requirements.txt
 curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/app.py
-curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/DOCKERFILE
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/Dockerfile
 ```
 
 Create Azure Container Registry (ACR name cannot contain dashes):
@@ -123,7 +123,7 @@ az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku B
 Build image directly in ACR (no local Docker needed):
 
 ```sh
-az acr build --registry $ACR_NAME --image $APP_NAME:latest --file DOCKERFILE .
+az acr build --registry $ACR_NAME --image $APP_NAME:latest --file Dockerfile .
 ```
 
 ### 2.2. Deploy Container App
