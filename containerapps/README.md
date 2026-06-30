@@ -25,9 +25,9 @@ Verify container app environment ID:
 ENV_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
 ```
 
-## 1. Method 1: Vanilla `python:alpine` + Azure Files Mount
+## 1. Method 1: Vanilla `python:alpine` + Azure Files mount
 
-### 1.1. Create Resources
+### 1.1. Setup storage account
 
 Prepare variables (storage account name cannot contain dashes):
 
@@ -67,7 +67,7 @@ az containerapp env storage set \
   --azure-file-share-name $SHARE_NAME --access-mode ReadOnly
 ```
 
-### 1.2. Deploy Container App
+### 1.2. Deploy Container App (YAML manifest only)
 
 > [!Note]
 >
@@ -94,16 +94,18 @@ az containerapp create --name $APP_NAME --resource-group $RG --yaml manifest-van
 >
 > The `pip install` runs at every cold start. For anything beyond a quick prototype, method 2 below is preferable.
 
-## 2. Method 2: Dockerfile + ACR
+## 2. Method 2: Build image with dependencies and code into Auzre Container Registry (ACR)
 
-### 2.0. Register subscription for `Microsoft.ContainerRegistry`
+> [!Note]
+>
+> The subscription needs to be registered for `Microsoft.ContainerRegistry`
 
-```sh
-az provider register --namespace Microsoft.ContainerRegistry
-az provider show --namespace Microsoft.ContainerRegistry --query "registrationState"
-```
+> ```sh
+> az provider register --namespace Microsoft.ContainerRegistry
+> az provider show --namespace Microsoft.ContainerRegistry --query "registrationState"
+> ```
 
-### 2.1. Create Resources
+### 2.1. Setup container registry
 
 Download app files:
 
@@ -113,7 +115,7 @@ curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/app
 curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/Dockerfile
 ```
 
-Create Azure Container Registry (ACR name cannot contain dashes):
+Create ACR (ACR name cannot contain dashes):
 
 ```sh
 ACR_NAME="acr$APP_NAME$RANDOM"
