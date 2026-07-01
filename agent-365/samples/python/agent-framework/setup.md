@@ -128,16 +128,39 @@ az containerapp env storage set \
   --azure-file-share-name $SHARE_NAME --access-mode ReadOnly
 ```
 
-## 3. Container Apps Environment
+## 3. Container Registry
+
+Create ACR (ACR name cannot contain dashes):
+
+```sh
+ACR_NAME="acr$APP_NAME$RANDOM"
+az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku Basic --tags SecurityControl=Ignore
+```
+
+Build image directly in ACR (no local Docker needed):
 
 ```sh
 curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/python/agent-framework/pyproject.toml
 curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/python/agent-framework/Dockerfile
-az account set --subscription 51073e5e-f1e6-409c-8de6-f9a1f72aa05c
-az acr build --registry acra365testhollpfcne3fxramc --image a365-maf-sample:latest .
+az acr build --registry $ACR_NAME --image $APP_NAME:latest --file Dockerfile .
 ```
 
-## 4. Deploy container app
+## 4. Container Apps Environment
+
+```sh
+
+```
+
+## 5. Deploy container app
+
+Add agent blueprint secret
+
+```sh
+az containerapp secret set \
+  --name <YOUR_CONTAINER_APP_NAME> \
+  --resource-group <YOUR_RESOURCE_GROUP> \
+  --secrets "my-db-password=YourSuperSecretValue123"
+```
 
 ```sh
 
