@@ -147,11 +147,32 @@ az acr build --registry $ACR_NAME --image $APP_NAME:latest --file Dockerfile .
 
 ## 4. Container Apps Environment
 
-```sh
+Create Container Apps environment:
 
+```sh
+az containerapp env create --name $ENV_NAME --resource-group $RG --location $LOCATION
 ```
 
-## 5. Deploy container app
+Verify container app environment ID:
+
+```sh
+ENV_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
+```
+
+Get container app environment domain:
+
+```sh
+ENV_DOMAIN=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query "properties.defaultDomain" --output tsv)
+```
+
+## 5. Agent 365 CLI
+
+```sh
+MESSAGING_ENDPOINT="https://$APP_NAME.$ENV_DOMAIN/api/messages"
+a365 setup all --aiteammate -n $AGENT_NAME --messaging-endpoint $MESSAGING_ENDPOINT
+```
+
+## 6. Deploy container app
 
 Add agent blueprint secret
 
