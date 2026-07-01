@@ -36,7 +36,7 @@ SA_NAME="sa$APP_NAME$RANDOM"
 SHARE_NAME="$APP_NAME-share"
 ```
 
-Storage account + file share:
+Create storage account + file share:
 
 ```sh
 az storage account create \
@@ -50,13 +50,13 @@ az storage share create --name $SHARE_NAME --connection-string "$CONN_STR"
 Download app files from GitHub and upload to storage account:
 
 ```sh
-curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/requirements.txt
-curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/app.py
-az storage file upload --share-name $SHARE_NAME --source requirements.txt --connection-string "$CONN_STR"
-az storage file upload --share-name $SHARE_NAME --source app.py --connection-string "$CONN_STR"
+for FILE in requirements.txt app.py; do
+  curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/python/agent-framework/app/$FILE"
+  az storage file upload --share-name $SHARE_NAME --source $FILE --connection-string $CONN_STR
+done
 ```
 
-Register Azure Files storage in the environment:
+Register Azure Files storage in container app environment:
 
 ```sh
 SA_KEY=$(az storage account keys list --account-name $SA_NAME --resource-group $RG --query "[0].value" -o tsv)
