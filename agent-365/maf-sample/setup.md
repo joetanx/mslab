@@ -1,5 +1,13 @@
 ## Cloud infrastructure setup
 
+> [!Important]
+>
+> The setup is performed in Cloud Shell (bash) in Azure portal, which already has `az`, `a365`, `python` and `pwsh` (v7) tools.
+>
+> (it even has most bash utilities like `vi` and `envsubst`)
+>
+> This is convenient, but the session is **ephemeral**, so any files to be kept from the session must be download via `Manage files` from the Cloud Shell
+
 Setup the shell/environment variables:
 
 ```sh
