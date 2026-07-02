@@ -22,7 +22,7 @@ az containerapp env create --name $ENV_NAME --resource-group $RG --location $LOC
 Verify container app environment ID:
 
 ```sh
-ENV_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
+CAE_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
 ```
 
 ## 1. Method 1: Vanilla `python:alpine` + Azure Files mount
@@ -80,7 +80,7 @@ curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/man
 sed -i "s/<LOCATION>/$LOCATION/" manifest-vanilla.yaml
 sed -i "s/<APP_NAME>/$APP_NAME/" manifest-vanilla.yaml
 sed -i "s/<RG>/$RG/" manifest-vanilla.yaml
-sed -i "s/<ENV_ID>/$ENV_ID/" manifest-vanilla.yaml
+sed -i "s/<CAE_ID>/$CAE_ID/" manifest-vanilla.yaml
 sed -i "s/<SHARE_NAME>/$SHARE_NAME/" manifest-vanilla.yaml
 ```
 
@@ -163,7 +163,7 @@ curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/containerapps/man
 sed -i "s/<LOCATION>/$LOCATION/" manifest-dockerfile.yaml
 sed -i "s/<APP_NAME>/$APP_NAME/" manifest-dockerfile.yaml
 sed -i "s/<RG>/$RG/" manifest-dockerfile.yaml
-sed -i "s|<ENV_ID>|$ENV_ID|" manifest-dockerfile.yaml
+sed -i "s|<CAE_ID>|$CAE_ID|" manifest-dockerfile.yaml
 sed -i "s/<ACR_NAME>/$ACR_NAME/" manifest-dockerfile.yaml
 ```
 
