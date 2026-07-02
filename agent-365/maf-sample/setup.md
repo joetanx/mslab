@@ -231,9 +231,9 @@ Upload the manifest to M365 Admin Center
 2. Click "Upload custom agent" button (top right area)
 3. Select the `manifest.zip` file
 4. In the upload wizard:
-  - Review the agent name and description
-  - Set Activate scope → select "All users" or a group of users as desired
-  - Click Publish
+    - Review the agent name and description
+    - Set Activate scope → select "All users" or a group of users as desired
+    - Click Publish
 
 ## 6. Deploy container app
 
