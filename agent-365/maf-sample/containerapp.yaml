@@ -1,6 +1,6 @@
 location: ${LOCATION}
 resourceGroup: ${RG}
-name: ${APP_NAME}
+name: ca-${APP_NAME}
 identity:
   type: UserAssigned
   userAssignedIdentities:
