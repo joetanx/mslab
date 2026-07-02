@@ -90,18 +90,11 @@ az cognitiveservices account deployment create \
   --sku-capacity 500 --sku 'GlobalStandard'
 ```
 
-Get project endpoint:
+Export project endpoint and model environment variables:
 
 ```sh
-az cognitiveservices account project show \
-  --name $FOUNDRY_NAME --resource-group $RG --project-name $PROJECT_NAME  --query 'properties.endpoints' -o tsv
-```
-
-Set other details for the app:
-
-```sh
-export AZURE_OPENAI_ENDPOINT=$(az cognitiveservices account show --name $FOUNDRY_NAME --resource-group $RG --query 'properties.endpoints."OpenAI Language Model Instance API"' -o tsv)
-export AZURE_OPENAI_DEPLOYMENT=$MODEL_NAME
+export FOUNDRY_PROJECT_ENDPOINT=$(az cognitiveservices account project show --name $FOUNDRY_NAME --resource-group $RG --project-name $PROJECT_NAME  --query 'properties.endpoints' -o tsv)
+export FOUNDRY_MODEL=$MODEL_NAME
 ```
 
 ### 1.1.  Create UAMI and assign role
@@ -115,7 +108,7 @@ az identity create --name $UAMI_NAME --resource-group $RG
 Get UAMI ID:
 
 ```sh
-UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query principalId -o tsv)
+export UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query principalId -o tsv)
 ```
 
 Get Foundry ID:
@@ -124,10 +117,10 @@ Get Foundry ID:
 FOUNDRY_ID=$(az cognitiveservices account show --name $FOUNDRY_NAME --resource-group $RG --query id -o tsv)
 ```
 
-Grant `Cognitive Services OpenAI User` to UAMI for Foundry resource:
+Grant `Cognitive Services User` to UAMI for Foundry resource:
 
 ```sh
-az role assignment create --assignee $UAMI_ID --role 'Cognitive Services OpenAI User' --scope $FOUNDRY_ID
+az role assignment create --assignee $UAMI_ID --role 'Cognitive Services User' --scope $FOUNDRY_ID
 ```
 
 Get UAMI resource ID (for later container app deployment use):
@@ -168,11 +161,8 @@ export SHARE_NAME="$APP_NAME-share"
 Create storage account + file share:
 
 ```sh
-az storage account create \
-  --name $SA_NAME --resource-group $RG --location $LOCATION \
-  --sku Standard_LRS --tags SecurityControl=Ignore
-CONN_STR=$(az storage account show-connection-string \
-  --name $SA_NAME --resource-group $RG --query connectionString -o tsv)
+az storage account create --name $SA_NAME --resource-group $RG --location $LOCATION --sku Standard_LRS --tags SecurityControl=Ignore
+CONN_STR=$(az storage account show-connection-string --name $SA_NAME --resource-group $RG --query connectionString -o tsv)
 az storage share create --name $SHARE_NAME --connection-string "$CONN_STR"
 ```
 
@@ -245,7 +235,7 @@ export PATH=$PATH:/home/system/.dotnet/tools/
 > Read more about the prerequisites: https://github.com/joetanx/mslab/blob/main/agent-365/a365-cli.md
 
 ```sh
-MESSAGING_ENDPOINT="https://$APP_NAME.$CAE_DOMAIN/api/messages"
+MESSAGING_ENDPOINT="https://ca-$APP_NAME.$CAE_DOMAIN/api/messages"
 a365 setup all --aiteammate -n $APP_NAME --messaging-endpoint $MESSAGING_ENDPOINT
 ```
 
