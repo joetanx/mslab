@@ -382,24 +382,19 @@ class GenericAgentHost:
         app.on_startup.append(lambda app: self.initialize_agent())
         app.on_shutdown.append(lambda app: self.cleanup())
 
-        desired_port = int(environ.get("PORT", 3978))
-        port = desired_port
-
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(0.5)
-            if s.connect_ex(("127.0.0.1", desired_port)) == 0:
-                port = desired_port + 1
+        host = environ.get("HOST", "localhost")
+        port = int(environ.get("PORT", 3978))
 
         print("=" * 80)
         print(f"🏢 {self.agent_class.__name__}")
         print("=" * 80)
         print(f"🔒 Auth: {'Enabled' if auth_configuration else 'Anonymous'}")
-        print(f"🚀 Server: localhost:{port}")
-        print(f"📚 Endpoint: http://localhost:{port}/api/messages")
-        print(f"❤️  Health: http://localhost:{port}/api/health\n")
+        print(f"🚀 Server: {host}:{port}")
+        print(f"📚 Endpoint: http://{host}:{port}/api/messages")
+        print(f"❤️  Health: http://{host}:{port}/api/health\n")
 
         try:
-            run_app(app, host="localhost", port=port, handle_signals=True)
+            run_app(app, host=host, port=port, handle_signals=True)
         except KeyboardInterrupt:
             print("\n👋 Server stopped")
 
