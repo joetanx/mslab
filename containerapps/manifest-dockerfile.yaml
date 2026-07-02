@@ -4,7 +4,7 @@ name: <APP_NAME>
 identity:
   type: SystemAssigned
 properties:
-  managedEnvironmentId: <ENV_ID>
+  managedEnvironmentId: <CAE_ID>
   configuration:
     registries:
       - server: <ACR_NAME>.azurecr.io
