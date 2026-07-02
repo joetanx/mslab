@@ -109,7 +109,7 @@ Get Foundry ID:
 FOUNDRY_ID=$(az cognitiveservices account show --name $FOUNDRY_NAME --resource-group $RG --query id -o tsv)
 ```
 
-Grant UAMI Cognitive Services User to Foundry resource:
+Grant UAMI Cognitive Services OpenAI User to Foundry resource:
 
 ```sh
 az role assignment create --assignee $UAMI_ID --role 'Cognitive Services OpenAI User' --scope $FOUNDRY_ID
