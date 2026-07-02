@@ -124,7 +124,7 @@ Get Foundry ID:
 FOUNDRY_ID=$(az cognitiveservices account show --name $FOUNDRY_NAME --resource-group $RG --query id -o tsv)
 ```
 
-Grant UAMI Cognitive Services OpenAI User to Foundry resource:
+Grant `Cognitive Services OpenAI User` to UAMI for Foundry resource:
 
 ```sh
 az role assignment create --assignee $UAMI_ID --role 'Cognitive Services OpenAI User' --scope $FOUNDRY_ID
@@ -209,6 +209,24 @@ Build image directly in ACR (no local Docker needed):
 ```sh
 curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sample/{pyproject.toml,Dockerfile}"
 az acr build --registry $ACR_NAME --image $APP_NAME:latest --file Dockerfile .
+```
+
+Get UAMI ID:
+
+```sh
+UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query principalId -o tsv)
+```
+
+Get ACR ID:
+
+```sh
+ACR_ID=$(az acr show --name $ACR_NAME --query id -o tsv)
+```
+
+Grant `AcrPull` to UAMI for ACR:
+
+```sh
+az role assignment create --assignee $UAMI_ID --role AcrPull --scope $ACR_ID
 ```
 
 ## 5. Agent 365 CLI
