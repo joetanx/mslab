@@ -221,7 +221,6 @@ class GenericAgentHost:
                     # Each send_activity call produces a discrete Teams message.
                     # NOTE: For Teams agentic identities, streaming is buffered into a single message by the SDK;
                     #       use send_activity for any messages that must arrive immediately.
-                    await context.send_activity("Got it — working on it…")
                     await context.send_activity(Activity(type="typing"))
 
                     # Typing indicator loop — refreshes the "..." animation every ~4s for long-running operations.
