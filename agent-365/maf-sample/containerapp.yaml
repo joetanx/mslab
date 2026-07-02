@@ -34,7 +34,6 @@ properties:
           cpu: 0.5
           memory: 1Gi
         env:
-        # ref: https://github.com/JTantra/a365-maf/blob/main/infra/resources.bicep
           - name: HOST
             value: "0.0.0.0"
           - name: PORT
@@ -44,7 +43,7 @@ properties:
           - name: FOUNDRY_MODEL
             value: "${FOUNDRY_MODEL}"
           - name: UAMI_ID
-            value: "${UAMI_ID}"
+            value: "${UAMI_CLIENT_ID}"
           - name: PYTHON_ENVIRONMENT
             value: "production"
           - name: ENABLE_A365_OBSERVABILITY_EXPORTER
@@ -54,7 +53,7 @@ properties:
           - name: CONNECTIONSMAP__0__SERVICEURL
             value: "*"
           - name: CONNECTIONSMAP__0__CONNECTION
-            value: "service_connection"
+            value: "SERVICE_CONNECTION"
           - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID
             value: "${BLUEPRINT_CLIENT_ID}"
           - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID
@@ -64,7 +63,7 @@ properties:
           - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTSECRET
             secretRef: blueprint-client-secret
           - name: AUTH_HANDLER_NAME
-            value: "agentic"
+            value: "AGENTIC"
           - name: USE_AGENTIC_AUTH
             value: "true"
           - name: CLIENT_ID
@@ -74,11 +73,11 @@ properties:
           - name: CLIENT_SECRET
             secretRef: blueprint-client-secret
           - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__TYPE
-            value: "agenticuserauthorization"
+            value: "AgenticUserAuthorization"
           - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__SCOPES
             value: "ea9ffc3e-8a23-4a7d-836d-234d7c7565c1/.default"
           - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__ALTERNATEBLUEPRINTCONNECTIONNAME
-            value: "service_connection"
+            value: "SERVICE_CONNECTION"
     scale:
       minReplicas: 1
       maxReplicas: 1
