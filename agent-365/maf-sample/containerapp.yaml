@@ -1,0 +1,84 @@
+location: ${LOCATION}
+resourceGroup: ${RG}
+name: ${APP_NAME}
+identity:
+  type: UserAssigned
+  userAssignedIdentities:
+    ${UAMI_RSC_ID}: {}
+properties:
+  managedEnvironmentId: ${CAE_ID}
+  configuration:
+    registries:
+      - server: ${ACR_NAME}.azurecr.io
+        identity: ${UAMI_RSC_ID}
+    secrets:
+      - name: blueprint-client-secret
+        value: ${BLUEPRINT_CLIENT_SECRET}
+    ingress:
+      external: true
+      allowInsecure: false
+      targetPort: 3978
+      transport: auto
+  template:
+    volumes:
+      - name: ${SHARE_NAME}-vol
+        storageType: AzureFile
+        storageName: ${SHARE_NAME}
+    containers:
+      - name: ${APP_NAME}
+        image: ${APP_NAME}:latest
+        volumeMounts:
+          - volumeName: ${SHARE_NAME}-vol
+            mountPath: /app
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+        env:
+        # ref: https://github.com/JTantra/a365-maf/blob/main/infra/resources.bicep
+          - name: HOST
+            value: "0.0.0.0"
+          - name: PORT
+            value: "3978"
+          - name: AZURE_OPENAI_ENDPOINT
+            value: "${AZURE_OPENAI_ENDPOINT}"
+          - name: AZURE_OPENAI_DEPLOYMENT
+            value: "${AZURE_OPENAI_DEPLOYMENT}"
+          - name: AZURE_OPENAI_API_VERSION
+            value: "preview"
+          - name: PYTHON_ENVIRONMENT
+            value: "production"
+          - name: ENABLE_A365_OBSERVABILITY_EXPORTER
+            value: "true"
+          - name: AGENT_RUN_TIMEOUT_SECONDS
+            value: "150"
+          - name: CONNECTIONSMAP__0__SERVICEURL
+            value: "*"
+          - name: CONNECTIONSMAP__0__CONNECTION
+            value: "service_connection"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID
+            value: "${BLUEPRINT_CLIENT_ID}"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID
+            value: "${TENANT_ID}"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__SCOPES
+            value: "https://graph.microsoft.com/.default"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTSECRET
+            secretRef: blueprint-client-secret
+          - name: AUTH_HANDLER_NAME
+            value: "agentic"
+          - name: USE_AGENTIC_AUTH
+            value: "true"
+          - name: CLIENT_ID
+            value: "${BLUEPRINT_CLIENT_ID}"
+          - name: TENANT_ID
+            value: "${TENANT_ID}"
+          - name: CLIENT_SECRET
+            secretRef: blueprint-client-secret
+          - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__TYPE
+            value: "agenticuserauthorization"
+          - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__SCOPES
+            value: "ea9ffc3e-8a23-4a7d-836d-234d7c7565c1/.default"
+          - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__ALTERNATEBLUEPRINTCONNECTIONNAME
+            value: "service_connection"
+    scale:
+      minReplicas: 1
+      maxReplicas: 1
