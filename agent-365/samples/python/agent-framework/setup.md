@@ -1,25 +1,38 @@
 ## Cloud infrastructure setup
 
+Setup the shell/environment variables:
+
 ```sh
-LOCATION='southeastasia'
-APP_NAME='a365-test-01'
-RG="rg-$APP_NAME"
 SUBSCRIPTION_ID='<subscription-id>'
-```
-
-```sh
-az account set --subscription $SUBSCRIPTION_ID
-az group create --name $RG --location $LOCATION
-```
-
-```sh
+export LOCATION='southeastasia'
+export APP_NAME='a365-test-01'
+export RG="rg-$APP_NAME"
 FOUNDRY_NAME="foundry-$APP_NAME"
 PROJECT_NAME="proj-$APP_NAME"
 MODEL_NAME='gpt-5.4-mini'
 UAMI_NAME="uami-$APP_NAME"
 ```
 
+> [!Tip]
+>
+> Shell vs environment variables:
+>
+> |  | Shell variables | Environment variables|
+> |---|---|---|
+> | Scope | **Local** to the current shell process | **Global** to the shell and all spawned child processes. |
+> | Viewing command | `set` (displays all shell and environment variables) | `env` or `printenv` |
+> 
+> Notice that certain variables in this write-up are `export`ed because they are used for `envsubst` later to be substituted into the container app manifest file
+
+Set az CLI to desired subscription (so that all future az commands uses this subscription without having to specify `--subscription`) and create the resource group:
+
+```sh
+az account set --subscription $SUBSCRIPTION_ID
+az group create --name $RG --location $LOCATION
+```
+
 ## 1. Foundry
+
 
 Create Foundry resource:
 
@@ -45,13 +58,6 @@ az cognitiveservices account project create \
   --project-name $PROJECT_NAME --display-name $PROJECT_NAME
 ```
 
-Get project endpoint:
-
-```sh
-az cognitiveservices account project show \
-  --name $FOUNDRY_NAME --resource-group $RG --project-name $PROJECT_NAME  --query 'properties.endpoints' -o tsv
-```
-
 Create model deployment:
 
 ```sh
@@ -60,6 +66,20 @@ az cognitiveservices account deployment create \
   --name $FOUNDRY_NAME --resource-group $RG --deployment-name $MODEL_NAME \
   --model-name $MODEL_NAME --model-version $MODEL_VERSION --model-format 'OpenAI' \
   --sku-capacity 500 --sku 'GlobalStandard'
+```
+
+Get project endpoint:
+
+```sh
+az cognitiveservices account project show \
+  --name $FOUNDRY_NAME --resource-group $RG --project-name $PROJECT_NAME  --query 'properties.endpoints' -o tsv
+```
+
+Set other details for the app:
+
+```sh
+export AZURE_OPENAI_ENDPOINT=$(az cognitiveservices account show --name $FOUNDRY_NAME --resource-group $RG --query 'properties.endpoints."OpenAI Language Model Instance API"' -o tsv)
+export AZURE_OPENAI_DEPLOYMENT=$MODEL_NAME
 ```
 
 ### 1.1.  Create UAMI and assigne role
@@ -74,6 +94,12 @@ Get UAMI ID:
 
 ```sh
 UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query principalId -o tsv)
+```
+
+Get UAMI resource ID
+
+```sh
+export UAMI_RSC_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query id -o tsv)
 ```
 
 Get Foundry ID:
@@ -94,7 +120,7 @@ Prepare variables (storage account name cannot contain dashes):
 
 ```sh
 SA_NAME="sa$APP_NAME$RANDOM"
-SHARE_NAME="$APP_NAME-share"
+export SHARE_NAME="$APP_NAME-share"
 ```
 
 Create storage account + file share:
@@ -133,7 +159,7 @@ az containerapp env storage set \
 Create ACR (ACR name cannot contain dashes):
 
 ```sh
-ACR_NAME="acr$APP_NAME$RANDOM"
+export ACR_NAME="acr$APP_NAME$RANDOM"
 az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku Basic --tags SecurityControl=Ignore
 ```
 
@@ -156,7 +182,7 @@ az containerapp env create --name $ENV_NAME --resource-group $RG --location $LOC
 Verify container app environment ID:
 
 ```sh
-ENV_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
+export CAE_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
 ```
 
 Get container app environment domain:
@@ -170,6 +196,12 @@ ENV_DOMAIN=$(az containerapp env show --name $ENV_NAME --resource-group $RG --qu
 ```sh
 MESSAGING_ENDPOINT="https://$APP_NAME.$ENV_DOMAIN/api/messages"
 a365 setup all --aiteammate -n $AGENT_NAME --messaging-endpoint $MESSAGING_ENDPOINT
+```
+
+```sh
+export TENANT_ID=$(python3 -c "import json; print(json.load(open('a365.config.json'))['tenantId'])")
+export BLUEPRINT_CLIENT_ID=$(python3 -c "import json; print(json.load(open('a365.generated.config.json'))['agentBlueprintId'])")
+export BLUEPRINT_CLIENT_SECRET=$(python3 -c "import json; print(json.load(open('a365.generated.config.json'))['agentBlueprintClientSecret'])")
 ```
 
 ## 6. Deploy container app
