@@ -33,7 +33,6 @@ az group create --name $RG --location $LOCATION
 
 ## 1. Foundry
 
-
 Create Foundry resource:
 
 ```sh
@@ -105,7 +104,7 @@ FOUNDRY_ID=$(az cognitiveservices account show --name $FOUNDRY_NAME --resource-g
 Grant UAMI Cognitive Services User to Foundry resource:
 
 ```sh
-az role assignment create --assignee $UAMI_ID --role 'Cognitive Services User' --scope $FOUNDRY_ID
+az role assignment create --assignee $UAMI_ID --role 'Cognitive Services OpenAI User' --scope $FOUNDRY_ID
 ```
 
 Get UAMI resource ID (for later container app deployment use):
@@ -114,7 +113,27 @@ Get UAMI resource ID (for later container app deployment use):
 export UAMI_RSC_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query id -o tsv)
 ```
 
-## 2. Azure Files
+## 2. Container Apps Environment
+
+Create Container Apps environment:
+
+```sh
+az containerapp env create --name $ENV_NAME --resource-group $RG --location $LOCATION
+```
+
+Verify container app environment ID:
+
+```sh
+export CAE_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
+```
+
+Get container app environment domain (for a365 CLI messaging endpoint):
+
+```sh
+CAE_DOMAIN=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query "properties.defaultDomain" --output tsv)
+```
+
+## 3. Azure Files
 
 Prepare variables (storage account name cannot contain dashes):
 
@@ -138,7 +157,7 @@ Download app files from GitHub and upload to storage account:
 
 ```sh
 for FILE in start_with_generic_host.py host_agent_server.py agent.py agent_interface.py local_authentication_options.py token_cache.py; do
-  curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/python/agent-framework/app/$FILE"
+  curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sample/app/$FILE"
   az storage file upload --share-name $SHARE_NAME --source $FILE --connection-string $CONN_STR
 done
 ```
@@ -154,7 +173,7 @@ az containerapp env storage set \
   --azure-file-share-name $SHARE_NAME --access-mode ReadOnly
 ```
 
-## 3. Container Registry
+## 4. Container Registry
 
 Create ACR (ACR name cannot contain dashes):
 
@@ -166,37 +185,23 @@ az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku B
 Build image directly in ACR (no local Docker needed):
 
 ```sh
-curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/python/agent-framework/pyproject.toml
-curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/python/agent-framework/Dockerfile
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sample/pyproject.toml
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sample/Dockerfile
 az acr build --registry $ACR_NAME --image $APP_NAME:latest --file Dockerfile .
-```
-
-## 4. Container Apps Environment
-
-Create Container Apps environment:
-
-```sh
-az containerapp env create --name $ENV_NAME --resource-group $RG --location $LOCATION
-```
-
-Verify container app environment ID:
-
-```sh
-export CAE_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
-```
-
-Get container app environment domain:
-
-```sh
-ENV_DOMAIN=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query "properties.defaultDomain" --output tsv)
 ```
 
 ## 5. Agent 365 CLI
 
 ```sh
-MESSAGING_ENDPOINT="https://$APP_NAME.$ENV_DOMAIN/api/messages"
+MESSAGING_ENDPOINT="https://$APP_NAME.$CAE_DOMAIN/api/messages"
 a365 setup all --aiteammate -n $AGENT_NAME --messaging-endpoint $MESSAGING_ENDPOINT
 ```
+
+> [!Important]
+>
+> Download the `a365.config.json` and `a365.generated.config.json` files from the cloud shell and keep them.
+>
+> The a365 CLI references these config files to resume the work on the agent for future commands.
 
 ```sh
 export TENANT_ID=$(python3 -c "import json; print(json.load(open('a365.config.json'))['tenantId'])")
@@ -204,17 +209,35 @@ export BLUEPRINT_CLIENT_ID=$(python3 -c "import json; print(json.load(open('a365
 export BLUEPRINT_CLIENT_SECRET=$(python3 -c "import json; print(json.load(open('a365.generated.config.json'))['agentBlueprintClientSecret'])")
 ```
 
-## 6. Deploy container app
-
-Add agent blueprint secret
+### 5.1. Publish agent manifest in M365 Admin Center
 
 ```sh
-az containerapp secret set \
-  --name <YOUR_CONTAINER_APP_NAME> \
-  --resource-group <YOUR_RESOURCE_GROUP> \
-  --secrets "my-db-password=YourSuperSecretValue123"
+a365 publish
 ```
 
-```sh
+This command generates the `manifest/manifest.zip` file, download it from the cloud shell
 
+Upload the manifest to M365 Admin Center
+
+1. Go to https://admin.cloud.microsoft/#/agents/all
+2. Click "Upload custom agent" button (top right area)
+3. Select the `manifest.zip` file
+4. In the upload wizard:
+  - Review the agent name and description
+  - Set Activate scope → select "All users" or a group of users as desired
+  - Click Publish
+
+## 6. Deploy container app
+
+Download manifest template and replace placeholders with environment variables
+
+```sh
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sample/containerapp.yaml
+envsubst < containerapp.yaml > containerapp-edited.yaml
+```
+
+Deploy container app with edited manifest file:
+
+```sh
+az containerapp create --name $APP_NAME --resource-group $RG --yaml containerapp-edited.yaml
 ```
