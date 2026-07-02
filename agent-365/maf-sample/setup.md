@@ -201,12 +201,6 @@ curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sa
 az acr build --registry $ACR_NAME --image $APP_NAME:latest --file Dockerfile .
 ```
 
-Get UAMI ID:
-
-```sh
-UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query principalId -o tsv)
-```
-
 Get ACR ID:
 
 ```sh
