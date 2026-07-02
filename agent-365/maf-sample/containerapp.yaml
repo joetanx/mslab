@@ -26,7 +26,7 @@ properties:
         storageName: ${SHARE_NAME}
     containers:
       - name: ${APP_NAME}
-        image: <ACR_NAME>.azurecr.io/${APP_NAME}:latest
+        image: ${ACR_NAME}.azurecr.io/${APP_NAME}:latest
         volumeMounts:
           - volumeName: ${SHARE_NAME}-vol
             mountPath: /app
