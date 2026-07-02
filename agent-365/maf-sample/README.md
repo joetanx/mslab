@@ -109,10 +109,16 @@ Create UAMI:
 az identity create --name $UAMI_NAME --resource-group $RG
 ```
 
-Export UAMI ID as environment variable:
+Get UAMI service principal ID:
 
 ```sh
-export UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query principalId -o tsv)
+UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query principalId -o tsv)
+```
+
+Export UAMI client ID as environment variable:
+
+```sh
+UAMI_CLIENT_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query clientId -o tsv)
 ```
 
 Get Foundry ID:
