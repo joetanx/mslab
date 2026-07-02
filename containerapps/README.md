@@ -3,14 +3,32 @@
 Prepare variables and create resource group (common step for both methods):
 
 ```sh
+SUBSCRIPTION_ID='<subscription-id>'
 LOCATION='southeastasia'
 APP_NAME='myapp'
 RG="rg-$APP_NAME"
 ENV_NAME="cae-$APP_NAME"
-SUBSCRIPTION_ID='<subscription-id>'
+```
 
+Set az CLI to desired subscription (so that all future az commands uses this subscription without having to specify `--subscription`) and create the resource group:
+
+```sh
 az account set --subscription $SUBSCRIPTION_ID
 az group create --name $RG --location $LOCATION
+```
+
+The subscription needs to be registered for `Microsoft.OperationalInsights` and `Microsoft.ContainerRegistry` resource provider for container apps environment and container registry creation.
+
+```sh
+az provider register --namespace Microsoft.OperationalInsights
+az provider register --namespace Microsoft.ContainerRegistry
+```
+
+Check the registration state (it can take some time to change from `Registering` to `Registered`:
+
+```sh
+az provider show --namespace Microsoft.OperationalInsights --query "registrationState"
+az provider show --namespace Microsoft.ContainerRegistry --query "registrationState"
 ```
 
 Create Container Apps environment:
@@ -95,15 +113,6 @@ az containerapp create --name $APP_NAME --resource-group $RG --yaml manifest-van
 > The `pip install` runs at every cold start. For anything beyond a quick prototype, method 2 below is preferable.
 
 ## 2. Method 2: Build image with dependencies and code into Auzre Container Registry (ACR)
-
-> [!Note]
->
-> The subscription needs to be registered for `Microsoft.ContainerRegistry`
-
-> ```sh
-> az provider register --namespace Microsoft.ContainerRegistry
-> az provider show --namespace Microsoft.ContainerRegistry --query "registrationState"
-> ```
 
 ### 2.1. Setup container registry
 
