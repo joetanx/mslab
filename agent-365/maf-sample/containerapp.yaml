@@ -39,12 +39,12 @@ properties:
             value: "0.0.0.0"
           - name: PORT
             value: "3978"
-          - name: AZURE_OPENAI_ENDPOINT
-            value: "${AZURE_OPENAI_ENDPOINT}"
-          - name: AZURE_OPENAI_DEPLOYMENT
-            value: "${AZURE_OPENAI_DEPLOYMENT}"
-          - name: AZURE_OPENAI_API_VERSION
-            value: "preview"
+          - name: FOUNDRY_PROJECT_ENDPOINT
+            value: "${FOUNDRY_PROJECT_ENDPOINT}"
+          - name: FOUNDRY_MODEL
+            value: "${FOUNDRY_MODEL}"
+          - name: UAMI_ID
+            value: "${UAMI_ID}"
           - name: PYTHON_ENVIRONMENT
             value: "production"
           - name: ENABLE_A365_OBSERVABILITY_EXPORTER
