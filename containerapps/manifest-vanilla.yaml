@@ -2,7 +2,7 @@ location: <LOCATION>
 resourceGroup: <RG>
 name: <APP_NAME>
 properties:
-  managedEnvironmentId: <ENV_ID>
+  managedEnvironmentId: <CAE_ID>
   configuration:
     ingress:
       external: true
