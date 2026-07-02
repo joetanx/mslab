@@ -1,5 +1,7 @@
 ## 0. Cloud infrastructure setup
 
+> Adapted from https://github.com/microsoft/Agent365-Samples/tree/main/python/agent-framework/sample-agent
+
 > [!Important]
 >
 > The setup is performed in Cloud Shell (bash) in Azure portal, which already has `az`, `dotnet`, `python` and `pwsh` (v7) tools.
@@ -40,19 +42,21 @@ az account set --subscription $SUBSCRIPTION_ID
 az group create --name $RG --location $LOCATION
 ```
 
-The subscription needs to be registered for `Microsoft.OperationalInsights` and `Microsoft.ContainerRegistry` resource provider for container apps environment and container registry creation.
-
-```sh
-az provider register --namespace Microsoft.OperationalInsights
-az provider register --namespace Microsoft.ContainerRegistry
-```
-
-Check:
-
-```sh
-az provider show --namespace Microsoft.OperationalInsights --query "registrationState"
-az provider show --namespace Microsoft.ContainerRegistry --query "registrationState"
-```
+> [!Note]
+>
+> The subscription needs to be registered for `Microsoft.OperationalInsights` and `Microsoft.ContainerRegistry` resource provider for container apps environment and container registry creation.
+>
+> ```sh
+> az provider register --namespace Microsoft.OperationalInsights
+> az provider register --namespace Microsoft.ContainerRegistry
+> ```
+>
+> Check the registration state, it can take some time to change from `Registering` to `Registered`:
+>
+> ```sh
+> az provider show --namespace Microsoft.OperationalInsights --query "registrationState"
+> az provider show --namespace Microsoft.ContainerRegistry --query "registrationState"
+> ```
 
 ## 1. Foundry
 
@@ -105,7 +109,7 @@ Create UAMI:
 az identity create --name $UAMI_NAME --resource-group $RG
 ```
 
-Get UAMI ID:
+Export UAMI ID as environment variable:
 
 ```sh
 export UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query principalId -o tsv)
@@ -258,8 +262,8 @@ Upload the manifest to M365 Admin Center
 1. Go to https://admin.cloud.microsoft/#/agents/all
 2. From menu on top of the agents list, click the elipsis `…` and select `Add agent`
 3. `Choose file` to select the `manifest.zip` file
-4. Select the desired users or groups to `Publish` and `Install` for
-5. Apply template, review permission, then `Publish`
+4. Select the desired users or groups to `Activate` for
+5. Select the template to apply, review permission, then `Publish`
 
 ## 6. Deploy container app
 
