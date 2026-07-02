@@ -82,7 +82,7 @@ export AZURE_OPENAI_ENDPOINT=$(az cognitiveservices account show --name $FOUNDRY
 export AZURE_OPENAI_DEPLOYMENT=$MODEL_NAME
 ```
 
-### 1.1.  Create UAMI and assigne role
+### 1.1.  Create UAMI and assign role
 
 Create UAMI:
 
@@ -96,12 +96,6 @@ Get UAMI ID:
 UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query principalId -o tsv)
 ```
 
-Get UAMI resource ID
-
-```sh
-export UAMI_RSC_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query id -o tsv)
-```
-
 Get Foundry ID:
 
 ```sh
@@ -112,6 +106,12 @@ Grant UAMI Cognitive Services User to Foundry resource:
 
 ```sh
 az role assignment create --assignee $UAMI_ID --role 'Cognitive Services User' --scope $FOUNDRY_ID
+```
+
+Get UAMI resource ID (for later container app deployment use):
+
+```sh
+export UAMI_RSC_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query id -o tsv)
 ```
 
 ## 2. Azure Files
