@@ -1,8 +1,8 @@
-## Cloud infrastructure setup
+## 0. Cloud infrastructure setup
 
 > [!Important]
 >
-> The setup is performed in Cloud Shell (bash) in Azure portal, which already has `az`, `a365`, `python` and `pwsh` (v7) tools.
+> The setup is performed in Cloud Shell (bash) in Azure portal, which already has `az`, `dotnet`, `python` and `pwsh` (v7) tools.
 >
 > (it even has most bash utilities like `vi` and `envsubst`)
 >
@@ -15,6 +15,7 @@ SUBSCRIPTION_ID='<subscription-id>'
 export LOCATION='southeastasia'
 export APP_NAME='a365-test-01'
 export RG="rg-$APP_NAME"
+CAE_NAME="cae-$APP_NAME"
 FOUNDRY_NAME="foundry-$APP_NAME"
 PROJECT_NAME="proj-$APP_NAME"
 MODEL_NAME='gpt-5.4-mini'
@@ -37,6 +38,20 @@ Set az CLI to desired subscription (so that all future az commands uses this sub
 ```sh
 az account set --subscription $SUBSCRIPTION_ID
 az group create --name $RG --location $LOCATION
+```
+
+The subscription needs to be registered for `Microsoft.OperationalInsights` and `Microsoft.ContainerRegistry` resource provider for container apps environment and container registry creation.
+
+```sh
+az provider register --namespace Microsoft.OperationalInsights
+az provider register --namespace Microsoft.ContainerRegistry
+```
+
+Check:
+
+```sh
+az provider show --namespace Microsoft.OperationalInsights --query "registrationState"
+az provider show --namespace Microsoft.ContainerRegistry --query "registrationState"
 ```
 
 ## 1. Foundry
@@ -126,19 +141,19 @@ export UAMI_RSC_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --q
 Create Container Apps environment:
 
 ```sh
-az containerapp env create --name $ENV_NAME --resource-group $RG --location $LOCATION
+az containerapp env create --name $CAE_NAME --resource-group $RG --location $LOCATION
 ```
 
 Verify container app environment ID:
 
 ```sh
-export CAE_ID=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query id -o tsv)
+export CAE_ID=$(az containerapp env show --name $CAE_NAME --resource-group $RG --query id -o tsv)
 ```
 
 Get container app environment domain (for a365 CLI messaging endpoint):
 
 ```sh
-CAE_DOMAIN=$(az containerapp env show --name $ENV_NAME --resource-group $RG --query "properties.defaultDomain" --output tsv)
+CAE_DOMAIN=$(az containerapp env show --name $CAE_NAME --resource-group $RG --query "properties.defaultDomain" --output tsv)
 ```
 
 ## 3. Azure Files
@@ -146,7 +161,7 @@ CAE_DOMAIN=$(az containerapp env show --name $ENV_NAME --resource-group $RG --qu
 Prepare variables (storage account name cannot contain dashes):
 
 ```sh
-SA_NAME="sa$APP_NAME$RANDOM"
+SA_NAME="sa${APP_NAME//-/}$RANDOM"
 export SHARE_NAME="$APP_NAME-share"
 ```
 
@@ -174,9 +189,8 @@ Register Azure Files storage in container app environment:
 
 ```sh
 SA_KEY=$(az storage account keys list --account-name $SA_NAME --resource-group $RG --query "[0].value" -o tsv)
-
 az containerapp env storage set \
-  --name $ENV_NAME --storage-name $SHARE_NAME --resource-group $RG \
+  --name $CAE_NAME --storage-name $SHARE_NAME --resource-group $RG \
   --azure-file-account-name $SA_NAME --azure-file-account-key "$SA_KEY" \
   --azure-file-share-name $SHARE_NAME --access-mode ReadOnly
 ```
@@ -186,23 +200,35 @@ az containerapp env storage set \
 Create ACR (ACR name cannot contain dashes):
 
 ```sh
-export ACR_NAME="acr$APP_NAME$RANDOM"
+export ACR_NAME="acr${APP_NAME//-/}$RANDOM"
 az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku Basic --tags SecurityControl=Ignore
 ```
 
 Build image directly in ACR (no local Docker needed):
 
 ```sh
-curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sample/pyproject.toml
-curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sample/Dockerfile
+curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sample/{pyproject.toml,Dockerfile}"
 az acr build --registry $ACR_NAME --image $APP_NAME:latest --file Dockerfile .
 ```
 
 ## 5. Agent 365 CLI
 
+Install a365 CLI in the Cloud Shell:
+
+```sh
+dotnet tool install --global Microsoft.Agents.A365.DevTools.Cli
+export PATH=$PATH:/home/system/.dotnet/tools/
+```
+
+> [!Tip]
+>
+> Run `a365 setup requirements` to verify if the tenant has the necessary prerequisites (e.g. `Agent 365 CLI` app registration)
+>
+> Read more about the prerequisites: https://github.com/joetanx/mslab/blob/main/agent-365/a365-cli.md
+
 ```sh
 MESSAGING_ENDPOINT="https://$APP_NAME.$CAE_DOMAIN/api/messages"
-a365 setup all --aiteammate -n $AGENT_NAME --messaging-endpoint $MESSAGING_ENDPOINT
+a365 setup all --aiteammate -n $APP_NAME --messaging-endpoint $MESSAGING_ENDPOINT
 ```
 
 > [!Important]
@@ -228,12 +254,10 @@ This command generates the `manifest/manifest.zip` file, download it from the cl
 Upload the manifest to M365 Admin Center
 
 1. Go to https://admin.cloud.microsoft/#/agents/all
-2. Click "Upload custom agent" button (top right area)
-3. Select the `manifest.zip` file
-4. In the upload wizard:
-    - Review the agent name and description
-    - Set Activate scope → select "All users" or a group of users as desired
-    - Click Publish
+2. From menu on top of the agents list, click the elipsis `…` and select `Add agent`
+3. `Choose file` to select the `manifest.zip` file
+4. Select the desired users or groups to `Publish` and `Install` for
+5. Apply template, review permission, then `Publish`
 
 ## 6. Deploy container app
 
@@ -247,5 +271,5 @@ envsubst < containerapp.yaml > containerapp-edited.yaml
 Deploy container app with edited manifest file:
 
 ```sh
-az containerapp create --name $APP_NAME --resource-group $RG --yaml containerapp-edited.yaml
+az containerapp create --name "ca-$APP_NAME" --resource-group $RG --yaml containerapp-edited.yaml
 ```
