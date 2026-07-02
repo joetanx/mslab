@@ -6,7 +6,6 @@
 # --- Imports ---
 import asyncio
 import logging
-import os
 import socket
 from os import environ
 
@@ -103,7 +102,7 @@ class GenericAgentHost:
 
         # Auth handler name can be configured via environment
         # Defaults to empty (no auth handler) - set AUTH_HANDLER_NAME=AGENTIC for production agentic auth
-        self.auth_handler_name = os.getenv("AUTH_HANDLER_NAME", "") or None
+        self.auth_handler_name = environ.get("AUTH_HANDLER_NAME", "") or None
         if self.auth_handler_name:
             logger.info(f"🔐 Using auth handler: {self.auth_handler_name}")
         else:
@@ -404,6 +403,3 @@ class GenericAgentHost:
                 await self.agent_instance.cleanup()
             except Exception as e:
                 logger.error(f"Cleanup error: {e}")
-
-
-
