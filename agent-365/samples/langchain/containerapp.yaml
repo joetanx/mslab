@@ -45,6 +45,8 @@ properties:
             value: "production"
           - name: ENABLE_OBSERVABILITY
             value: "true"
+          - name: ENABLE_A365_OBSERVABILITY_EXPORTER
+            value: "true"
           - name: CONNECTIONSMAP__0__SERVICEURL
             value: "*"
           - name: CONNECTIONSMAP__0__CONNECTION

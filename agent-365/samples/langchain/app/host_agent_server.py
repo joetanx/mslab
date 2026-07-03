@@ -76,8 +76,14 @@ def create_and_run_host(
         enable_azure_monitor=False,
         a365_token_resolver=lambda agent_id, tenant_id: get_cached_agentic_token(
             tenant_id, agent_id
-        )
-        or "",
+        ),
+        instrumentation_options={
+            "openai": {"enabled": False},
+            "openai_agents": {"enabled": False},
+            "langchain": {"enabled": True},
+            "semantic_kernel": {"enabled": False},
+            "agent_framework": {"enabled": False},
+        }
     )
 
     host = GenericAgentHost(agent_class, *agent_args, **agent_kwargs)
@@ -304,14 +310,18 @@ class GenericAgentHost:
             await self.agent_instance.initialize()
 
     def create_auth_configuration(self) -> AgentAuthConfiguration | None:
-        return AgentAuthConfiguration(
-            auth_type=environ.get("CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHTYPE"),
-            client_id=environ.get("CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID"),
-            federated_client_id=environ.get("CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID"),
-            tenant_id=environ.get("CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID"),
-            scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
-        )
-        logger.info("🔒 AgentAuthConfiguration initialized")
+        if environ['CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID']:
+            logger.info("🔒 Using Federated Identity Credentials authentication")
+            return AgentAuthConfiguration(
+                auth_type=environ['CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHTYPE'],
+                client_id=environ['CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID'],
+                federated_client_id=environ['CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID'],
+                tenant_id=environ['CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID'],
+                scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
+            )
+        else:
+            logger.warning("⚠️ No auth env vars; running anonymous")
+            return none
 
     def start_server(self, auth_configuration: AgentAuthConfiguration | None = None):
         async def entry_point(req: Request) -> Response:

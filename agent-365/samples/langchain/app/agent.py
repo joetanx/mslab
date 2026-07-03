@@ -68,9 +68,9 @@ class LangChainAgent(AgentInterface):
     def _create_model(self):
         """Create a LangChain chat model using init_chat_model."""
         model = init_chat_model(
-            f"azure_ai:{environ.get('FOUNDRY_MODEL')}"
+            f"azure_ai:{environ['FOUNDRY_MODEL']}",
             project_endpoint=environ['FOUNDRY_PROJECT_ENDPOINT'],
-            credential=ManagedIdentityCredential(client_id=environ.get("UAMI_CLIENT_ID")
+            credential=ManagedIdentityCredential(client_id=environ['UAMI_CLIENT_ID'])
         )
         logger.info("✅ LangChain chat model created")
         return model
