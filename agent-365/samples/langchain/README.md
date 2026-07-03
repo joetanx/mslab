@@ -180,7 +180,11 @@ Download app files from GitHub and upload to storage account:
 
 ```sh
 for FILE in start_with_generic_host.py host_agent_server.py agent.py agent_interface.py local_authentication_options.py token_cache.py; do
+<<<<<<< HEAD:agent-365/samples/langchain/README.md
+  curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/langchain/app/$FILE"
+=======
   curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/sample-maf/app/$FILE"
+>>>>>>> 4c5a5c06ef4ad0fb983779c3a1695c5ecc380b95:agent-365/sample-maf/README.md
   az storage file upload --share-name $SHARE_NAME --source $FILE --connection-string $CONN_STR
 done
 ```
@@ -207,7 +211,11 @@ az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku B
 Build image directly in ACR (no local Docker needed):
 
 ```sh
+<<<<<<< HEAD:agent-365/samples/langchain/README.md
+curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/langchain/{pyproject.toml,Dockerfile}"
+=======
 curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/sample-maf/{pyproject.toml,Dockerfile}"
+>>>>>>> 4c5a5c06ef4ad0fb983779c3a1695c5ecc380b95:agent-365/sample-maf/README.md
 az acr build --registry $ACR_NAME --image $APP_NAME:latest --file Dockerfile .
 ```
 
@@ -276,7 +284,11 @@ Upload the manifest to M365 Admin Center
 Download manifest template and replace placeholders with environment variables
 
 ```sh
+<<<<<<< HEAD:agent-365/samples/langchain/README.md
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/langchain/containerapp.yaml
+=======
 curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/sample-maf/containerapp.yaml
+>>>>>>> 4c5a5c06ef4ad0fb983779c3a1695c5ecc380b95:agent-365/sample-maf/README.md
 envsubst < containerapp.yaml > containerapp-edited.yaml
 ```
 
