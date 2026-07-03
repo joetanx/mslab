@@ -1,9 +1,9 @@
 [project]
-name = "a365-maf-sample"
+name = "a365-langchain-sample"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-    # LangChain agent framework and model/tool integrations
+    # LangChain runtime and model/tool integrations
     "langchain",
     "langgraph",
     "langchain-azure-ai",
