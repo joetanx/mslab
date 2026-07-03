@@ -7,6 +7,7 @@ dependencies = [
     "langchain",
     "langchain-openai",
     "langchain-mcp",
+    "langgraph",
 
     # Microsoft Agents SDK - Official packages for hosting and integration
     "microsoft-agents-hosting-aiohttp",
