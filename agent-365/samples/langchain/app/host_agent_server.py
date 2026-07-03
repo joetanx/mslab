@@ -310,18 +310,13 @@ class GenericAgentHost:
             await self.agent_instance.initialize()
 
     def create_auth_configuration(self) -> AgentAuthConfiguration | None:
-        if environ['CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID']:
-            logger.info("🔒 Using Federated Identity Credentials authentication")
-            return AgentAuthConfiguration(
-                auth_type=environ['CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHTYPE'],
-                client_id=environ['CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID'],
-                federated_client_id=environ['CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID'],
-                tenant_id=environ['CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID'],
-                scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
-            )
-        else:
-            logger.warning("⚠️ No auth env vars; running anonymous")
-            return none
+        """Method edited from sample code to use ONLY FIC"""
+        service_settings = agents_sdk_config["CONNECTIONS"]["SERVICE_CONNECTION"]["SETTINGS"]
+        logger.info("🔒 AgentAuthConfiguration initialized with FIC")
+        return AgentAuthConfiguration(
+            **service_settings,
+            scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
+        )
 
     def start_server(self, auth_configuration: AgentAuthConfiguration | None = None):
         async def entry_point(req: Request) -> Response:

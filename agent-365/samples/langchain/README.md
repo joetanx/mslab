@@ -260,15 +260,16 @@ UAMI will be used for Feederated Identity Credential (FIC) for the blueprint, th
 
 > [!Note]
 >
-> `Application Administrator` or `Cloud Application Administrator` Entra role required to add FIC to agent blueprint
+> 1. `Application Administrator` or `Cloud Application Administrator` Entra role required to add FIC to agent blueprint
+> 2. The principal ID (not client ID) of the UAMI is used to assign FIC
 
 ```sh
 az ad app federated-credential create \
   --id $BLUEPRINT_CLIENT_ID \
   --parameters '{
     "name": "containerapp-uami-fic",
-    "issuer": "https://login.microsoftonline.com/$TENANT_ID/v2.0",
-    "subject": "'"$UAMI_CLIENT_ID"'",
+    "issuer": "https://login.microsoftonline.com/'"$TENANT_ID"'/v2.0",
+    "subject": "'"$UAMI_ID"'",
     "audiences": ["api://AzureADTokenExchange"]
   }'
 ```
