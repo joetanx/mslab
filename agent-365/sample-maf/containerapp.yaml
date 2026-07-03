@@ -42,11 +42,11 @@ properties:
             value: "${FOUNDRY_PROJECT_ENDPOINT}"
           - name: FOUNDRY_MODEL
             value: "${FOUNDRY_MODEL}"
-          - name: UAMI_ID
+          - name: UAMI_CLIENT_ID
             value: "${UAMI_CLIENT_ID}"
           - name: PYTHON_ENVIRONMENT
             value: "production"
-          - name: ENABLE_A365_OBSERVABILITY_EXPORTER
+          - name: ENABLE_OBSERVABILITY
             value: "true"
           - name: AGENT_RUN_TIMEOUT_SECONDS
             value: "150"
