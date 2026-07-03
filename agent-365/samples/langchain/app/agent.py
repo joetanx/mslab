@@ -18,6 +18,7 @@ from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from azure.identity.aio import ManagedIdentityCredential
 
 # Agent Interface
 from agent_interface import AgentInterface
@@ -66,8 +67,11 @@ class LangChainAgent(AgentInterface):
 
     def _create_model(self):
         """Create a LangChain chat model using init_chat_model."""
-        model = init_chat_model(f"azure_ai:{environ.get('LANGCHAIN_MODEL')}")
-        """init_chat_model takes AZURE_AI_PROJECT_ENDPOINT and AZURE_CLIENT_ID from environment variables."""
+        model = init_chat_model(
+            f"azure_ai:{environ.get('FOUNDRY_MODEL')}"
+            project_endpoint=environ['FOUNDRY_PROJECT_ENDPOINT'],
+            credential=ManagedIdentityCredential(client_id=environ.get("UAMI_CLIENT_ID")
+        )
         logger.info("✅ LangChain chat model created")
         return model
 

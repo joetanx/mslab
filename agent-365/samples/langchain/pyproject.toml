@@ -5,6 +5,7 @@ requires-python = ">=3.12"
 dependencies = [
     # LangChain runtime and model/tool integrations
     "langchain",
+	"langchain-core",
     "langgraph",
     "langchain-azure-ai",
     "langchain-mcp-adapters",

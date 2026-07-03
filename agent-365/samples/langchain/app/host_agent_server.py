@@ -304,21 +304,14 @@ class GenericAgentHost:
             await self.agent_instance.initialize()
 
     def create_auth_configuration(self) -> AgentAuthConfiguration | None:
-        client_id = environ.get("CLIENT_ID")
-        tenant_id = environ.get("TENANT_ID")
-        client_secret = environ.get("CLIENT_SECRET")
-
-        if client_id and tenant_id and client_secret:
-            logger.info("🔒 Using Client Credentials authentication")
-            return AgentAuthConfiguration(
-                client_id=client_id,
-                tenant_id=tenant_id,
-                client_secret=client_secret,
-                scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
-            )
-
-        logger.warning("⚠️ No client credentials configured; running anonymous")
-        return None
+        return AgentAuthConfiguration(
+            auth_type=environ.get("CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHTYPE"),
+            client_id=environ.get("CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID"),
+            federated_client_id=environ.get("CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID"),
+            tenant_id=environ.get("CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID"),
+            scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
+        )
+        logger.info("🔒 AgentAuthConfiguration initialized")
 
     def start_server(self, auth_configuration: AgentAuthConfiguration | None = None):
         async def entry_point(req: Request) -> Response:
