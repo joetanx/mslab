@@ -43,7 +43,7 @@ properties:
           - name: LANGCHAIN_MODEL
             value: "${LANGCHAIN_MODEL}"
           - name: AZURE_CLIENT_ID
-            value: "${AZURE_CLIENT_ID}"
+            value: "${UAMI_CLIENT_ID}"
           - name: PYTHON_ENVIRONMENT
             value: "production"
           - name: ENABLE_OBSERVABILITY
@@ -52,14 +52,18 @@ properties:
             value: "*"
           - name: CONNECTIONSMAP__0__CONNECTION
             value: "SERVICE_CONNECTION"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHORITY
+            value: "https://login.microsoftonline.com/${TENANT_ID}"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHTYPE
+            value: FederatedCredentials
           - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID
             value: "${BLUEPRINT_CLIENT_ID}"
-          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID
-            value: "${TENANT_ID}"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID
+            value: "${UAMI_CLIENT_ID}"
           - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__SCOPES
             value: "https://graph.microsoft.com/.default"
-          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTSECRET
-            secretRef: blueprint-client-secret
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID
+            value: "${TENANT_ID}"
           - name: AUTH_HANDLER_NAME
             value: "AGENTIC"
           - name: CLIENT_ID
