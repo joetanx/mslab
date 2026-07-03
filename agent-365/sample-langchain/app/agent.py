@@ -3,11 +3,11 @@
 """
 LangChain Agent with MCP Server Integration and Observability
 
-This agent uses LangChain's create_agent and connects to MCP servers for extended
+This agent uses LangChain's create_react_agent and connects to MCP servers for extended
 functionality, with integrated observability using Microsoft Agent 365.
 
 Features:
-- LangChain create_agent with init_chat_model for unified model interface
+- LangChain create_react_agent with init_chat_model for unified model interface
 - MCP server integration via McpToolServerConfigurationService + langchain_mcp
 - Simplified observability setup following reference examples pattern
 - Token-based authentication for Agent 365 Observability
@@ -34,9 +34,9 @@ logger = logging.getLogger(__name__)
 # <DependencyImports>
 
 # LangChain
-from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_mcp import load_mcp_tools, StreamableHTTPClient
+from langgraph.prebuilt import create_react_agent
 
 # Agent Interface
 from agent_interface import AgentInterface
@@ -112,10 +112,10 @@ class LangChainAgent(AgentInterface):
     def _create_agent(self):
         """Create the LangChain agent with initial configuration"""
         try:
-            self.agent = create_agent(
+            self.agent = create_react_agent(
                 model=self.model,
                 tools=[],
-                system_prompt=self.AGENT_PROMPT,
+                prompt=self.AGENT_PROMPT,
             )
             logger.info("✅ LangChain agent created")
         except Exception as e:
@@ -187,10 +187,10 @@ class LangChainAgent(AgentInterface):
 
             # Rebuild agent with discovered tools
             if all_tools:
-                self.agent = create_agent(
+                self.agent = create_react_agent(
                     model=self.model,
                     tools=all_tools,
-                    system_prompt=self.AGENT_PROMPT,
+                    prompt=self.AGENT_PROMPT,
                 )
                 logger.info(f"✅ Agent rebuilt with {len(all_tools)} MCP tools")
 
@@ -214,7 +214,7 @@ class LangChainAgent(AgentInterface):
     async def process_user_message(
         self, message: str, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
     ) -> str:
-        """Process user message using LangChain create_agent"""
+        """Process user message using LangChain create_react_agent"""
         # Log the user identity from activity.from_property
         from_prop = context.activity.from_property
         logger.info(
@@ -312,7 +312,7 @@ class LangChainAgent(AgentInterface):
         """Extract text content from LangChain agent result"""
         if not result:
             return ""
-        # LangChain create_agent returns a dict with "messages" key
+        # LangChain create_react_agent returns a dict with "messages" key
         if isinstance(result, dict) and "messages" in result:
             messages = result["messages"]
             # Get the last AI message content
