@@ -38,18 +38,16 @@ properties:
             value: "0.0.0.0"
           - name: PORT
             value: "3978"
-          - name: FOUNDRY_PROJECT_ENDPOINT
-            value: "${FOUNDRY_PROJECT_ENDPOINT}"
-          - name: FOUNDRY_MODEL
-            value: "${FOUNDRY_MODEL}"
-          - name: UAMI_CLIENT_ID
-            value: "${UAMI_CLIENT_ID}"
+          - name: AZURE_AI_PROJECT_ENDPOINT
+            value: "${AZURE_AI_PROJECT_ENDPOINT}"
+          - name: LANGCHAIN_MODEL
+            value: "${LANGCHAIN_MODEL}"
+          - name: AZURE_CLIENT_ID
+            value: "${AZURE_CLIENT_ID}"
           - name: PYTHON_ENVIRONMENT
             value: "production"
           - name: ENABLE_OBSERVABILITY
             value: "true"
-          - name: AGENT_RUN_TIMEOUT_SECONDS
-            value: "150"
           - name: CONNECTIONSMAP__0__SERVICEURL
             value: "*"
           - name: CONNECTIONSMAP__0__CONNECTION
@@ -64,8 +62,6 @@ properties:
             secretRef: blueprint-client-secret
           - name: AUTH_HANDLER_NAME
             value: "AGENTIC"
-          - name: USE_AGENTIC_AUTH
-            value: "true"
           - name: CLIENT_ID
             value: "${BLUEPRINT_CLIENT_ID}"
           - name: TENANT_ID

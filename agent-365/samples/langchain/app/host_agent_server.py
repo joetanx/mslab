@@ -1,19 +1,17 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-"""Generic Agent Host Server - Hosts agents implementing AgentInterface"""
+"""Microsoft Agents host for LangChain-compatible AgentInterface implementations."""
 
-# --- Imports ---
 import asyncio
 import logging
-import socket
 from os import environ
 
 from aiohttp.web import Application, Request, Response, json_response, run_app
 from aiohttp.web_middlewares import middleware as web_middleware
 from dotenv import load_dotenv
 from agent_interface import AgentInterface, check_agent_inheritance
-from microsoft_agents.activity import load_configuration_from_env, Activity, ActivityTypes
+from microsoft_agents.activity import Activity, load_configuration_from_env
 from microsoft_agents.authentication.msal import MsalConnectionManager
 from microsoft_agents.hosting.aiohttp import (
     CloudAdapter,
@@ -47,7 +45,6 @@ from microsoft_agents_a365.runtime.environment_utils import (
 )
 from token_cache import cache_agentic_token, get_cached_agentic_token
 
-# --- Configuration ---
 ms_agents_logger = logging.getLogger("microsoft_agents")
 ms_agents_logger.addHandler(logging.StreamHandler())
 ms_agents_logger.setLevel(logging.INFO)
@@ -61,11 +58,10 @@ load_dotenv()
 agents_sdk_config = load_configuration_from_env(environ)
 
 
-# --- Public API ---
 def create_and_run_host(
     agent_class: type[AgentInterface], *agent_args, **agent_kwargs
 ):
-    """Create and run a generic agent host"""
+    """Create and run the Microsoft Agents host."""
     if not check_agent_inheritance(agent_class):
         raise TypeError(
             f"Agent class {agent_class.__name__} must inherit from AgentInterface"
@@ -89,19 +85,16 @@ def create_and_run_host(
     host.start_server(auth_config)
 
 
-# --- Generic Agent Host ---
 class GenericAgentHost:
-    """Generic host for agents implementing AgentInterface"""
+    """Host an AgentInterface implementation behind the Microsoft Agents SDK."""
 
-    # --- Initialization ---
     def __init__(self, agent_class: type[AgentInterface], *agent_args, **agent_kwargs):
         if not check_agent_inheritance(agent_class):
             raise TypeError(
                 f"Agent class {agent_class.__name__} must inherit from AgentInterface"
             )
 
-        # Auth handler name can be configured via environment
-        # Defaults to empty (no auth handler) - set AUTH_HANDLER_NAME=AGENTIC for production agentic auth
+        # Defaults to no auth handler; set AUTH_HANDLER_NAME=AGENTIC in production.
         self.auth_handler_name = environ.get("AUTH_HANDLER_NAME", "") or None
         if self.auth_handler_name:
             logger.info(f"🔐 Using auth handler: {self.auth_handler_name}")
@@ -129,15 +122,13 @@ class GenericAgentHost:
         self._setup_handlers()
         logger.info("✅ Notification handlers registered successfully")
 
-    # --- Observability ---
     async def _setup_observability_token(
         self, context: TurnContext, tenant_id: str, agent_id: str
     ):
-        # Only attempt token exchange when auth handler is configured
         if not self.auth_handler_name:
             logger.debug("Skipping observability token exchange (no auth handler)")
             return
-            
+
         try:
             logger.info(
                 f"🔐 Attempting token exchange for observability... "
@@ -170,11 +161,13 @@ class GenericAgentHost:
         await self._setup_observability_token(context, tenant_id, agent_id)
         return tenant_id, agent_id
 
-    # --- Handlers (Messages & Notifications) ---
     def _setup_handlers(self):
-        """Setup message and notification handlers"""
-        # Configure auth handlers - only required when auth_handler_name is set
-        handler_config = {"auth_handlers": [self.auth_handler_name]} if self.auth_handler_name else {}
+        """Set up message and notification handlers."""
+        handler_config = (
+            {"auth_handlers": [self.auth_handler_name]}
+            if self.auth_handler_name
+            else {}
+        )
 
         async def help_handler(context: TurnContext, _: TurnState):
             await context.send_activity(
@@ -185,7 +178,6 @@ class GenericAgentHost:
         self.agent_app.conversation_update("membersAdded", **handler_config)(help_handler)
         self.agent_app.message("/help", **handler_config)(help_handler)
 
-        # Handle agent install / uninstall events (agentInstanceCreated / InstallationUpdate)
         @self.agent_app.activity("installationUpdate")
         async def on_installation_update(context: TurnContext, _: TurnState):
             action = context.activity.action
@@ -197,9 +189,14 @@ class GenericAgentHost:
                 getattr(from_prop, "id", "(unknown)") if from_prop else "(unknown)",
             )
             if action == "add":
-                await context.send_activity("Thank you for hiring me! Looking forward to assisting you in your professional journey!")
+                await context.send_activity(
+                    "Thank you for hiring me! Looking forward to assisting you in "
+                    "your professional journey!"
+                )
             elif action == "remove":
-                await context.send_activity("Thank you for your time, I enjoyed working with you.")
+                await context.send_activity(
+                    "Thank you for your time, I enjoyed working with you."
+                )
 
         @self.agent_app.activity("message", **handler_config)
         async def on_message(context: TurnContext, _: TurnState):
@@ -216,14 +213,8 @@ class GenericAgentHost:
 
                     logger.info(f"📨 {user_message}")
 
-                    # Multiple messages pattern: send an immediate acknowledgment before the LLM work begins.
-                    # Each send_activity call produces a discrete Teams message.
-                    # NOTE: For Teams agentic identities, streaming is buffered into a single message by the SDK;
-                    #       use send_activity for any messages that must arrive immediately.
                     await context.send_activity(Activity(type="typing"))
 
-                    # Typing indicator loop — refreshes the "..." animation every ~4s for long-running operations.
-                    # Typing indicators time out after ~5s and must be re-sent. Only visible in 1:1 and small group chats.
                     async def _typing_loop():
                         try:
                             while True:
@@ -235,7 +226,10 @@ class GenericAgentHost:
                     typing_task = asyncio.create_task(_typing_loop())
                     try:
                         response = await self.agent_instance.process_user_message(
-                            user_message, self.agent_app.auth, self.auth_handler_name, context
+                            user_message,
+                            self.agent_app.auth,
+                            self.auth_handler_name,
+                            context,
                         )
                         await context.send_activity(response)
                     finally:
@@ -255,7 +249,7 @@ class GenericAgentHost:
         )
         async def on_notification(
             context: TurnContext,
-            state: TurnState,
+            _state: TurnState,
             notification_activity: AgentNotificationActivity,
         ):
             try:
@@ -278,12 +272,20 @@ class GenericAgentHost:
 
                     response = (
                         await self.agent_instance.handle_agent_notification_activity(
-                            notification_activity, self.agent_app.auth, self.auth_handler_name, context
+                            notification_activity,
+                            self.agent_app.auth,
+                            self.auth_handler_name,
+                            context,
                         )
                     )
 
-                    if notification_activity.notification_type == NotificationTypes.EMAIL_NOTIFICATION:
-                        response_activity = EmailResponse.create_email_response_activity(response)
+                    if (
+                        notification_activity.notification_type
+                        == NotificationTypes.EMAIL_NOTIFICATION
+                    ):
+                        response_activity = (
+                            EmailResponse.create_email_response_activity(response)
+                        )
                         await context.send_activity(response_activity)
                         return
 
@@ -295,14 +297,12 @@ class GenericAgentHost:
                     f"Sorry, I encountered an error processing the notification: {str(e)}"
                 )
 
-    # --- Agent Initialization ---
     async def initialize_agent(self):
         if self.agent_instance is None:
             logger.info(f"🤖 Initializing {self.agent_class.__name__}...")
             self.agent_instance = self.agent_class(*self.agent_args, **self.agent_kwargs)
             await self.agent_instance.initialize()
 
-    # --- Authentication ---
     def create_auth_configuration(self) -> AgentAuthConfiguration | None:
         client_id = environ.get("CLIENT_ID")
         tenant_id = environ.get("TENANT_ID")
@@ -317,13 +317,9 @@ class GenericAgentHost:
                 scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
             )
 
-        if environ.get("BEARER_TOKEN"):
-            logger.info("🔑 Anonymous dev mode")
-        else:
-            logger.warning("⚠️ No auth env vars; running anonymous")
+        logger.warning("⚠️ No client credentials configured; running anonymous")
         return None
 
-    # --- Server ---
     def start_server(self, auth_configuration: AgentAuthConfiguration | None = None):
         async def entry_point(req: Request) -> Response:
             return await start_agent_process(
@@ -396,7 +392,6 @@ class GenericAgentHost:
         except KeyboardInterrupt:
             print("\n👋 Server stopped")
 
-    # --- Cleanup ---
     async def cleanup(self):
         if self.agent_instance:
             try:

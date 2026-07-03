@@ -97,8 +97,8 @@ az cognitiveservices account deployment create \
 Export project endpoint and model environment variables:
 
 ```sh
-export FOUNDRY_PROJECT_ENDPOINT=$(az cognitiveservices account project show --name $FOUNDRY_NAME --resource-group $RG --project-name $PROJECT_NAME  --query 'properties.endpoints' -o tsv)
-export FOUNDRY_MODEL=$MODEL_NAME
+export AZURE_AI_PROJECT_ENDPOINT=$(az cognitiveservices account project show --name $FOUNDRY_NAME --resource-group $RG --project-name $PROJECT_NAME  --query 'properties.endpoints' -o tsv)
+export LANGCHAIN_MODEL=$MODEL_NAME
 ```
 
 ### 1.1.  Create UAMI and assign role
@@ -118,7 +118,7 @@ UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query princi
 Export UAMI client ID as environment variable:
 
 ```sh
-UAMI_CLIENT_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query clientId -o tsv)
+AZURE_CLIENT_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query clientId -o tsv)
 ```
 
 Get Foundry ID:

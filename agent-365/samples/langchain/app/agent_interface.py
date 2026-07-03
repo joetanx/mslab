@@ -1,9 +1,6 @@
 # Copyright (c) Microsoft. All rights reserved.
 
-"""
-Agent Base Class
-Defines the abstract base class that agents must inherit from to work with the generic host.
-"""
+"""Shared host contract for LangChain-compatible agents."""
 
 from abc import ABC, abstractmethod
 from typing import Optional
@@ -26,7 +23,11 @@ class AgentInterface(ABC):
 
     @abstractmethod
     async def process_user_message(
-        self, message: str, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
+        self,
+        message: str,
+        auth: Authorization,
+        auth_handler_name: Optional[str],
+        context: TurnContext,
     ) -> str:
         """Process a user message and return a response."""
         pass
@@ -38,17 +39,8 @@ class AgentInterface(ABC):
 
 
 def check_agent_inheritance(agent_class) -> bool:
-    """
-    Check that an agent class inherits from AgentInterface.
-
-    Args:
-        agent_class: The agent class to check
-
-    Returns:
-        True if the agent inherits from AgentInterface, False otherwise
-    """
+    """Check that an agent class inherits from AgentInterface."""
     if not issubclass(agent_class, AgentInterface):
         print(f"❌ Agent {agent_class.__name__} does not inherit from AgentInterface")
         return False
     return True
-

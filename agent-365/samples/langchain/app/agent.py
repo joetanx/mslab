@@ -22,8 +22,6 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 # Agent Interface
 from agent_interface import AgentInterface
 
-# Microsoft Agents SDK
-from local_authentication_options import LocalAuthenticationOptions
 from microsoft_agents.hosting.core import Authorization, TurnContext
 
 # Notifications
@@ -59,44 +57,24 @@ class LangChainAgent(AgentInterface):
         """Initialize the LangChain agent."""
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        self.auth_options = LocalAuthenticationOptions.from_environment()
-        self.chat_model = self._create_chat_model()
+        self.model = self._create_model()
         self.agent = self._create_agent([])
 
         self.tool_config_service = McpToolServerConfigurationService(logger=self.logger)
         self.mcp_client: Optional[MultiServerMCPClient] = None
         self.mcp_servers_initialized = False
 
-    def _create_chat_model(self):
+    def _create_model(self):
         """Create a LangChain chat model using init_chat_model."""
-        project_endpoint = environ.get("AZURE_AI_PROJECT_ENDPOINT") or environ.get(
-            "FOUNDRY_PROJECT_ENDPOINT"
-        )
-        if project_endpoint and not environ.get("AZURE_AI_PROJECT_ENDPOINT"):
-            environ["AZURE_AI_PROJECT_ENDPOINT"] = project_endpoint
-
-        if environ.get("UAMI_CLIENT_ID") and not environ.get("AZURE_CLIENT_ID"):
-            environ["AZURE_CLIENT_ID"] = environ["UAMI_CLIENT_ID"]
-
-        model = environ.get("LANGCHAIN_MODEL") or environ.get("FOUNDRY_MODEL")
-        if not model:
-            raise ValueError("LANGCHAIN_MODEL or FOUNDRY_MODEL must be configured")
-
-        provider = environ.get("LANGCHAIN_MODEL_PROVIDER")
-        if provider:
-            chat_model = init_chat_model(model, model_provider=provider)
-        elif ":" in model:
-            chat_model = init_chat_model(model)
-        else:
-            chat_model = init_chat_model(model, model_provider="azure_ai")
-
+        model = init_chat_model(f"azure_ai:{environ.get('LANGCHAIN_MODEL')}")
+        """init_chat_model takes AZURE_AI_PROJECT_ENDPOINT and AZURE_CLIENT_ID from environment variables."""
         logger.info("✅ LangChain chat model created")
-        return chat_model
+        return model
 
     def _create_agent(self, tools):
         """Create the LangChain agent graph."""
         agent = create_agent(
-            model=self.chat_model,
+            model=self.model,
             tools=tools,
             system_prompt=self.AGENT_PROMPT,
         )
@@ -111,7 +89,7 @@ class LangChainAgent(AgentInterface):
     ) -> Optional[str]:
         """Get the shared discovery token used to list A365 MCP servers."""
         if is_development_environment():
-            return self.auth_options.bearer_token or None
+            return None
 
         if not auth_handler_name:
             raise ValueError("auth_handler_name is required for production MCP discovery")
@@ -136,16 +114,18 @@ class LangChainAgent(AgentInterface):
         if self.mcp_servers_initialized:
             return
 
-        auth_token = await self._get_mcp_discovery_token(auth, auth_handler_name, context)
+        discovery_token = await self._get_mcp_discovery_token(
+            auth, auth_handler_name, context
+        )
         agentic_app_id = (
             ""
             if is_development_environment()
-            else Utility.resolve_agent_identity(context, auth_token)
+            else Utility.resolve_agent_identity(context, discovery_token)
         )
 
         server_configs = await self.tool_config_service.list_tool_servers(
             agentic_app_id=agentic_app_id,
-            auth_token=auth_token,
+            auth_token=discovery_token,
             options=ToolOptions(orchestrator_name=self.ORCHESTRATOR_NAME),
             authorization=auth,
             auth_handler_name=auth_handler_name,
@@ -167,14 +147,6 @@ class LangChainAgent(AgentInterface):
             }
             if config.headers:
                 headers.update(config.headers)
-            elif auth_token:
-                headers[Constants.Headers.AUTHORIZATION] = (
-                    auth_token
-                    if auth_token.lower().startswith(
-                        f"{Constants.Headers.BEARER_PREFIX.lower()} "
-                    )
-                    else f"{Constants.Headers.BEARER_PREFIX} {auth_token}"
-                )
 
             mcp_connections[server_name] = {
                 "transport": "http",

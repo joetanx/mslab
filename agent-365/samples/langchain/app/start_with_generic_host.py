@@ -1,10 +1,6 @@
 # Copyright (c) Microsoft. All rights reserved.
 
-# !/usr/bin/env python3
-"""
-Example: Direct usage of Generic Agent Host with LangChainAgent
-This script demonstrates direct usage without complex imports.
-"""
+"""Start the Microsoft Agents host with the LangChain agent."""
 
 import sys
 
@@ -18,12 +14,11 @@ except ImportError as e:
 
 
 def main():
-    """Main entry point - start the generic host with LangChainAgent"""
+    """Start the host with LangChainAgent."""
     try:
-        print("Starting Generic Agent Host with LangChainAgent...")
+        print("Starting Microsoft Agents host with LangChainAgent...")
         print()
 
-        # Use the convenience function to start hosting
         create_and_run_host(LangChainAgent)
 
     except Exception as e:
