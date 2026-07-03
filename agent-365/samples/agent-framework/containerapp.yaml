@@ -48,6 +48,8 @@ properties:
             value: "production"
           - name: ENABLE_OBSERVABILITY
             value: "true"
+          - name: AGENT_RUN_TIMEOUT_SECONDS
+            value: "150"
           - name: CONNECTIONSMAP__0__SERVICEURL
             value: "*"
           - name: CONNECTIONSMAP__0__CONNECTION

@@ -3,11 +3,11 @@ name = "a365-maf-sample"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-    # LangChain - Agent framework
+    # LangChain agent framework and model/tool integrations
     "langchain",
-    "langchain-openai",
-    "langchain-mcp",
     "langgraph",
+    "langchain-azure-ai",
+    "langchain-mcp-adapters",
 
     # Microsoft Agents SDK - Official packages for hosting and integration
     "microsoft-agents-hosting-aiohttp",

@@ -1,10 +1,10 @@
 # Copyright (c) Microsoft. All rights reserved.
 
 """
-Local Authentication Options for the AgentFramework Agent.
+Local Authentication Options for the LangChain Agent.
 
 This module provides configuration options for authentication when running
-the AgentFramework agent locally or in development scenarios.
+the LangChain agent locally or in development scenarios.
 """
 
 import os
