@@ -20,7 +20,7 @@ COPY pyproject.toml .
 RUN pip install --no-cache-dir .
 
 # --- Stage 2: runtime ---
-FROM python:slim AS runtime
+FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
