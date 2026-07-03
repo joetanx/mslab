@@ -256,7 +256,7 @@ export TENANT_ID=$(python3 -c "import json; print(json.load(open('a365.config.js
 export BLUEPRINT_CLIENT_ID=$(python3 -c "import json; print(json.load(open('a365.generated.config.json'))['agentBlueprintId'])")
 ```
 
-UAMI will be used for Feederated Identity Credential (FIC) for the blueprint, the `agentBlueprintClientSecret` can be discarded:
+UAMI will be used for Federated Identity Credential (FIC) for the blueprint, the `agentBlueprintClientSecret` can be discarded:
 
 > [!Note]
 >
