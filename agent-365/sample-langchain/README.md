@@ -180,7 +180,7 @@ Download app files from GitHub and upload to storage account:
 
 ```sh
 for FILE in start_with_generic_host.py host_agent_server.py agent.py agent_interface.py local_authentication_options.py token_cache.py; do
-  curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sample/app/$FILE"
+  curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/sample-maf/app/$FILE"
   az storage file upload --share-name $SHARE_NAME --source $FILE --connection-string $CONN_STR
 done
 ```
@@ -207,7 +207,7 @@ az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku B
 Build image directly in ACR (no local Docker needed):
 
 ```sh
-curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sample/{pyproject.toml,Dockerfile}"
+curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/sample-maf/{pyproject.toml,Dockerfile}"
 az acr build --registry $ACR_NAME --image $APP_NAME:latest --file Dockerfile .
 ```
 
@@ -276,7 +276,7 @@ Upload the manifest to M365 Admin Center
 Download manifest template and replace placeholders with environment variables
 
 ```sh
-curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/maf-sample/containerapp.yaml
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/sample-maf/containerapp.yaml
 envsubst < containerapp.yaml > containerapp-edited.yaml
 ```
 
