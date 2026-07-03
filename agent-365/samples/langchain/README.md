@@ -268,7 +268,7 @@ az ad app federated-credential create \
   --parameters '{
     "name": "containerapp-uami-fic",
     "issuer": "https://login.microsoftonline.com/$TENANT_ID/v2.0",
-    "subject": "$UAMI_CLIENT_ID",
+    "subject": "'"$UAMI_CLIENT_ID"'",
     "audiences": ["api://AzureADTokenExchange"]
   }'
 ```
