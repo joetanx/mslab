@@ -1,5 +1,3 @@
-# Copyright (c) Microsoft. All rights reserved.
-
 """Shared host contract for LangChain-compatible agents."""
 
 from abc import ABC, abstractmethod

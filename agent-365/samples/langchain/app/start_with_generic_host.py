@@ -1,5 +1,3 @@
-# Copyright (c) Microsoft. All rights reserved.
-
 """Start the Microsoft Agents host with the LangChain agent."""
 
 import sys

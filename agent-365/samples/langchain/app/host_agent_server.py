@@ -1,6 +1,3 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
-
 """Microsoft Agents host for LangChain-compatible AgentInterface implementations."""
 
 import asyncio
@@ -46,7 +43,6 @@ from microsoft_agents_a365.runtime.environment_utils import (
 from token_cache import cache_agentic_token, get_cached_agentic_token
 
 ms_agents_logger = logging.getLogger("microsoft_agents")
-ms_agents_logger.addHandler(logging.StreamHandler())
 ms_agents_logger.setLevel(logging.INFO)
 
 observability_logger = logging.getLogger("microsoft_agents_a365.observability")
@@ -135,6 +131,14 @@ class GenericAgentHost:
             logger.debug("Skipping observability token exchange (no auth handler)")
             return
 
+        if get_cached_agentic_token(tenant_id, agent_id):
+            logger.debug(
+                "Using cached observability token (tenant_id=%s, agent_id=%s)",
+                tenant_id,
+                agent_id,
+            )
+            return
+
         try:
             logger.info(
                 f"🔐 Attempting token exchange for observability... "
@@ -219,12 +223,10 @@ class GenericAgentHost:
 
                     logger.info(f"📨 {user_message}")
 
-                    await context.send_activity(Activity(type="typing"))
-
                     async def _typing_loop():
                         try:
                             while True:
-                                await asyncio.sleep(4)
+                                await asyncio.sleep(5)
                                 await context.send_activity(Activity(type="typing"))
                         except asyncio.CancelledError:
                             pass  # Expected: loop is cancelled when processing completes.

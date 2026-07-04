@@ -1,14 +1,6 @@
-# Copyright (c) Microsoft. All rights reserved.
+"""LangChain Agent with MCP Server Integration and Observability"""
 
-"""
-LangChain Agent with MCP Server Integration and Observability
-
-This agent uses LangChain's create_agent API, initializes chat models through
-LangChain's provider-neutral init_chat_model helper, and loads A365 MCP servers
-through the core A365 tooling package plus the official langchain-mcp-adapters
-library.
-"""
-
+import asyncio
 import logging
 from os import environ
 from typing import Optional
@@ -48,6 +40,8 @@ class LangChainAgent(AgentInterface):
         self.model = self._create_model()
         self.agent = self._create_agent([])
         self.mcp_service = McpToolRegistrationService(logger=self.logger)
+        self._mcp_tools_revision = self.mcp_service.revision
+        self._mcp_invoke_lock = asyncio.Lock()
 
     def _create_model(self):
         """Create a LangChain chat model using init_chat_model."""
@@ -76,19 +70,66 @@ class LangChainAgent(AgentInterface):
         context: TurnContext,
     ) -> None:
         """Discover A365 MCP servers and load them as LangChain tools."""
-        if self.mcp_service.initialized:
-            return
-
         tools = await self.mcp_service.discover_and_load_tools(
             auth=auth,
             auth_handler_name=auth_handler_name,
             context=context,
         )
-        if not tools:
+        self._replace_agent_if_tools_changed(tools)
+
+    async def refresh_mcp_servers(
+        self,
+        auth: Authorization,
+        auth_handler_name: Optional[str],
+        context: TurnContext,
+    ) -> None:
+        """Force MCP rediscovery and rebuild the LangChain agent with fresh headers."""
+        tools = await self.mcp_service.force_refresh(
+            auth=auth,
+            auth_handler_name=auth_handler_name,
+            context=context,
+        )
+        self._replace_agent_if_tools_changed(tools)
+
+    def _replace_agent_if_tools_changed(self, tools) -> None:
+        if self.mcp_service.revision == self._mcp_tools_revision:
             return
 
         self.agent = self._create_agent(tools)
+        self._mcp_tools_revision = self.mcp_service.revision
         self.logger.info("✅ MCP setup completed with %d LangChain tools", len(tools))
+
+    async def _invoke_with_mcp_retry(
+        self,
+        message: str,
+        auth: Authorization,
+        auth_handler_name: Optional[str],
+        context: TurnContext,
+    ):
+        async with self._mcp_invoke_lock:
+            await self.setup_mcp_servers(auth, auth_handler_name, context)
+            try:
+                return await self.agent.ainvoke(
+                    {"messages": [HumanMessage(content=message)]}
+                )
+            except Exception as e:
+                if not self._is_auth_failure(e):
+                    raise
+
+                self.logger.warning(
+                    "MCP tool call returned an auth failure; refreshing tool headers and retrying once"
+                )
+                await self.refresh_mcp_servers(auth, auth_handler_name, context)
+                return await self.agent.ainvoke(
+                    {"messages": [HumanMessage(content=message)]}
+                )
+
+    def _is_auth_failure(self, exc: BaseException) -> bool:
+        if isinstance(exc, BaseExceptionGroup):
+            return any(self._is_auth_failure(error) for error in exc.exceptions)
+
+        message = str(exc)
+        return "401" in message or "Unauthorized" in message
 
     async def initialize(self):
         """Initialize the agent."""
@@ -111,9 +152,8 @@ class LangChainAgent(AgentInterface):
         )
 
         try:
-            await self.setup_mcp_servers(auth, auth_handler_name, context)
-            result = await self.agent.ainvoke(
-                {"messages": [HumanMessage(content=message)]}
+            result = await self._invoke_with_mcp_retry(
+                message, auth, auth_handler_name, context
             )
             return self._extract_result(result) or "I couldn't process your request at this time."
         except Exception as e:
@@ -132,8 +172,6 @@ class LangChainAgent(AgentInterface):
             notification_type = notification_activity.notification_type
             logger.info(f"📬 Processing notification: {notification_type}")
 
-            await self.setup_mcp_servers(auth, auth_handler_name, context)
-
             if notification_type == NotificationTypes.EMAIL_NOTIFICATION:
                 if not hasattr(notification_activity, "email") or not notification_activity.email:
                     return "I could not find the email notification details."
@@ -144,8 +182,8 @@ class LangChainAgent(AgentInterface):
                     "You have received the following email. Please follow any "
                     f"instructions in it. {email_body}"
                 )
-                result = await self.agent.ainvoke(
-                    {"messages": [HumanMessage(content=message)]}
+                result = await self._invoke_with_mcp_retry(
+                    message, auth, auth_handler_name, context
                 )
                 return self._extract_result(result) or "Email notification processed."
 
@@ -167,8 +205,8 @@ class LangChainAgent(AgentInterface):
                     "Please retrieve the Word document as well as the comments and "
                     "return it in text format."
                 )
-                doc_result = await self.agent.ainvoke(
-                    {"messages": [HumanMessage(content=doc_message)]}
+                doc_result = await self._invoke_with_mcp_retry(
+                    doc_message, auth, auth_handler_name, context
                 )
                 word_content = self._extract_result(doc_result)
 
@@ -178,16 +216,16 @@ class LangChainAgent(AgentInterface):
                     f"Please refer to these when responding to comment '{comment_text}'. "
                     f"{word_content}"
                 )
-                result = await self.agent.ainvoke(
-                    {"messages": [HumanMessage(content=response_message)]}
+                result = await self._invoke_with_mcp_retry(
+                    response_message, auth, auth_handler_name, context
                 )
                 return self._extract_result(result) or "Word notification processed."
 
             notification_message = (
                 notification_activity.text or f"Notification received: {notification_type}"
             )
-            result = await self.agent.ainvoke(
-                {"messages": [HumanMessage(content=notification_message)]}
+            result = await self._invoke_with_mcp_retry(
+                notification_message, auth, auth_handler_name, context
             )
             return self._extract_result(result) or "Notification processed successfully."
 
