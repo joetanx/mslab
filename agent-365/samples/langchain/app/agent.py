@@ -13,27 +13,20 @@ import logging
 from os import environ
 from typing import Optional
 
+from azure.identity.aio import ManagedIdentityCredential
 from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
-from langchain_mcp_adapters.client import MultiServerMCPClient
-from azure.identity.aio import ManagedIdentityCredential
 
 # Agent Interface
 from agent_interface import AgentInterface
+from mcp_tool_registration_service import McpToolRegistrationService
 
 from microsoft_agents.hosting.core import Authorization, TurnContext
 
 # Notifications
 from microsoft_agents_a365.notifications.agent_notification import NotificationTypes
-
-# A365 Tooling
-from microsoft_agents_a365.runtime.utility import Utility
-from microsoft_agents_a365.tooling.models import ToolOptions
-from microsoft_agents_a365.tooling import McpToolServerConfigurationService, MCPServerConfig
-from microsoft_agents_a365.tooling.utils import Constants
-from microsoft_agents_a365.tooling.utils.utility import get_mcp_platform_authentication_scope
 
 # Load environment variables
 load_dotenv()
@@ -47,7 +40,6 @@ class LangChainAgent(AgentInterface):
     """LangChain agent integrated with A365 MCP servers and observability."""
 
     AGENT_PROMPT = environ.get("AGENT_PROMPT", "You are a helpful assistant.")
-    ORCHESTRATOR_NAME = "LangChain"
 
     def __init__(self):
         """Initialize the LangChain agent."""
@@ -55,10 +47,7 @@ class LangChainAgent(AgentInterface):
 
         self.model = self._create_model()
         self.agent = self._create_agent([])
-
-        self.tool_config_service = McpToolServerConfigurationService(logger=self.logger)
-        self.mcp_client: Optional[MultiServerMCPClient] = None
-        self.mcp_servers_initialized = False
+        self.mcp_service = McpToolRegistrationService(logger=self.logger)
 
     def _create_model(self):
         """Create a LangChain chat model using init_chat_model."""
@@ -80,26 +69,6 @@ class LangChainAgent(AgentInterface):
         logger.info("✅ LangChain agent created with %d tools", len(tools))
         return agent
 
-    async def _get_mcp_discovery_token(
-        self,
-        auth: Authorization,
-        auth_handler_name: Optional[str],
-        context: TurnContext,
-    ) -> Optional[str]:
-        """Get the shared discovery token used to list A365 MCP servers."""
-        if not auth_handler_name:
-            raise ValueError("auth_handler_name is required for production MCP discovery")
-
-        token_result = await auth.exchange_token(
-            context,
-            get_mcp_platform_authentication_scope(),
-            auth_handler_name,
-        )
-        if token_result is None or not token_result.token:
-            raise ValueError("Failed to obtain token for MCP server discovery")
-
-        return token_result.token
-
     async def setup_mcp_servers(
         self,
         auth: Authorization,
@@ -107,55 +76,18 @@ class LangChainAgent(AgentInterface):
         context: TurnContext,
     ) -> None:
         """Discover A365 MCP servers and load them as LangChain tools."""
-        if self.mcp_servers_initialized:
+        if self.mcp_service.initialized:
             return
 
-        discovery_token = await self._get_mcp_discovery_token(
-            auth, auth_handler_name, context
-        )
-        agentic_app_id = Utility.resolve_agent_identity(context, discovery_token)
-
-        mcp_servers = await self.tool_config_service.list_tool_servers(
-            agentic_app_id=agentic_app_id,
-            auth_token=discovery_token,
-            options=ToolOptions(orchestrator_name=self.ORCHESTRATOR_NAME),
-            authorization=auth,
+        tools = await self.mcp_service.discover_and_load_tools(
+            auth=auth,
             auth_handler_name=auth_handler_name,
-            turn_context=context,
+            context=context,
         )
-        self.logger.info("Loaded %d MCP server configurations", len(mcp_servers))
-
-        mcp_connections = {}
-        for mcp_server in mcp_servers:
-            server_name = mcp_server.mcp_server_name or mcp_server.mcp_server_unique_name
-            server_url = mcp_server.mcp_server_unique_name
-
-            if not server_url:
-                self.logger.warning("Skipping MCP server '%s' without URL", server_name)
-                continue
-
-            mcp_connections[server_name] = {
-                "transport": "http",
-                "url": server_url,
-                "headers": {
-                    Constants.Headers.USER_AGENT: Utility.get_user_agent_header(
-                        self.ORCHESTRATOR_NAME
-                    ),
-                    Constants.Headers.AUTHORIZATION: (
-                        f"{Constants.Headers.BEARER_PREFIX} {discovery_token}"
-                    ),
-                },
-            }
-
-        if not mcp_connections:
-            self.logger.info("No MCP servers configured")
-            self.mcp_servers_initialized = True
+        if not tools:
             return
 
-        self.mcp_client = MultiServerMCPClient(mcp_connections)
-        tools = await self.mcp_client.get_tools()
         self.agent = self._create_agent(tools)
-        self.mcp_servers_initialized = True
         self.logger.info("✅ MCP setup completed with %d LangChain tools", len(tools))
 
     async def initialize(self):
@@ -306,14 +238,7 @@ class LangChainAgent(AgentInterface):
     async def cleanup(self) -> None:
         """Clean up agent resources."""
         try:
-            if self.mcp_client:
-                close = getattr(self.mcp_client, "aclose", None) or getattr(
-                    self.mcp_client, "close", None
-                )
-                if close:
-                    result = close()
-                    if hasattr(result, "__await__"):
-                        await result
+            await self.mcp_service.cleanup()
             logger.info("LangChain agent cleanup completed")
         except Exception as e:
             logger.error(f"Cleanup error: {e}")
