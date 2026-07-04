@@ -31,26 +31,36 @@ properties:
           cpu: 0.5
           memory: 1Gi
         env:
+          # Listener for aiohttp.web run_app
           - name: HOST
             value: "0.0.0.0"
           - name: PORT
             value: "3978"
+          # LangChain model connection
           - name: FOUNDRY_PROJECT_ENDPOINT
             value: "${FOUNDRY_PROJECT_ENDPOINT}"
           - name: FOUNDRY_MODEL
             value: "${FOUNDRY_MODEL}"
           - name: UAMI_CLIENT_ID
             value: "${UAMI_CLIENT_ID}"
-          - name: PYTHON_ENVIRONMENT
-            value: "production"
+          # Set to AGENTIC to enable token exchange for Graph, MCP, and observability (Unset for playground mode)
+          - name: AUTH_HANDLER_NAME
+            value: "AGENTIC"
+          # Use agentic authentication for MCP (optional, defaults to true)
+          # - name: USE_AGENTIC_AUTH
+          #   value: "true"
+          # Required for observability SDK
           - name: ENABLE_OBSERVABILITY
             value: "true"
           - name: ENABLE_A365_OBSERVABILITY_EXPORTER
             value: "true"
-          - name: CONNECTIONSMAP__0__SERVICEURL
-            value: "*"
-          - name: CONNECTIONSMAP__0__CONNECTION
-            value: "SERVICE_CONNECTION"
+          - name: PYTHON_ENVIRONMENT
+            value: "production"
+          - name: OBSERVABILITY_SERVICE_NAME
+            value: "LangChainSampleAgent"
+          - name: OBSERVABILITY_SERVICE_NAMESPACE
+            value: "LangChainSampleAgent"
+          # Service connection settings (stamped by `a365 setup all` against the Entra app)
           - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHORITY
             value: "https://login.microsoftonline.com/${TENANT_ID}"
           - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHTYPE
@@ -63,8 +73,12 @@ properties:
             value: "https://graph.microsoft.com/.default"
           - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID
             value: "${TENANT_ID}"
-          - name: AUTH_HANDLER_NAME
-            value: "AGENTIC"
+          # Connections map configuration to set SERVICE_CONNECTION as default
+          - name: CONNECTIONSMAP__0__SERVICEURL
+            value: "*"
+          - name: CONNECTIONSMAP__0__CONNECTION
+            value: "SERVICE_CONNECTION"
+          # Agent application user authorization settings
           - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__TYPE
             value: "AgenticUserAuthorization"
           - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__SCOPES

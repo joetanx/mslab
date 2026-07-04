@@ -31,14 +31,9 @@ from microsoft_agents_a365.notifications.agent_notification import NotificationT
 # A365 Tooling
 from microsoft_agents_a365.runtime.utility import Utility
 from microsoft_agents_a365.tooling.models import ToolOptions
-from microsoft_agents_a365.tooling.services.mcp_tool_server_configuration_service import (
-    McpToolServerConfigurationService,
-)
+from microsoft_agents_a365.tooling import McpToolServerConfigurationService, MCPServerConfig
 from microsoft_agents_a365.tooling.utils import Constants
-from microsoft_agents_a365.tooling.utils.utility import (
-    get_mcp_platform_authentication_scope,
-    is_development_environment,
-)
+from microsoft_agents_a365.tooling.utils.utility import get_mcp_platform_authentication_scope
 
 # Load environment variables
 load_dotenv()
@@ -92,9 +87,6 @@ class LangChainAgent(AgentInterface):
         context: TurnContext,
     ) -> Optional[str]:
         """Get the shared discovery token used to list A365 MCP servers."""
-        if is_development_environment():
-            return None
-
         if not auth_handler_name:
             raise ValueError("auth_handler_name is required for production MCP discovery")
 
@@ -121,13 +113,9 @@ class LangChainAgent(AgentInterface):
         discovery_token = await self._get_mcp_discovery_token(
             auth, auth_handler_name, context
         )
-        agentic_app_id = (
-            ""
-            if is_development_environment()
-            else Utility.resolve_agent_identity(context, discovery_token)
-        )
+        agentic_app_id = Utility.resolve_agent_identity(context, discovery_token)
 
-        server_configs = await self.tool_config_service.list_tool_servers(
+        mcp_servers = await self.tool_config_service.list_tool_servers(
             agentic_app_id=agentic_app_id,
             auth_token=discovery_token,
             options=ToolOptions(orchestrator_name=self.ORCHESTRATOR_NAME),
@@ -135,27 +123,28 @@ class LangChainAgent(AgentInterface):
             auth_handler_name=auth_handler_name,
             turn_context=context,
         )
-        self.logger.info("Loaded %d MCP server configurations", len(server_configs))
+        self.logger.info("Loaded %d MCP server configurations", len(mcp_servers))
 
         mcp_connections = {}
-        for config in server_configs:
-            server_name = config.mcp_server_name or config.mcp_server_unique_name
-            if not config.url:
+        for mcp_server in mcp_servers:
+            server_name = mcp_server.mcp_server_name or mcp_server.mcp_server_unique_name
+            server_url = mcp_server.mcp_server_unique_name
+
+            if not server_url:
                 self.logger.warning("Skipping MCP server '%s' without URL", server_name)
                 continue
 
-            headers = {
-                Constants.Headers.USER_AGENT: Utility.get_user_agent_header(
-                    self.ORCHESTRATOR_NAME
-                )
-            }
-            if config.headers:
-                headers.update(config.headers)
-
             mcp_connections[server_name] = {
                 "transport": "http",
-                "url": config.url,
-                "headers": headers,
+                "url": server_url,
+                "headers": {
+                    Constants.Headers.USER_AGENT: Utility.get_user_agent_header(
+                        self.ORCHESTRATOR_NAME
+                    ),
+                    Constants.Headers.AUTHORIZATION: (
+                        f"{Constants.Headers.BEARER_PREFIX} {discovery_token}"
+                    ),
+                },
             }
 
         if not mcp_connections:
