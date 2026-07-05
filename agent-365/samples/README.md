@@ -11,15 +11,21 @@ The sample agents are deployed in container apps and depends on several reusable
 ```mermaid
 flowchart TD
     ACA(Container App)
-    Model(Foundry)
-    SA(Azure Files)
+    subgraph Foundry
+        Model(Model)
+    end
+    subgraph Storage Account
+        Share(Azure Files)
+    end
     CAE(Container App Environment)
-    ACR(Container Registry)
+    subgraph Container Registry
+        Image(Image)
+    end
     A365(A365)
     Model --> ACA
-    SA --> ACA
+    Share --> ACA
     CAE --> ACA
-    ACR --> ACA
+    Image --> ACA
     ACA --> A365
 ```
 
@@ -164,9 +170,7 @@ az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku B
 
 ## X. Tasks moving to per agent
 
-### Create UAMI 
-
-Create UAMI:
+### Create UAMI
 
 ```sh
 UAMI_NAME="uami-$APP_NAME"
@@ -193,7 +197,7 @@ FOUNDRY_ID=$(az cognitiveservices account show --name $FOUNDRY_NAME --resource-g
 az role assignment create --assignee $UAMI_ID --role 'Cognitive Services User' --scope $FOUNDRY_ID
 ```
 
-### Assign ACR role to UAMI
+#### Assign ACR role to UAMI
 
 ```sh
 ACR_ID=$(az acr show --name $ACR_NAME --query id -o tsv)
@@ -203,7 +207,6 @@ az role assignment create --assignee $UAMI_ID --role AcrPull --scope $ACR_ID
 ### Create file share
 
 ```sh
-az storage account create --name $SA_NAME --resource-group $RG --location $LOCATION --sku Standard_LRS --tags SecurityControl=Ignore
 CONN_STR=$(az storage account show-connection-string --name $SA_NAME --resource-group $RG --query connectionString -o tsv)
 az storage share create --name $APP_NAME --connection-string "$CONN_STR"
 ```
