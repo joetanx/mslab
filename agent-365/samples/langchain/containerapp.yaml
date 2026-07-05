@@ -49,17 +49,15 @@ properties:
           # Use agentic authentication for MCP (optional, defaults to true)
           # - name: USE_AGENTIC_AUTH
           #   value: "true"
+          # Set to production for a365 tooling to discovery mcp tools
+          # If unset or "development", a365 tooling attempts to read from ToolingManifest.json
+          - name: PYTHON_ENVIRONMENT
+            value: "production"
           # Required for observability SDK
           - name: ENABLE_OBSERVABILITY
             value: "true"
           - name: ENABLE_A365_OBSERVABILITY_EXPORTER
             value: "true"
-          - name: PYTHON_ENVIRONMENT
-            value: "production"
-          - name: OBSERVABILITY_SERVICE_NAME
-            value: "LangChainSampleAgent"
-          - name: OBSERVABILITY_SERVICE_NAMESPACE
-            value: "LangChainSampleAgent"
           # Service connection settings (stamped by `a365 setup all` against the Entra app)
           - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHORITY
             value: "https://login.microsoftonline.com/${TENANT_ID}"

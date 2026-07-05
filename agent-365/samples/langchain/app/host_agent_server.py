@@ -6,8 +6,8 @@ from os import environ
 
 from aiohttp.web import Application, Request, Response, json_response, run_app
 from aiohttp.web_middlewares import middleware as web_middleware
-from dotenv import load_dotenv
 from agent_interface import AgentInterface, check_agent_inheritance
+from opentelemetry.sdk.resources import Resource
 from microsoft_agents.activity import Activity, load_configuration_from_env
 from microsoft_agents.authentication.msal import MsalConnectionManager
 from microsoft_agents.hosting.aiohttp import (
@@ -34,26 +34,24 @@ from microsoft_agents_a365.notifications.agent_notification import (
 from microsoft_agents_a365.notifications import EmailResponse
 
 from microsoft.opentelemetry import use_microsoft_opentelemetry
-from microsoft_agents_a365.observability.core.middleware.baggage_builder import (
-    BaggageBuilder,
-)
-from microsoft_agents_a365.runtime.environment_utils import (
-    get_observability_authentication_scope,
-)
+from microsoft.opentelemetry.a365.core import BaggageBuilder
+from microsoft.opentelemetry.a365.runtime import get_observability_authentication_scope
 from token_cache import cache_agentic_token, get_cached_agentic_token
 
+# --- Configuration ---
 ms_agents_logger = logging.getLogger("microsoft_agents")
+ms_agents_logger.addHandler(logging.StreamHandler())
 ms_agents_logger.setLevel(logging.INFO)
 
-observability_logger = logging.getLogger("microsoft_agents_a365.observability")
+observability_logger = logging.getLogger("microsoft.opentelemetry.a365")
 observability_logger.setLevel(logging.ERROR)
 
 logger = logging.getLogger(__name__)
 
-load_dotenv()
 agents_sdk_config = load_configuration_from_env(environ)
 
 
+# --- Public API ---
 def create_and_run_host(
     agent_class: type[AgentInterface], *agent_args, **agent_kwargs
 ):
@@ -69,7 +67,10 @@ def create_and_run_host(
     # See: https://github.com/microsoft/opentelemetry-distro-python
     use_microsoft_opentelemetry(
         enable_a365=True,
-        enable_azure_monitor=False,
+        resource=Resource.create({
+            "service.name": "langchain-sample-agent",
+            "service.namespace": "a365-test-01",
+        }),
         a365_token_resolver=lambda agent_id, tenant_id: get_cached_agentic_token(
             tenant_id, agent_id
         ),
@@ -87,16 +88,19 @@ def create_and_run_host(
     host.start_server(auth_config)
 
 
+# --- Generic Agent Host ---
 class GenericAgentHost:
     """Host an AgentInterface implementation behind the Microsoft Agents SDK."""
 
+    # --- Initialization ---
     def __init__(self, agent_class: type[AgentInterface], *agent_args, **agent_kwargs):
         if not check_agent_inheritance(agent_class):
             raise TypeError(
                 f"Agent class {agent_class.__name__} must inherit from AgentInterface"
             )
 
-        # Defaults to no auth handler; set AUTH_HANDLER_NAME=AGENTIC in production.
+        # Auth handler name can be configured via environment
+        # Defaults to empty (no auth handler) - set AUTH_HANDLER_NAME=AGENTIC for production agentic auth
         self.auth_handler_name = environ.get("AUTH_HANDLER_NAME", "") or None
         if self.auth_handler_name:
             logger.info(f"🔐 Using auth handler: {self.auth_handler_name}")
@@ -124,44 +128,34 @@ class GenericAgentHost:
         self._setup_handlers()
         logger.info("✅ Notification handlers registered successfully")
 
+    # --- Observability ---
     async def _setup_observability_token(
         self, context: TurnContext, tenant_id: str, agent_id: str
     ):
+        # Only attempt token exchange when auth handler is configured
         if not self.auth_handler_name:
             logger.debug("Skipping observability token exchange (no auth handler)")
             return
 
         if get_cached_agentic_token(tenant_id, agent_id):
-            logger.debug(
-                "Using cached observability token (tenant_id=%s, agent_id=%s)",
-                tenant_id,
-                agent_id,
-            )
+            logger.info(f"ℹ️ Using cached observability token (tenant_id={tenant_id}, agent_id={agent_id})")
             return
 
         try:
-            logger.info(
-                f"🔐 Attempting token exchange for observability... "
-                f"(tenant_id={tenant_id}, agent_id={agent_id})"
-            )
             exaau_token = await self.agent_app.auth.exchange_token(
                 context,
                 scopes=get_observability_authentication_scope(),
                 auth_handler_id=self.auth_handler_name,
             )
             cache_agentic_token(tenant_id, agent_id, exaau_token.token)
-            logger.info(
-                f"✅ Token exchange successful "
-                f"(tenant_id={tenant_id}, agent_id={agent_id})"
-            )
+            logger.info(f"✅ Observability token acquired (tenant_id={tenant_id}, agent_id={agent_id})")
         except Exception as e:
             logger.warning(f"⚠️ Failed to cache observability token: {e}")
 
     async def _validate_agent_and_setup_context(self, context: TurnContext):
-        logger.info("🔍 Validating agent and setting up context...")
         tenant_id = context.activity.recipient.tenant_id
         agent_id = context.activity.recipient.agentic_app_id
-        logger.info(f"🔍 tenant_id={tenant_id}, agent_id={agent_id}")
+        logger.info(f"🔍 Agent context acquired from TurnContext (tenant_id={tenant_id}, agent_id={agent_id})")
 
         if not self.agent_instance:
             logger.error("Agent not available")
@@ -171,13 +165,11 @@ class GenericAgentHost:
         await self._setup_observability_token(context, tenant_id, agent_id)
         return tenant_id, agent_id
 
+    # --- Handlers (Messages & Notifications) ---
     def _setup_handlers(self):
         """Set up message and notification handlers."""
-        handler_config = (
-            {"auth_handlers": [self.auth_handler_name]}
-            if self.auth_handler_name
-            else {}
-        )
+        # Configure auth handlers - only required when auth_handler_name is set
+        handler_config = {"auth_handlers": [self.auth_handler_name]} if self.auth_handler_name else {}
 
         async def help_handler(context: TurnContext, _: TurnState):
             await context.send_activity(
@@ -188,6 +180,7 @@ class GenericAgentHost:
         self.agent_app.conversation_update("membersAdded", **handler_config)(help_handler)
         self.agent_app.message("/help", **handler_config)(help_handler)
 
+        # Handle agent install / uninstall events (agentInstanceCreated / InstallationUpdate)
         @self.agent_app.activity("installationUpdate")
         async def on_installation_update(context: TurnContext, _: TurnState):
             action = context.activity.action
@@ -199,14 +192,9 @@ class GenericAgentHost:
                 getattr(from_prop, "id", "(unknown)") if from_prop else "(unknown)",
             )
             if action == "add":
-                await context.send_activity(
-                    "Thank you for hiring me! Looking forward to assisting you in "
-                    "your professional journey!"
-                )
+                await context.send_activity("Thank you for hiring me! Looking forward to assisting you in your professional journey!")
             elif action == "remove":
-                await context.send_activity(
-                    "Thank you for your time, I enjoyed working with you."
-                )
+                await context.send_activity("Thank you for your time, I enjoyed working with you.")
 
         @self.agent_app.activity("message", **handler_config)
         async def on_message(context: TurnContext, _: TurnState):
@@ -223,10 +211,11 @@ class GenericAgentHost:
 
                     logger.info(f"📨 {user_message}")
 
+                    # Refresh typing indicator loop every 30 seconds
                     async def _typing_loop():
                         try:
                             while True:
-                                await asyncio.sleep(5)
+                                await asyncio.sleep(30)
                                 await context.send_activity(Activity(type="typing"))
                         except asyncio.CancelledError:
                             pass  # Expected: loop is cancelled when processing completes.
@@ -234,10 +223,7 @@ class GenericAgentHost:
                     typing_task = asyncio.create_task(_typing_loop())
                     try:
                         response = await self.agent_instance.process_user_message(
-                            user_message,
-                            self.agent_app.auth,
-                            self.auth_handler_name,
-                            context,
+                            user_message, self.agent_app.auth, self.auth_handler_name, context
                         )
                         await context.send_activity(response)
                     finally:
@@ -280,20 +266,12 @@ class GenericAgentHost:
 
                     response = (
                         await self.agent_instance.handle_agent_notification_activity(
-                            notification_activity,
-                            self.agent_app.auth,
-                            self.auth_handler_name,
-                            context,
+                            notification_activity, self.agent_app.auth, self.auth_handler_name, context
                         )
                     )
 
-                    if (
-                        notification_activity.notification_type
-                        == NotificationTypes.EMAIL_NOTIFICATION
-                    ):
-                        response_activity = (
-                            EmailResponse.create_email_response_activity(response)
-                        )
+                    if notification_activity.notification_type == NotificationTypes.EMAIL_NOTIFICATION:
+                        response_activity = EmailResponse.create_email_response_activity(response)
                         await context.send_activity(response_activity)
                         return
 
@@ -305,12 +283,14 @@ class GenericAgentHost:
                     f"Sorry, I encountered an error processing the notification: {str(e)}"
                 )
 
+    # --- Agent Initialization ---
     async def initialize_agent(self):
         if self.agent_instance is None:
             logger.info(f"🤖 Initializing {self.agent_class.__name__}...")
             self.agent_instance = self.agent_class(*self.agent_args, **self.agent_kwargs)
             await self.agent_instance.initialize()
 
+    # --- Authentication ---
     def create_auth_configuration(self) -> AgentAuthConfiguration | None:
         """Method edited from sample code to use ONLY FIC"""
         service_settings = agents_sdk_config["CONNECTIONS"]["SERVICE_CONNECTION"]["SETTINGS"]
@@ -320,6 +300,7 @@ class GenericAgentHost:
             scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
         )
 
+    # --- Server ---
     def start_server(self, auth_configuration: AgentAuthConfiguration | None = None):
         async def entry_point(req: Request) -> Response:
             return await start_agent_process(
@@ -392,6 +373,7 @@ class GenericAgentHost:
         except KeyboardInterrupt:
             print("\n👋 Server stopped")
 
+    # --- Cleanup ---
     async def cleanup(self):
         if self.agent_instance:
             try:

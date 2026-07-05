@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langgraph.checkpoint.memory import InMemorySaver
 
 # Agent Interface
 from agent_interface import AgentInterface
@@ -38,6 +39,7 @@ class LangChainAgent(AgentInterface):
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.model = self._create_model()
+        self.checkpointer = InMemorySaver()
         self.agent = self._create_agent([])
         self.mcp_service = McpToolRegistrationService(logger=self.logger)
         self._mcp_tools_revision = self.mcp_service.revision
@@ -59,6 +61,7 @@ class LangChainAgent(AgentInterface):
             model=self.model,
             tools=tools,
             system_prompt=self.AGENT_PROMPT,
+            checkpointer=self.checkpointer,
         )
         logger.info("✅ LangChain agent created with %d tools", len(tools))
         return agent
@@ -106,11 +109,14 @@ class LangChainAgent(AgentInterface):
         auth_handler_name: Optional[str],
         context: TurnContext,
     ):
+        thread_id = self._get_thread_id(context)
+        config = {"configurable": {"thread_id": thread_id}}
         async with self._mcp_invoke_lock:
             await self.setup_mcp_servers(auth, auth_handler_name, context)
             try:
                 return await self.agent.ainvoke(
-                    {"messages": [HumanMessage(content=message)]}
+                    {"messages": [HumanMessage(content=message)]},
+                    config=config,
                 )
             except Exception as e:
                 if not self._is_auth_failure(e):
@@ -121,8 +127,16 @@ class LangChainAgent(AgentInterface):
                 )
                 await self.refresh_mcp_servers(auth, auth_handler_name, context)
                 return await self.agent.ainvoke(
-                    {"messages": [HumanMessage(content=message)]}
+                    {"messages": [HumanMessage(content=message)]},
+                    config=config,
                 )
+
+    def _get_thread_id(self, context: TurnContext) -> str:
+        from_prop = getattr(context.activity, "from_property", None)
+        user_id = getattr(from_prop, "id", None) if from_prop else None
+        if not user_id:
+            raise ValueError("UserId is required to checkpoint the LangGraph thread.")
+        return user_id
 
     def _is_auth_failure(self, exc: BaseException) -> bool:
         if isinstance(exc, BaseExceptionGroup):
