@@ -37,6 +37,7 @@ dependencies = [
     "typing-extensions",
 
     # Microsoft Agent 365 SDK packages
+    "microsoft_agents_a365_runtime",
     "microsoft_agents_a365_tooling",
     "microsoft_agents_a365_notifications",
 

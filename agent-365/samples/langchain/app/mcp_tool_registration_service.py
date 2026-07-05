@@ -6,8 +6,8 @@ from typing import Any, Optional
 
 from langchain_core.tools import BaseTool
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from microsoft.opentelemetry.a365.runtime import Utility
 from microsoft_agents.hosting.core import Authorization, TurnContext
-from microsoft_agents_a365.runtime.utility import Utility
 from microsoft_agents_a365.tooling.models import ToolOptions
 from microsoft_agents_a365.tooling.services.mcp_tool_server_configuration_service import (
     McpToolServerConfigurationService,
