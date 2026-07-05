@@ -6,7 +6,6 @@ from os import environ
 from typing import Optional
 
 from azure.identity.aio import ManagedIdentityCredential
-from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
@@ -20,9 +19,6 @@ from microsoft_agents.hosting.core import Authorization, TurnContext
 
 # Notifications
 from microsoft_agents_a365.notifications.agent_notification import NotificationTypes
-
-# Load environment variables
-load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -137,6 +133,13 @@ class LangChainAgent(AgentInterface):
         if not user_id:
             raise ValueError("UserId is required to checkpoint the LangGraph thread.")
         return user_id
+
+    async def clear_conversation(self, context: TurnContext) -> None:
+        """Clear the LangGraph checkpoint state for the current user."""
+        thread_id = self._get_thread_id(context)
+        async with self._mcp_invoke_lock:
+            await self.checkpointer.adelete_thread(thread_id)
+        self.logger.info(f"Cleared conversation checkpoint for thread_id {thread_id}")
 
     def _is_auth_failure(self, exc: BaseException) -> bool:
         if isinstance(exc, BaseExceptionGroup):

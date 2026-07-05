@@ -179,7 +179,7 @@ az storage share create --name $SHARE_NAME --connection-string "$CONN_STR"
 Download app files from GitHub and upload to storage account:
 
 ```sh
-for FILE in start_with_generic_host.py host_agent_server.py agent.py agent_interface.py local_authentication_options.py token_cache.py; do
+for FILE in start_with_generic_host.py host_agent_server.py agent.py agent_interface.py mcp_tool_registration_service.py token_cache.py; do
   curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/langchain/app/$FILE"
   az storage file upload --share-name $SHARE_NAME --source $FILE --connection-string $CONN_STR
 done
