@@ -39,7 +39,6 @@ flowchart TD
 
 ```sh
 az account set --subscription <subscription-id>
-export TENANT_ID='323626f5-1bfe-48cd-8902-ddfdfd44e1ce'
 export LOCATION='southeastasia'
 PROJECT='agentslab'
 export RG='rg-'$PROJECT
