@@ -171,6 +171,21 @@ class GenericAgentHost:
         # Configure auth handlers - only required when auth_handler_name is set
         handler_config = {"auth_handlers": [self.auth_handler_name]} if self.auth_handler_name else {}
 
+        async def help_handler(context: TurnContext, _: TurnState):
+            await context.send_activity(f"👋 **Hi there!** I'm **{self.agent_class.__name__}**, your AI assistant.\n\nHow can I help you today?")
+
+        async def clear_handler(context: TurnContext, _: TurnState):
+            try:
+                await self.agent_instance.clear_conversation(context)
+                await context.send_activity("✅ Conversation cleared.")
+            except Exception as e:
+                logger.error(f"❌ Clear conversation error: {e}")
+                await context.send_activity(f"Sorry, I encountered an error clearing the conversation: {str(e)}")
+
+        self.agent_app.conversation_update("membersAdded", **handler_config)(help_handler)
+        self.agent_app.message("/help", **handler_config)(help_handler)
+        self.agent_app.message("/clear", **handler_config)(clear_handler)
+
         # Handle agent install / uninstall events (agentInstanceCreated / InstallationUpdate)
         @self.agent_app.activity("installationUpdate")
         async def on_installation_update(context: TurnContext, _: TurnState):
@@ -187,20 +202,6 @@ class GenericAgentHost:
             elif action == "remove":
                 await context.send_activity("Thank you for your time, I enjoyed working with you.")
 
-        @self.agent_app.conversation_update("membersAdded", **handler_config)
-        @self.agent_app.activity('/help', **handler_config)
-        async def on_help(context: TurnContext, _: TurnState):
-            await context.send_activity(f"👋 **Hi there!** I'm **{self.agent_class.__name__}**, your AI assistant.\n\nHow can I help you today?")
-
-        @self.agent_app.activity('/clear', **handler_config)
-        async def on_clear(context: TurnContext, _: TurnState):
-            try:
-                await self.agent_instance.clear_conversation(context)
-                await context.send_activity("✅ Conversation cleared.")
-            except Exception as e:
-                logger.error(f"❌ Clear conversation error: {e}")
-                await context.send_activity(f"Sorry, I encountered an error clearing the conversation: {str(e)}")
-
         @self.agent_app.activity("message", **handler_config)
         async def on_message(context: TurnContext, _: TurnState):
             try:
@@ -211,7 +212,7 @@ class GenericAgentHost:
 
                 with BaggageBuilder().tenant_id(tenant_id).agent_id(agent_id).build():
                     user_message = context.activity.text or ""
-                    if not user_message.strip():
+                    if not user_message.strip() or user_message.strip() == "/help" or user_message.strip() == "/clear":
                         return
 
                     logger.info(f"📨 {user_message}")
