@@ -255,7 +255,49 @@ export BLUEPRINT_CLIENT_ID=$(python3 -c "import json; print(json.load(open('a365
 export BLUEPRINT_CLIENT_SECRET=$(python3 -c "import json; print(json.load(open('a365.generated.config.json'))['agentBlueprintClientSecret'])")
 ```
 
-### 5.1. Publish agent manifest in M365 Admin Center
+### 5.1. Configure tools
+
+List availables tools in the [Agent 365 tools catalog](https://learn.microsoft.com/en-us/microsoft-agent-365/tooling-servers-overview#agent-365-tools-catalog)
+
+```sh
+a365 develop list-available
+```
+
+Add desired tools to the agent, this generates the `ToolingManifest.json` file:
+
+```sh
+for mcp in mcp_M365Copilot mcp_CalendarTools mcp_MailTools mcp_SharePointRemoteServer mcp_OneDriveRemoteServer mcp_TeamsServer mcp_MeServer mcp_WordServer; do
+  a365 develop add-mcp-servers $mcp
+done
+```
+
+> [!Note]
+>
+> These tools are now consider legacy:
+> - mcp_ExcelServer
+> - mcp_ODSPRemoteServer
+> - cp_WebSearchTools
+> - mcp_SharePointListsTools
+>
+> Below warning occurs when trying to add legacy tools (but still usable at the time of writing):
+>
+> ```
+> uses a legacy ATG audience and may not work correctly. Consider re-running add-mcp-servers to pick up the latest catalog.
+> ```
+
+Verify/view the tools configured in `ToolingManifest.json`
+
+```sh
+a365 develop list-configured
+```
+
+Run `setup all` again, or `setup permissions mcp` to grant the permissions required by the tool
+
+```sh
+a365 setup permissions mcp -n $APP_NAME
+```
+
+### 5.2. Publish agent manifest in M365 Admin Center
 
 ```sh
 a365 publish

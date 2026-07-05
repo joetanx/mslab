@@ -22,11 +22,6 @@ import logging
 from os import environ
 from typing import Optional
 
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,7 +40,6 @@ from agent_interface import AgentInterface
 from azure.identity import ManagedIdentityCredential
 
 # Microsoft Agents SDK
-from local_authentication_options import LocalAuthenticationOptions
 from microsoft_agents.hosting.core import Authorization, TurnContext
 
 # Notifications
@@ -77,9 +71,6 @@ class AgentFrameworkAgent(AgentInterface):
     def __init__(self):
         """Initialize the AgentFramework agent."""
         self.logger = logging.getLogger(self.__class__.__name__)
-
-        # Initialize authentication options
-        self.auth_options = LocalAuthenticationOptions.from_environment()
 
         # Create Azure OpenAI chat client
         self._create_chat_client()
@@ -145,27 +136,14 @@ class AgentFrameworkAgent(AgentInterface):
                 logger.warning("⚠️ MCP tool service unavailable")
                 return
 
-            use_agentic_auth = environ.get("USE_AGENTIC_AUTH", "false").lower() == "true"
-
-            if use_agentic_auth:
-                self.agent = await self.tool_service.add_tool_servers_to_agent(
-                    chat_client=self.chat_client,
-                    agent_instructions=self.AGENT_PROMPT,
-                    initial_tools=[],
-                    auth=auth,
-                    auth_handler_name=auth_handler_name,
-                    turn_context=context,
-                )
-            else:
-                self.agent = await self.tool_service.add_tool_servers_to_agent(
-                    chat_client=self.chat_client,
-                    agent_instructions=self.AGENT_PROMPT,
-                    initial_tools=[],
-                    auth=auth,
-                    auth_handler_name=auth_handler_name,
-                    auth_token=self.auth_options.bearer_token,
-                    turn_context=context,
-                )
+            self.agent = await self.tool_service.add_tool_servers_to_agent(
+                chat_client=self.chat_client,
+                agent_instructions=self.AGENT_PROMPT,
+                initial_tools=[],
+                auth=auth,
+                auth_handler_name=auth_handler_name,
+                turn_context=context,
+            )
 
             if self.agent:
                 logger.info("✅ MCP setup completed")

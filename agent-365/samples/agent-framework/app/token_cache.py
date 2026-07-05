@@ -1,9 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-"""
-Token caching utilities for Agent 365 Observability exporter authentication.
-"""
+"""Token caching utilities for Agent 365 Observability exporter authentication."""
 
 import logging
 

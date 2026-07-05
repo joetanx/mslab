@@ -11,7 +11,6 @@ from os import environ
 
 from aiohttp.web import Application, Request, Response, json_response, run_app
 from aiohttp.web_middlewares import middleware as web_middleware
-from dotenv import load_dotenv
 from agent_interface import AgentInterface, check_agent_inheritance
 from microsoft_agents.activity import load_configuration_from_env, Activity, ActivityTypes
 from microsoft_agents.authentication.msal import MsalConnectionManager
@@ -39,12 +38,8 @@ from microsoft_agents_a365.notifications.agent_notification import (
 from microsoft_agents_a365.notifications import EmailResponse
 
 from microsoft.opentelemetry import use_microsoft_opentelemetry
-from microsoft_agents_a365.observability.core.middleware.baggage_builder import (
-    BaggageBuilder,
-)
-from microsoft_agents_a365.runtime.environment_utils import (
-    get_observability_authentication_scope,
-)
+from microsoft.opentelemetry.a365.core import BaggageBuilder
+from microsoft.opentelemetry.a365.runtime import get_observability_authentication_scope
 from token_cache import cache_agentic_token, get_cached_agentic_token
 
 # --- Configuration ---
@@ -57,7 +52,6 @@ observability_logger.setLevel(logging.ERROR)
 
 logger = logging.getLogger(__name__)
 
-load_dotenv()
 agents_sdk_config = load_configuration_from_env(environ)
 
 
@@ -220,14 +214,13 @@ class GenericAgentHost:
                     # Each send_activity call produces a discrete Teams message.
                     # NOTE: For Teams agentic identities, streaming is buffered into a single message by the SDK;
                     #       use send_activity for any messages that must arrive immediately.
-                    await context.send_activity(Activity(type="typing"))
 
                     # Typing indicator loop — refreshes the "..." animation every ~4s for long-running operations.
                     # Typing indicators time out after ~5s and must be re-sent. Only visible in 1:1 and small group chats.
                     async def _typing_loop():
                         try:
                             while True:
-                                await asyncio.sleep(4)
+                                await asyncio.sleep(30)
                                 await context.send_activity(Activity(type="typing"))
                         except asyncio.CancelledError:
                             pass  # Expected: loop is cancelled when processing completes.
@@ -304,24 +297,13 @@ class GenericAgentHost:
 
     # --- Authentication ---
     def create_auth_configuration(self) -> AgentAuthConfiguration | None:
-        client_id = environ.get("CLIENT_ID")
-        tenant_id = environ.get("TENANT_ID")
-        client_secret = environ.get("CLIENT_SECRET")
-
-        if client_id and tenant_id and client_secret:
-            logger.info("🔒 Using Client Credentials authentication")
-            return AgentAuthConfiguration(
-                client_id=client_id,
-                tenant_id=tenant_id,
-                client_secret=client_secret,
-                scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
-            )
-
-        if environ.get("BEARER_TOKEN"):
-            logger.info("🔑 Anonymous dev mode")
-        else:
-            logger.warning("⚠️ No auth env vars; running anonymous")
-        return None
+        """Method edited from sample code to use ONLY FIC"""
+        service_settings = agents_sdk_config["CONNECTIONS"]["SERVICE_CONNECTION"]["SETTINGS"]
+        logger.info("🔒 AgentAuthConfiguration initialized with FIC")
+        return AgentAuthConfiguration(
+            **service_settings,
+            scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
+        )
 
     # --- Server ---
     def start_server(self, auth_configuration: AgentAuthConfiguration | None = None):

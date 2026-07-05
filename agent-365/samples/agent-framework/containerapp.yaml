@@ -11,9 +11,6 @@ properties:
     registries:
       - server: ${ACR_NAME}.azurecr.io
         identity: ${UAMI_RSC_ID}
-    secrets:
-      - name: blueprint-client-secret
-        value: ${BLUEPRINT_CLIENT_SECRET}
     ingress:
       external: true
       allowInsecure: false
@@ -34,51 +31,60 @@ properties:
           cpu: 0.5
           memory: 1Gi
         env:
+          # Listener for aiohttp.web run_app
           - name: HOST
             value: "0.0.0.0"
           - name: PORT
             value: "3978"
+          # LangChain model connection
           - name: FOUNDRY_PROJECT_ENDPOINT
             value: "${FOUNDRY_PROJECT_ENDPOINT}"
           - name: FOUNDRY_MODEL
             value: "${FOUNDRY_MODEL}"
           - name: UAMI_CLIENT_ID
             value: "${UAMI_CLIENT_ID}"
+          # Set to AGENTIC to enable token exchange for Graph, MCP, and observability (Unset for playground mode)
+          - name: AUTH_HANDLER_NAME
+            value: "AGENTIC"
+          # Use agentic authentication for MCP (optional, defaults to true)
+          # - name: USE_AGENTIC_AUTH
+          #   value: "true"
+          # Set to production for a365 tooling to discovery mcp tools
+          # If unset or "development", a365 tooling attempts to read from ToolingManifest.json
           - name: PYTHON_ENVIRONMENT
             value: "production"
+          # Required for observability SDK
           - name: ENABLE_OBSERVABILITY
             value: "true"
           - name: ENABLE_A365_OBSERVABILITY_EXPORTER
             value: "true"
+          # For agent framework use
           - name: AGENT_RUN_TIMEOUT_SECONDS
             value: "150"
+          # Service connection settings (stamped by `a365 setup all` against the Entra app)
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHORITY
+            value: "https://login.microsoftonline.com/${TENANT_ID}"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHTYPE
+            value: FederatedCredentials
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID
+            value: "${BLUEPRINT_CLIENT_ID}"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID
+            value: "${UAMI_CLIENT_ID}"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__SCOPES
+            value: "https://graph.microsoft.com/.default"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID
+            value: "${TENANT_ID}"
+          # Connections map configuration to set SERVICE_CONNECTION as default
           - name: CONNECTIONSMAP__0__SERVICEURL
             value: "*"
           - name: CONNECTIONSMAP__0__CONNECTION
             value: "SERVICE_CONNECTION"
-          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID
-            value: "${BLUEPRINT_CLIENT_ID}"
-          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID
-            value: "${TENANT_ID}"
-          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__SCOPES
-            value: "https://graph.microsoft.com/.default"
-          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTSECRET
-            secretRef: blueprint-client-secret
-          - name: AUTH_HANDLER_NAME
-            value: "AGENTIC"
-          - name: USE_AGENTIC_AUTH
-            value: "true"
-          - name: CLIENT_ID
-            value: "${BLUEPRINT_CLIENT_ID}"
-          - name: TENANT_ID
-            value: "${TENANT_ID}"
-          - name: CLIENT_SECRET
-            secretRef: blueprint-client-secret
+          # Agent application user authorization settings
           - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__TYPE
             value: "AgenticUserAuthorization"
           - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__SCOPES
             value: "ea9ffc3e-8a23-4a7d-836d-234d7c7565c1/.default"
-          - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__ALTERNATEBLUEPRINTCONNECTIONNAME
+          - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__ALT_BLUEPRINT_NAME
             value: "SERVICE_CONNECTION"
     scale:
       minReplicas: 1
