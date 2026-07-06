@@ -377,7 +377,7 @@ Upload the manifest to M365 Admin Center
 Download manifest template and replace placeholders with environment variables
 
 ```sh
-curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/langchain/containerapp.yaml
+curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/$SAMPLE/containerapp.yaml
 envsubst < containerapp.yaml > containerapp-edited.yaml
 ```
 
