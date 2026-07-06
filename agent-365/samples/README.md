@@ -308,7 +308,7 @@ a365 develop list-available
 Add desired tools to the agent, this generates the `ToolingManifest.json` file:
 
 ```sh
-for mcp in mcp_M365Copilot mcp_CalendarTools mcp_MailTools mcp_SharePointRemoteServer mcp_OneDriveRemoteServer mcp_TeamsServer mcp_MeServer mcp_WordServer; do
+for mcp in mcp_M365Copilot mcp_CalendarTools mcp_MailTools mcp_TeamsServer mcp_SharePointRemoteServer mcp_OneDriveRemoteServer mcp_WordServer mcp_MeServer; do
   a365 develop add-mcp-servers $mcp
 done
 ```
@@ -318,7 +318,7 @@ done
 > These tools are now consider legacy:
 > - mcp_ExcelServer
 > - mcp_ODSPRemoteServer
-> - cp_WebSearchTools
+> - mcp_WebSearchTools
 > - mcp_SharePointListsTools
 >
 > Below warning occurs when trying to add legacy tools (but still usable at the time of writing):
