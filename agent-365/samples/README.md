@@ -372,6 +372,16 @@ Upload the manifest to M365 Admin Center
 4. Select the desired users or groups to `Activate` for
 5. Select the template to apply, review permission, then `Publish`
 
+> [!Note]
+>
+> Before an agent template can be activated, a policy template of `Agents with their own identity` type must be created, and M365 licenses must be assigned to the policy template.
+>
+> ![](https://github.com/user-attachments/assets/e3eccb2d-8d78-4831-a3a4-fb45b49230c8)
+>
+> ![](https://github.com/user-attachments/assets/128b908a-8425-43fa-a301-400bd8243ec5)
+>
+> ![](https://github.com/user-attachments/assets/7e7cf512-4530-44eb-aefb-dbae01db8cec)
+
 ## 5. Deploy container app
 
 Download manifest template and replace placeholders with environment variables
