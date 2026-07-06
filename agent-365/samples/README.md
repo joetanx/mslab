@@ -181,6 +181,12 @@ SAMPLE='agent-framework'
 SAMPLE='langchain'
 ```
 
+Export desired agent name:
+
+```sh
+export APP_NAME='<app-name>'
+```
+
 ## 1. Create UAMI for the agent app
 
 ```sh
