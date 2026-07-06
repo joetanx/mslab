@@ -170,6 +170,8 @@ az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku B
 
 # Part II. Per-agent setup
 
+Set `SAMPLE` to the agent runtime (different path from the `samples` path):
+
 ```sh
 SAMPLE='agent-framework'
 # or
