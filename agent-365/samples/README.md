@@ -5,10 +5,13 @@
 ## 1. Reusable resources
 
 The sample agents are deployed in container apps and depends on several resources that can be shared between agents:
-- **Container app environment** - just a _container_ for container apps, establishs connection to Azure files via SAS key
-- **Container registry** - hosts the agent images that have the respective python packages built into the images
-- **Azure files** - agent code is intentionally separated away from the image for development, agent code would typically be baked into the image for production
-- **Foundry** - provides the model deployment
+
+| Resource | Description |
+|---|---|
+| Container app environment | _Container_ for container apps.<br>Connects to Azure files via SAS key for volume mounts to file shares. |
+| Container registry | Hosts the agent images that have the respective python packages built into the images.<br>Authenticates via container app's UAMI. |
+| Azure files | Agent code is intentionally separated away from the image for _development_.<br>Agent code would typically be baked into the image for _production_. |
+| Foundry | Provides the model deployment.<br>Authenticates via container app's UAMI. |
 
 ```mermaid
 flowchart TD
@@ -176,6 +179,12 @@ Set `SAMPLE` to the agent runtime (different path from the `samples` path):
 SAMPLE='agent-framework'
 # or
 SAMPLE='langchain'
+```
+
+Export desired agent name:
+
+```sh
+export APP_NAME='<app-name>'
 ```
 
 ## 1. Create UAMI for the agent app
