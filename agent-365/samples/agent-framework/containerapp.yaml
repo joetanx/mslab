@@ -18,14 +18,14 @@ properties:
       transport: auto
   template:
     volumes:
-      - name: ${SHARE_NAME}-vol
+      - name: ${APP_NAME}-vol
         storageType: AzureFile
-        storageName: ${SHARE_NAME}
+        storageName: ${APP_NAME}
     containers:
       - name: ${APP_NAME}
         image: ${ACR_NAME}.azurecr.io/${APP_NAME}:latest
         volumeMounts:
-          - volumeName: ${SHARE_NAME}-vol
+          - volumeName: ${APP_NAME}-vol
             mountPath: /app
         resources:
           cpu: 0.5
