@@ -190,7 +190,7 @@ export APP_NAME='<app-name>'
 ## 1. Create UAMI for the agent app
 
 ```sh
-UAMI_NAME="uami-$APP_NAME"
+UAMI_NAME='uami-'$APP_NAME
 az identity create --name $UAMI_NAME --resource-group $RG
 ```
 
@@ -384,5 +384,5 @@ envsubst < containerapp.yaml > containerapp-edited.yaml
 Deploy container app with edited manifest file:
 
 ```sh
-az containerapp create --name "$APP_NAME" --resource-group $RG --yaml containerapp-edited.yaml
+az containerapp create --name $APP_NAME --resource-group $RG --yaml containerapp-edited.yaml
 ```
