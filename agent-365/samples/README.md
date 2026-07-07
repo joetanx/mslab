@@ -175,11 +175,10 @@ az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku B
 
 Set `SAMPLE` to the agent runtime (different path from the `samples` path):
 
-```sh
-SAMPLE='agent-framework'
-# or
-SAMPLE='langchain'
-```
+| Sample | Environment |
+|---|---|
+| [Agent Framework](agent-framework) | `SAMPLE='agent-framework'` |
+| [LangChain](langchain) | `SAMPLE='langchain'` |
 
 Export desired agent name:
 
