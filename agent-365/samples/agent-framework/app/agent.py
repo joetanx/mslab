@@ -1,104 +1,60 @@
-# Copyright (c) Microsoft. All rights reserved.
-
-"""
-AgentFramework Agent with MCP Server Integration and Observability
-
-This agent uses the AgentFramework SDK and connects to MCP servers for extended functionality,
-with integrated observability using Microsoft Agent 365.
-
-Features:
-- AgentFramework SDK with Azure OpenAI integration
-- MCP server integration for dynamic tool registration
-- Simplified observability setup following reference examples pattern
-- Two-step configuration: configure() + instrument()
-- Automatic AgentFramework instrumentation
-- Token-based authentication for Agent 365 Observability
-- Custom spans with detailed attributes
-- Comprehensive error handling and cleanup
-"""
+"""Implements an Agent Framework-backed assistant with MCP tool support."""
 
 import asyncio
 import logging
 from os import environ
 from typing import Optional
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# =============================================================================
-# DEPENDENCY IMPORTS
-# =============================================================================
-# <DependencyImports>
 
-# AgentFramework SDK
 from agent_framework import Agent
 from agent_framework.foundry import FoundryChatClient
 
-# Agent Interface
 from agent_interface import AgentInterface
 from azure.identity import ManagedIdentityCredential
 
-# Microsoft Agents SDK
 from microsoft_agents.hosting.core import Authorization, TurnContext
 
-# Notifications
 from microsoft_agents_a365.notifications.agent_notification import NotificationTypes
 
-# Observability Components
-# AgentFramework auto-instrumentation is handled by the microsoft-opentelemetry
-# distro (see host_agent_server.py). No manual instrumentor setup is needed.
 
-# MCP Tooling
 from microsoft_agents_a365.tooling.extensions.agentframework.services.mcp_tool_registration_service import (
     McpToolRegistrationService,
 )
-from token_cache import get_cached_agentic_token
+from microsoft.opentelemetry.a365.runtime import get_observability_authentication_scope
+from token_manager import get_token
 
-# </DependencyImports>
 
 
 class AgentFrameworkAgent(AgentInterface):
-    """AgentFramework Agent integrated with MCP servers and Observability"""
+    """Runs user messages and notifications through the Agent Framework runtime."""
 
     AGENT_PROMPT = environ.get("AGENT_PROMPT", "You are a helpful assistant.")
 
-    # =========================================================================
-    # INITIALIZATION
-    # =========================================================================
-    # <Initialization>
 
     def __init__(self):
-        """Initialize the AgentFramework agent."""
+        """Create the chat client, agent, and supporting services."""
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        # Create Azure OpenAI chat client
         self._create_chat_client()
 
-        # Create the agent with initial configuration
         self._create_agent()
 
-        # Initialize MCP services
         self._initialize_services()
 
-        # Track if MCP servers have been set up
         self.mcp_servers_initialized = False
 
-    # </Initialization>
 
-    # =========================================================================
-    # CLIENT AND AGENT CREATION
-    # =========================================================================
-    # <ClientCreation>
 
     def _create_chat_client(self):
-        """Create the Azure OpenAI chat client"""
+        """Create the Foundry chat client used by the agent."""
         self.chat_client = FoundryChatClient(credential=ManagedIdentityCredential(client_id=environ.get("UAMI_CLIENT_ID")))
-        # FOUNDRY_PROJECT_ENDPOINT and FOUNDRY_MODEL automatically taken from env
         logger.info("✅ FoundryChatClient created")
 
     def _create_agent(self):
-        """Create the AgentFramework agent with initial configuration"""
+        """Create the Agent Framework agent instance."""
         try:
             self.agent = Agent(
                 client=self.chat_client,
@@ -110,15 +66,10 @@ class AgentFrameworkAgent(AgentInterface):
             logger.error(f"Failed to create agent: {e}")
             raise
 
-    # </ClientCreation>
 
-    # =========================================================================
-    # MCP SERVER SETUP AND INITIALIZATION
-    # =========================================================================
-    # <McpServerSetup>
 
     def _initialize_services(self):
-        """Initialize MCP services"""
+        """Initialize optional services used to register MCP tools."""
         try:
             self.tool_service = McpToolRegistrationService()
             logger.info("✅ MCP tool service initialized")
@@ -127,7 +78,7 @@ class AgentFrameworkAgent(AgentInterface):
             self.tool_service = None
 
     async def setup_mcp_servers(self, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext):
-        """Set up MCP server connections"""
+        """Attach configured MCP tool servers to the agent once per process."""
         if self.mcp_servers_initialized:
             return
 
@@ -135,6 +86,17 @@ class AgentFrameworkAgent(AgentInterface):
             if not self.tool_service:
                 logger.warning("⚠️ MCP tool service unavailable")
                 return
+
+            tenant_id = getattr(context.activity.recipient, "tenant_id", None)
+            agent_id = getattr(context.activity.recipient, "agentic_app_id", None)
+            await get_token(
+                agent_id=agent_id,
+                tenant_id=tenant_id,
+                auth=auth,
+                auth_handler_name=auth_handler_name,
+                context=context,
+                scopes=get_observability_authentication_scope(),
+            )
 
             self.agent = await self.tool_service.add_tool_servers_to_agent(
                 chat_client=self.chat_client,
@@ -154,22 +116,16 @@ class AgentFrameworkAgent(AgentInterface):
         except Exception as e:
             logger.error(f"MCP setup error: {e}")
 
-    # </McpServerSetup>
 
-    # =========================================================================
-    # MESSAGE PROCESSING
-    # =========================================================================
-    # <MessageProcessing>
 
     async def initialize(self):
-        """Initialize the agent"""
+        """Log that the agent has completed startup initialization."""
         logger.info("Agent initialized")
 
     async def process_user_message(
         self, message: str, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
     ) -> str:
-        """Process user message using the AgentFramework SDK"""
-        # Log the user identity from activity.from_property — set by the A365 platform on every message.
+        """Run a user message through the agent and return its response."""
         from_prop = context.activity.from_property
         logger.info(
             "Turn received from user — DisplayName: '%s', UserId: '%s', AadObjectId: '%s'",
@@ -186,25 +142,18 @@ class AgentFrameworkAgent(AgentInterface):
             logger.error(f"Error processing message: {e}")
             return f"Sorry, I encountered an error: {str(e)}"
 
-    # </MessageProcessing>
 
-    # =========================================================================
-    # NOTIFICATION HANDLING
-    # =========================================================================
-    # <NotificationHandling>
 
     async def handle_agent_notification_activity(
         self, notification_activity, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
     ) -> str:
-        """Handle agent notification activities (email, Word mentions, etc.)"""
+        """Process a Microsoft 365 notification activity through the agent."""
         try:
             notification_type = notification_activity.notification_type
             logger.info(f"📬 Processing notification: {notification_type}")
 
-            # Setup MCP servers on first call
             await self.setup_mcp_servers(auth, auth_handler_name, context)
 
-            # Handle Email Notifications
             if notification_type == NotificationTypes.EMAIL_NOTIFICATION:
                 if not hasattr(notification_activity, "email") or not notification_activity.email:
                     return "I could not find the email notification details."
@@ -216,7 +165,6 @@ class AgentFrameworkAgent(AgentInterface):
                 result = await self.agent.run(message)
                 return self._extract_result(result) or "Email notification processed."
 
-            # Handle Word Comment Notifications
             elif notification_type == NotificationTypes.WPX_COMMENT:
                 if not hasattr(notification_activity, "wpx_comment") or not notification_activity.wpx_comment:
                     return "I could not find the Word notification details."
@@ -226,18 +174,15 @@ class AgentFrameworkAgent(AgentInterface):
                 comment_id = getattr(wpx, "initiating_comment_id", "")
                 drive_id = "default"
 
-                # Get Word document content
                 doc_message = f"You have a new comment on the Word document with id '{doc_id}', comment id '{comment_id}', drive id '{drive_id}'. Please retrieve the Word document as well as the comments and return it in text format."
                 doc_result = await self.agent.run(doc_message)
                 word_content = self._extract_result(doc_result)
 
-                # Process the comment with document context
                 comment_text = notification_activity.text or ""
                 response_message = f"You have received the following Word document content and comments. Please refer to these when responding to comment '{comment_text}'. {word_content}"
                 result = await self.agent.run(response_message)
                 return self._extract_result(result) or "Word notification processed."
 
-            # Generic notification handling
             else:
                 notification_message = notification_activity.text or f"Notification received: {notification_type}"
                 result = await self.agent.run(notification_message)
@@ -248,7 +193,7 @@ class AgentFrameworkAgent(AgentInterface):
             return f"Sorry, I encountered an error processing the notification: {str(e)}"
 
     def _extract_result(self, result) -> str:
-        """Extract text content from agent result"""
+        """Convert an agent run result object into response text."""
         if not result:
             return ""
         if hasattr(result, "contents"):
@@ -260,20 +205,13 @@ class AgentFrameworkAgent(AgentInterface):
         else:
             return str(result)
 
-    # </NotificationHandling>
 
-    # =========================================================================
-    # CLEANUP
-    # =========================================================================
-    # <Cleanup>
 
     async def cleanup(self) -> None:
-        """Clean up agent resources"""
+        """Release services created by the agent."""
         try:
             if hasattr(self, "tool_service") and self.tool_service:
                 await self.tool_service.cleanup()
             logger.info("Agent cleanup completed")
         except Exception as e:
             logger.error(f"Cleanup error: {e}")
-
-    # </Cleanup>

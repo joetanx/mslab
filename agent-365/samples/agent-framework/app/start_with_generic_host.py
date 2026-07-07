@@ -1,10 +1,4 @@
-# Copyright (c) Microsoft. All rights reserved.
-
-# !/usr/bin/env python3
-"""
-Example: Direct usage of Generic Agent Host with AgentFrameworkAgent
-This script demonstrates direct usage without complex imports.
-"""
+"""Starts the generic host with the Agent Framework agent implementation."""
 
 import sys
 
@@ -18,12 +12,11 @@ except ImportError as e:
 
 
 def main():
-    """Main entry point - start the generic host with AgentFrameworkAgent"""
+    """Start the generic host and return the process exit code."""
     try:
         print("Starting Generic Agent Host with AgentFrameworkAgent...")
         print()
 
-        # Use the convenience function to start hosting
         create_and_run_host(AgentFrameworkAgent)
 
     except Exception as e:
