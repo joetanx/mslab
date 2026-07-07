@@ -29,7 +29,9 @@ Collection of lab setups done as a Microsoft techie
 
 | Topic | Description |
 |---|---|
-| [Simple secure VNET setup](https://github.com/joetanx/mslab/blob/main/firewall-bastion-natgw.md) | Secure Azure VM access with Bastion and internet connection with Azure Firewall |
+| [Microsoft Foundry](https://github.com/joetanx/mslab/blob/main/foundry.md) | • Setup AI resources in Azure<br>• Connect to models via API endpoint and key (for use with tools like n8n and Langflow) |
+| [Azure OpenAI](https://github.com/joetanx/mslab/blob/main/azure-openai.md) | Create Azure OpenAI resource (for use with tools like n8n) |
+| [Azure perimeter network](https://github.com/joetanx/mslab/blob/main/firewall-bastion-natgw.md) | Secure Azure virtual network:<br>• VM access with Bastion<br>• Outbound internet connection with Azure Firewall and NAT gateway |
 | [Key vault](https://github.com/joetanx/mslab/blob/main/key-vault.md) | Onboard VM credentials to Azure key vault to secure VM access via bastion |
 | [Azure Arc](https://github.com/joetanx/mslab/blob/main/arc.md) | Setup Azure Arc connection for on-premise Windows and Linux machines |
-| [Azure OpenAI](https://github.com/joetanx/mslab/blob/main/azure-openai.md) | Create Azure OpenAI resource (for use with tools like n8n) |
+| [Configuration manager](https://github.com/joetanx/mslab/tree/main/ConfigMgr/) | • Setup Configuration Manager and system roles<br>• Setup Endpoint Protection feature |
