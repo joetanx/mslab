@@ -1,4 +1,4 @@
-"""Shared host contract for LangChain-compatible agents."""
+"""Defines the common interface required by hosted agent implementations."""
 
 from abc import ABC, abstractmethod
 from typing import Optional
@@ -7,37 +7,28 @@ from microsoft_agents.hosting.core import Authorization, TurnContext
 
 
 class AgentInterface(ABC):
-    """
-    Abstract base class that any hosted agent must inherit from.
-
-    This ensures agents implement the required methods at class definition time,
-    providing stronger guarantees than a Protocol.
-    """
+    """Declares the lifecycle and messaging contract for agent implementations."""
 
     @abstractmethod
     async def initialize(self) -> None:
-        """Initialize the agent and any required resources."""
+        """Prepare the agent before it starts handling turns."""
         pass
 
     @abstractmethod
     async def process_user_message(
-        self,
-        message: str,
-        auth: Authorization,
-        auth_handler_name: Optional[str],
-        context: TurnContext,
+        self, message: str, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
     ) -> str:
-        """Process a user message and return a response."""
+        """Process a user message and return the response text."""
         pass
 
     @abstractmethod
     async def cleanup(self) -> None:
-        """Clean up any resources used by the agent."""
+        """Release resources owned by the agent implementation."""
         pass
 
 
 def check_agent_inheritance(agent_class) -> bool:
-    """Check that an agent class inherits from AgentInterface."""
+    """Return whether the supplied class implements AgentInterface."""
     if not issubclass(agent_class, AgentInterface):
         print(f"❌ Agent {agent_class.__name__} does not inherit from AgentInterface")
         return False

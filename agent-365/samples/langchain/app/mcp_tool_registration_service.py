@@ -1,276 +1,127 @@
-"""MCP tool registration service for LangChain agents."""
+"""LangChain MCP tool registration backed by Microsoft Agent 365 tooling."""
+
+from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Optional
 
 from langchain_core.tools import BaseTool
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from microsoft.opentelemetry.a365.runtime import Utility
 from microsoft_agents.hosting.core import Authorization, TurnContext
+from microsoft_agents_a365.runtime.utility import Utility
 from microsoft_agents_a365.tooling.models import ToolOptions
 from microsoft_agents_a365.tooling.services.mcp_tool_server_configuration_service import (
     McpToolServerConfigurationService,
 )
-from microsoft_agents_a365.tooling.utils import Constants
-from microsoft_agents_a365.tooling.utils.utility import get_mcp_platform_authentication_scope
-from token_cache import (
-    build_token_cache_key,
-    cache_token,
-    get_cached_token,
-    is_token_valid,
+from microsoft_agents_a365.tooling.utils.constants import Constants
+from microsoft_agents_a365.tooling.utils.utility import (
+    get_mcp_platform_authentication_scope,
+    is_development_environment,
 )
 
 
-McpConnectionConfig = dict[str, Any]
-
-
-@dataclass
-class McpToolCacheEntry:
-    """Cached MCP client state for a tenant, agent, and user identity."""
-
-    client: Optional[MultiServerMCPClient]
-    connections: dict[str, McpConnectionConfig]
-    tools: list[BaseTool]
-
-
 class McpToolRegistrationService:
-    """Discover MCP servers and load their tools for LangChain."""
+    """Loads Agent 365 MCP server registrations as LangChain tools."""
 
     _orchestrator_name = "LangChain"
 
-    def __init__(self, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(self, logger: Optional[logging.Logger] = None):
+        """Create the registration service and its core configuration service."""
         self._logger = logger or logging.getLogger(self.__class__.__name__)
-        self._config_service = McpToolServerConfigurationService(logger=self._logger)
-        self._tool_cache: dict[str, McpToolCacheEntry] = {}
-        self._active_identity_key: str | None = None
-        self._revision = 0
+        self._mcp_server_configuration_service = McpToolServerConfigurationService(
+            logger=self._logger
+        )
+        self._mcp_client: MultiServerMCPClient | None = None
 
-    @property
-    def initialized(self) -> bool:
-        """Return whether MCP discovery has already completed."""
-        return self._active_identity_key is not None
-
-    @property
-    def revision(self) -> int:
-        """Incremented whenever the loaded MCP tools are replaced."""
-        return self._revision
-
-    async def discover_and_load_tools(
+    async def add_tool_servers_to_agent(
         self,
+        initial_tools: list[BaseTool],
         auth: Authorization,
-        auth_handler_name: Optional[str],
-        context: TurnContext,
-        force_refresh: bool = False,
+        auth_handler_name: str | None,
+        turn_context: TurnContext,
+        auth_token: Optional[str] = None,
     ) -> list[BaseTool]:
-        """Discover A365 MCP servers and load them as LangChain tools."""
-        discovery_token = await self._get_mcp_discovery_token(
-            auth, auth_handler_name, context, force_refresh=force_refresh
-        )
-        agentic_app_id = Utility.resolve_agent_identity(context, discovery_token)
-        tenant_id = getattr(context.activity.recipient, "tenant_id", "") or ""
-        identity_key = build_token_cache_key(
-            tenant_id, agentic_app_id, self._get_user_identity(context)
-        )
-        cached_entry = self._tool_cache.get(identity_key)
+        """
+        Return initial tools plus LangChain tools discovered from Agent 365 MCP servers.
 
-        if (
-            cached_entry
-            and not force_refresh
-            and self._connection_tokens_are_valid(identity_key, cached_entry.connections)
-        ):
-            if self._active_identity_key != identity_key:
-                self._active_identity_key = identity_key
-                self._revision += 1
-            return list(cached_entry.tools)
-
-        if cached_entry:
-            self._logger.info(
-                "Refreshing MCP tools for agent identity %s", identity_key
+        The method intentionally mirrors the Agent Framework extension's entrypoint,
+        but returns a list suitable for LangChain's ``create_agent(..., tools=...)``.
+        """
+        is_dev = is_development_environment()
+        if not auth_token and not is_dev:
+            if not auth_handler_name:
+                raise ValueError("auth_handler_name is required outside development mode")
+            token_result = await auth.exchange_token(
+                turn_context,
+                get_mcp_platform_authentication_scope(),
+                auth_handler_name,
             )
-            await self._close_entry(cached_entry)
-            self._tool_cache.pop(identity_key, None)
-            if self._active_identity_key == identity_key:
-                self._active_identity_key = None
+            if token_result is None or not token_result.token:
+                raise ValueError("Token exchange did not return an MCP platform token")
+            auth_token = token_result.token
 
-        server_configs = await self._config_service.list_tool_servers(
+        agentic_app_id = (
+            "" if is_dev else Utility.resolve_agent_identity(turn_context, auth_token)
+        )
+        options = ToolOptions(orchestrator_name=self._orchestrator_name)
+        server_configs = await self._mcp_server_configuration_service.list_tool_servers(
             agentic_app_id=agentic_app_id,
-            auth_token=discovery_token,
-            options=ToolOptions(orchestrator_name=self._orchestrator_name),
+            auth_token=auth_token,
+            options=options,
             authorization=auth,
             auth_handler_name=auth_handler_name,
-            turn_context=context,
+            turn_context=turn_context,
         )
         self._logger.info("Loaded %d MCP server configurations", len(server_configs))
 
-        connections = self._build_mcp_connections(server_configs)
-        if not connections:
-            self._logger.info("No MCP servers configured")
-            self._tool_cache[identity_key] = McpToolCacheEntry(
-                client=None,
-                connections={},
-                tools=[],
-            )
-            self._active_identity_key = identity_key
-            self._revision += 1
-            return []
-
-        mcp_client = MultiServerMCPClient(connections)
-        tools = await mcp_client.get_tools()
-        self._tool_cache[identity_key] = McpToolCacheEntry(
-            client=mcp_client,
-            connections=connections,
-            tools=tools,
-        )
-        self._active_identity_key = identity_key
-        self._revision += 1
-        self._logger.info("Loaded %d LangChain MCP tools", len(tools))
-        return list(tools)
-
-    async def force_refresh(
-        self,
-        auth: Authorization,
-        auth_handler_name: Optional[str],
-        context: TurnContext,
-    ) -> list[BaseTool]:
-        """Discard cached MCP connections and load tools with fresh auth headers."""
-        return await self.discover_and_load_tools(
-            auth, auth_handler_name, context, force_refresh=True
-        )
-
-    async def _get_mcp_discovery_token(
-        self,
-        auth: Authorization,
-        auth_handler_name: Optional[str],
-        context: TurnContext,
-        force_refresh: bool = False,
-    ) -> Optional[str]:
-        """Get the shared discovery token used to list A365 MCP servers."""
-        if not auth_handler_name:
-            raise ValueError("auth_handler_name is required for production MCP discovery")
-
-        scope = get_mcp_platform_authentication_scope()
-        cache_key = build_token_cache_key(
-            "mcp-discovery",
-            getattr(context.activity.recipient, "tenant_id", ""),
-            getattr(context.activity.recipient, "agentic_app_id", ""),
-            self._get_user_identity(context),
-            self._normalize_scope(scope),
-        )
-        if not force_refresh:
-            cached_token = get_cached_token(cache_key)
-            if cached_token:
-                return cached_token
-
-        token_result = await auth.exchange_token(
-            context,
-            scope,
-            auth_handler_name,
-        )
-        if token_result is None or not token_result.token:
-            raise ValueError("Failed to obtain token for MCP server discovery")
-
-        cache_token(cache_key, token_result.token)
-        return token_result.token
-
-    def _build_mcp_connections(self, server_configs) -> dict[str, McpConnectionConfig]:
-        """Convert A365 server configs to langchain-mcp-adapters configs."""
-        mcp_connections: dict[str, McpConnectionConfig] = {}
-
+        server_connections: dict[str, dict[str, object]] = {}
         for config in server_configs:
             server_name = config.mcp_server_name or config.mcp_server_unique_name
-            if not config.url:
-                self._logger.warning(
-                    "Skipping MCP server '%s' without URL", server_name
-                )
-                continue
-
-            headers = {
-                Constants.Headers.USER_AGENT: Utility.get_user_agent_header(
-                    self._orchestrator_name
-                )
-            }
-            if config.headers:
-                headers.update(config.headers)
-
-            mcp_connections[server_name] = {
+            headers = self._build_server_headers(config.headers, auth_token)
+            server_connections[server_name] = {
                 "transport": "http",
                 "url": config.url,
                 "headers": headers,
             }
+            self._logger.info("Configured MCP server '%s' at %s", server_name, config.url)
 
-        return mcp_connections
+        if not server_connections:
+            return list(initial_tools)
 
-    def _connection_tokens_are_valid(
-        self, identity_key: str, connections: dict[str, McpConnectionConfig]
-    ) -> bool:
-        """Check cached MCP connection bearer tokens before reusing tools."""
-        for server_name, connection in connections.items():
-            headers = connection.get("headers") or {}
-            authorization = self._get_header(headers, "authorization")
-            if not authorization:
-                continue
+        self._mcp_client = MultiServerMCPClient(server_connections)
+        mcp_tools = await self._mcp_client.get_tools()
+        self._logger.info("Loaded %d LangChain MCP tools", len(mcp_tools))
+        return [*initial_tools, *mcp_tools]
 
-            scheme, _, token = authorization.partition(" ")
-            if scheme.lower() != "bearer" or not token:
-                continue
+    def _build_server_headers(
+        self,
+        server_headers: dict[str, str] | None,
+        auth_token: Optional[str],
+    ) -> dict[str, str]:
+        """Build HTTP headers for LangChain MCP adapter server connections."""
+        headers = {
+            Constants.Headers.USER_AGENT: Utility.get_user_agent_header(
+                self._orchestrator_name
+            )
+        }
+        if server_headers:
+            headers.update(server_headers)
 
-            if not is_token_valid(token):
-                self._logger.info(
-                    "Cached MCP token for identity '%s' server '%s' is expired or near expiry",
-                    identity_key,
-                    server_name,
+        if Constants.Headers.AUTHORIZATION not in headers and auth_token:
+            headers[Constants.Headers.AUTHORIZATION] = (
+                auth_token
+                if auth_token.lower().startswith(
+                    f"{Constants.Headers.BEARER_PREFIX.lower()} "
                 )
-                return False
+                else f"{Constants.Headers.BEARER_PREFIX} {auth_token}"
+            )
 
-        return True
-
-    def _get_header(self, headers: dict[str, Any], name: str) -> str | None:
-        for header_name, header_value in headers.items():
-            if header_name.lower() == name:
-                return str(header_value)
-        return None
-
-    def get_available_server_names(self) -> list[str]:
-        """Get names for the MCP servers registered with LangChain."""
-        entry = self._get_active_entry()
-        return list(entry.connections.keys()) if entry else []
-
-    def _get_active_entry(self) -> McpToolCacheEntry | None:
-        if not self._active_identity_key:
-            return None
-        return self._tool_cache.get(self._active_identity_key)
-
-    def _get_user_identity(self, context: TurnContext) -> str:
-        from_property = getattr(context.activity, "from_property", None)
-        if not from_property:
-            return ""
-        return (
-            getattr(from_property, "aad_object_id", None)
-            or getattr(from_property, "id", None)
-            or ""
-        )
-
-    def _normalize_scope(self, scope: Any) -> str:
-        if isinstance(scope, (list, tuple, set)):
-            return " ".join(str(item) for item in scope)
-        return str(scope or "")
-
-    async def _close_entry(self, entry: McpToolCacheEntry) -> None:
-        if not entry.client:
-            return
-
-        close = getattr(entry.client, "aclose", None) or getattr(entry.client, "close", None)
-        if close:
-            result = close()
-            if hasattr(result, "__await__"):
-                await result
+        return headers
 
     async def cleanup(self) -> None:
-        """Clean up MCP client resources."""
-        for entry in self._tool_cache.values():
-            await self._close_entry(entry)
-
-        self._tool_cache = {}
-        self._active_identity_key = None
-        self._logger.info("MCP tool registration service cleaned up")
+        """Release resources created by the LangChain MCP adapter if supported."""
+        if self._mcp_client is None:
+            return
+        close = getattr(self._mcp_client, "aclose", None)
+        if close is not None:
+            await close()

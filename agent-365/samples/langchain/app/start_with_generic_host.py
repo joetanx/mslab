@@ -1,4 +1,4 @@
-"""Start the Microsoft Agents host with the LangChain agent."""
+"""Starts the generic host with the LangChain agent implementation."""
 
 import sys
 
@@ -12,9 +12,9 @@ except ImportError as e:
 
 
 def main():
-    """Start the host with LangChainAgent."""
+    """Start the generic host and return the process exit code."""
     try:
-        print("Starting Microsoft Agents host with LangChainAgent...")
+        print("Starting Generic Agent Host with LangChainAgent...")
         print()
 
         create_and_run_host(LangChainAgent)

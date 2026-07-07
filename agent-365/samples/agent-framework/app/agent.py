@@ -8,18 +8,12 @@ from typing import Optional
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 from agent_framework import Agent
 from agent_framework.foundry import FoundryChatClient
-
 from agent_interface import AgentInterface
 from azure.identity import ManagedIdentityCredential
-
 from microsoft_agents.hosting.core import Authorization, TurnContext
-
 from microsoft_agents_a365.notifications.agent_notification import NotificationTypes
-
-
 from microsoft_agents_a365.tooling.extensions.agentframework.services.mcp_tool_registration_service import (
     McpToolRegistrationService,
 )
@@ -27,26 +21,18 @@ from microsoft.opentelemetry.a365.runtime import get_observability_authenticatio
 from token_manager import get_token
 
 
-
 class AgentFrameworkAgent(AgentInterface):
     """Runs user messages and notifications through the Agent Framework runtime."""
 
     AGENT_PROMPT = environ.get("AGENT_PROMPT", "You are a helpful assistant.")
 
-
     def __init__(self):
         """Create the chat client, agent, and supporting services."""
         self.logger = logging.getLogger(self.__class__.__name__)
-
         self._create_chat_client()
-
         self._create_agent()
-
         self._initialize_services()
-
         self.mcp_servers_initialized = False
-
-
 
     def _create_chat_client(self):
         """Create the Foundry chat client used by the agent."""
@@ -65,8 +51,6 @@ class AgentFrameworkAgent(AgentInterface):
         except Exception as e:
             logger.error(f"Failed to create agent: {e}")
             raise
-
-
 
     def _initialize_services(self):
         """Initialize optional services used to register MCP tools."""
@@ -116,8 +100,6 @@ class AgentFrameworkAgent(AgentInterface):
         except Exception as e:
             logger.error(f"MCP setup error: {e}")
 
-
-
     async def initialize(self):
         """Log that the agent has completed startup initialization."""
         logger.info("Agent initialized")
@@ -141,8 +123,6 @@ class AgentFrameworkAgent(AgentInterface):
         except Exception as e:
             logger.error(f"Error processing message: {e}")
             return f"Sorry, I encountered an error: {str(e)}"
-
-
 
     async def handle_agent_notification_activity(
         self, notification_activity, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
@@ -204,8 +184,6 @@ class AgentFrameworkAgent(AgentInterface):
             return str(result.content)
         else:
             return str(result)
-
-
 
     async def cleanup(self) -> None:
         """Release services created by the agent."""

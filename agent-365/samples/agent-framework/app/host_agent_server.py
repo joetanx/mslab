@@ -61,13 +61,11 @@ def create_and_run_host(
 
     use_microsoft_opentelemetry(
         enable_a365=True,
-        enable_azure_monitor=False,
         a365_token_resolver=lambda agent_id, tenant_id: get_token(
             agent_id=agent_id,
             tenant_id=tenant_id,
             scopes=get_observability_authentication_scope(),
         )
-        or "",
     )
 
     host = GenericAgentHost(agent_class, *agent_args, **agent_kwargs)

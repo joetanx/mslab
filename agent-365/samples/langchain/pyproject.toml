@@ -1,14 +1,13 @@
 [project]
-name = "a365-langchain-sample"
+name = "a365-maf-sample"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-    # LangChain runtime and model/tool integrations
+    # LangChain SDK and MCP adapter
     "langchain",
     "langchain-core",
-    "langgraph",
-    "langchain-azure-ai",
     "langchain-mcp-adapters",
+    "langchain-azure-ai",
 
     # Microsoft Agents SDK - Official packages for hosting and integration
     "microsoft-agents-hosting-aiohttp",
@@ -22,22 +21,9 @@ dependencies = [
     # Core dependencies
     "aiohttp",
 
-    # HTTP server support for MCP servers
-    "uvicorn[standard]",
-    "fastapi",
-
-    # HTTP client
-    "httpx",
-
-    # Data validation
-    "pydantic",
-
-    # Additional utilities
-    "typing-extensions",
-
     # Microsoft Agent 365 SDK packages
-    "microsoft_agents_a365_runtime",
     "microsoft_agents_a365_tooling",
+    "microsoft_agents_a365_runtime",
     "microsoft_agents_a365_notifications",
 
     # Observability using Microsoft Opentelemetry
