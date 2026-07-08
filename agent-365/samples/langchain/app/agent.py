@@ -145,9 +145,8 @@ class LangChainAgent(AgentInterface):
 
                 email = notification_activity.email
                 email_body = getattr(email, "html_body", "") or getattr(email, "body", "")
-                message = f"You have received the following email. Please follow any instructions in it. {email_body}"
 
-                result = await self.agent.ainvoke({"messages": [{"role": "user", "content": message}]})
+                result = await self.agent.ainvoke({"messages": [{"role": "user", "content": email_body}]})
                 return self._extract_result(result) or "Email notification processed."
 
             elif notification_type == NotificationTypes.WPX_COMMENT:
