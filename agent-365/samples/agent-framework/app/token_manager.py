@@ -16,7 +16,6 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 TOKEN_REFRESH_BUFFER_SECONDS = int(environ.get("TOKEN_REFRESH_BUFFER_SECONDS", "300"))
-DEFAULT_TOKEN_TTL_SECONDS = int(environ.get("DEFAULT_TOKEN_TTL_SECONDS", "300"))
 
 
 @dataclass(frozen=True)
@@ -60,7 +59,18 @@ def get_token(
             scopes=normalized_scopes,
         )
 
-    return _get_cached_token(agent_id, normalized_scopes) or ""
+    return _get_cached_token(agent_id, tenant_id, normalized_scopes) or ""
+
+
+def token_is_valid(
+    *,
+    agent_id: str | None,
+    tenant_id: str | None = None,
+    scopes: Sequence[str] | str | None = None,
+) -> bool:
+    """Return whether a non-expiring cached token exists for the agent and scopes."""
+    normalized_scopes = _normalize_scopes(scopes)
+    return _get_cached_token(agent_id, tenant_id, normalized_scopes) is not None
 
 
 async def _get_token_async(
@@ -73,7 +83,7 @@ async def _get_token_async(
     scopes: tuple[str, ...],
 ) -> str:
     """Exchange and cache an agentic token when no valid cached token exists."""
-    cached_token = _get_cached_token(agent_id, scopes)
+    cached_token = _get_cached_token(agent_id, tenant_id, scopes)
     if cached_token:
         return cached_token
 
@@ -85,9 +95,10 @@ async def _get_token_async(
         logger.debug("Skipping token exchange because no auth handler is configured")
         return ""
 
-    lock = _agent_locks.setdefault(agent_id, asyncio.Lock())
+    cache_key = _get_cache_key(agent_id, tenant_id, scopes)
+    lock = _agent_locks.setdefault(cache_key, asyncio.Lock())
     async with lock:
-        cached_token = _get_cached_token(agent_id, scopes)
+        cached_token = _get_cached_token(agent_id, tenant_id, scopes)
         if cached_token:
             return cached_token
 
@@ -103,7 +114,7 @@ async def _get_token_async(
         )
         token = _extract_token_value(exchanged_token)
         expires_at = _extract_expires_at(exchanged_token, token)
-        _agentic_token_cache[agent_id] = CachedToken(
+        _agentic_token_cache[cache_key] = CachedToken(
             token=token,
             expires_at=expires_at,
             scopes=scopes,
@@ -126,7 +137,8 @@ def cache_agentic_token(
 ) -> None:
     """Store an agentic token in the in-memory cache."""
     normalized_scopes = _normalize_scopes(scopes)
-    _agentic_token_cache[agent_id] = CachedToken(
+    cache_key = _get_cache_key(agent_id, tenant_id, normalized_scopes)
+    _agentic_token_cache[cache_key] = CachedToken(
         token=token,
         expires_at=_extract_expires_at(None, token),
         scopes=normalized_scopes,
@@ -141,13 +153,14 @@ def get_cached_agentic_token(tenant_id: str | None, agent_id: str) -> str | None
     return token or None
 
 
-def _get_cached_token(agent_id: str | None, scopes: tuple[str, ...]) -> str | None:
+def _get_cached_token(agent_id: str | None, tenant_id: str | None, scopes: tuple[str, ...]) -> str | None:
     """Return a valid cached token for an agent and scope set."""
     if not agent_id:
         logger.warning("Cannot resolve cached token without agent_id")
         return None
 
-    cached_token = _agentic_token_cache.get(agent_id)
+    cache_key = _get_cache_key(agent_id, tenant_id, scopes)
+    cached_token = _agentic_token_cache.get(cache_key)
     if not cached_token:
         logger.debug("No cached token found for agent_id=%s", agent_id)
         return None
@@ -158,6 +171,12 @@ def _get_cached_token(agent_id: str | None, scopes: tuple[str, ...]) -> str | No
 
     logger.debug("Using cached token for agent_id=%s", agent_id)
     return cached_token.token
+
+
+def _get_cache_key(agent_id: str, tenant_id: str | None, scopes: tuple[str, ...]) -> str:
+    """Build a cache key that isolates tenants and token audiences."""
+    scope_key = " ".join(scopes)
+    return f"{tenant_id or ''}:{agent_id}:{scope_key}"
 
 
 def _normalize_scopes(scopes: Sequence[str] | str | None) -> tuple[str, ...]:
@@ -199,11 +218,8 @@ def _extract_expires_at(exchanged_token: Any, token: str) -> float:
     if jwt_expires_at is not None:
         return jwt_expires_at
 
-    logger.warning(
-        "Token expiry was not available; using fallback TTL of %s seconds",
-        DEFAULT_TOKEN_TTL_SECONDS,
-    )
-    return now + DEFAULT_TOKEN_TTL_SECONDS
+    # Set expire to longer than buffer if token doesn't have expiry
+    return now + TOKEN_REFRESH_BUFFER_SECONDS
 
 
 def _decode_jwt_exp(token: str) -> float | None:

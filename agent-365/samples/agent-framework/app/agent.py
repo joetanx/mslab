@@ -17,8 +17,8 @@ from microsoft_agents_a365.notifications.agent_notification import NotificationT
 from microsoft_agents_a365.tooling.extensions.agentframework.services.mcp_tool_registration_service import (
     McpToolRegistrationService,
 )
-from microsoft.opentelemetry.a365.runtime import get_observability_authentication_scope
-from token_manager import get_token
+from microsoft_agents_a365.tooling.utils.utility import get_mcp_platform_authentication_scope
+from token_manager import get_token, token_is_valid
 
 
 class AgentFrameworkAgent(AgentInterface):
@@ -63,7 +63,14 @@ class AgentFrameworkAgent(AgentInterface):
 
     async def setup_mcp_servers(self, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext):
         """Attach configured MCP tool servers to the agent once per process."""
-        if self.mcp_servers_initialized:
+        tenant_id = getattr(context.activity.recipient, "tenant_id", None)
+        agent_id = getattr(context.activity.recipient, "agentic_app_id", None)
+        mcp_scopes = get_mcp_platform_authentication_scope()
+        if self.mcp_servers_initialized and token_is_valid(
+            agent_id=agent_id,
+            tenant_id=tenant_id,
+            scopes=mcp_scopes,
+        ):
             return
 
         try:
@@ -71,15 +78,13 @@ class AgentFrameworkAgent(AgentInterface):
                 logger.warning("⚠️ MCP tool service unavailable")
                 return
 
-            tenant_id = getattr(context.activity.recipient, "tenant_id", None)
-            agent_id = getattr(context.activity.recipient, "agentic_app_id", None)
             await get_token(
                 agent_id=agent_id,
                 tenant_id=tenant_id,
                 auth=auth,
                 auth_handler_name=auth_handler_name,
                 context=context,
-                scopes=get_observability_authentication_scope(),
+                scopes=mcp_scopes,
             )
 
             self.agent = await self.tool_service.add_tool_servers_to_agent(
