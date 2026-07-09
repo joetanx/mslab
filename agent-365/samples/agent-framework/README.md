@@ -109,6 +109,28 @@ The root [README.md](../README.md) contains the full Azure resource and Agent 36
 10. Publish the Agent 365 manifest.
 11. Substitute `containerapp.yaml` with environment variables and deploy it with `az containerapp create`.
 
+## Observability
+
+Agent 365 observability is provided by Microsoft OpenTelemetry: https://github.com/microsoft/opentelemetry-distro-python/tree/main/src/microsoft/opentelemetry/a365
+
+It is enabled just with a simple `use_microsoft_opentelemetry` ([example](https://github.com/microsoft/opentelemetry-distro-python/blob/main/samples/a365/exporter.py)):
+
+```python
+from microsoft.opentelemetry import use_microsoft_opentelemetry
+
+use_microsoft_opentelemetry(
+    enable_a365=True,
+    a365_token_resolver=get_token,
+    instrumentation_options={
+        "langchain": {"enabled": True},
+    },
+)
+```
+
+The [documentation](https://github.com/microsoft/opentelemetry-distro-python/blob/main/A365_DOCUMENTATION.md) provides details on auto-instrumented libraries, baggage configuration, token resolver, etc
+
+Microsoft OpenTelemetry replaces A365 observability and observability-extensions packages; the [migration documentation](https://github.com/microsoft/opentelemetry-distro-python/blob/main/MIGRATION_A365.md) provides more details.
+
 ## MCP tool behavior
 
 The sample uses `McpToolRegistrationService` from `microsoft_agents_a365_tooling_extensions_agentframework`. During the first turn:
