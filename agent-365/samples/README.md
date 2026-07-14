@@ -291,7 +291,12 @@ UAMI is used for Federated Identity Credential (FIC) for the blueprint, the `age
 
 > [!Note]
 >
-> 1. `Application Administrator` or `Cloud Application Administrator` Entra role required to add FIC to agent blueprint
+> 1. `Application Administrator` or `Cloud Application Administrator` [Entra role required](https://learn.microsoft.com/en-us/graph/api/federatedidentitycredential-post#permissions) to add FIC to agent blueprint
+>
+>     In event of `Insufficient privilleges to complete the operation`, assign the permission and try:
+>     - `az logout`, then `az login` to refresh the permissions
+>     - If logging out and in didn't work, open a new tab of Azure portal or MAC, then open the cloud shell again
+>
 > 2. The principal ID (not client ID) of the UAMI is used to assign FIC
 
 ```sh
