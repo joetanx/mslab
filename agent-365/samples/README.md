@@ -254,7 +254,27 @@ curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/sample
 az acr build --registry $ACR_NAME --image $APP_NAME:latest --file Dockerfile .
 ```
 
-## 4. Agent 365 CLI
+## 4. AI teammate setup in Agent 365
+
+> [!Note]
+>
+> AI teammate is currently under Frontier, which can be activated in MAC
+> 
+> ![](https://github.com/user-attachments/assets/c54e9f02-dfc9-4bd2-9c91-6018a484d3a7)
+>
+> ![](https://github.com/user-attachments/assets/b5b2e15f-ea73-422d-ba8c-f656941f54d9)
+>
+> ![](https://github.com/user-attachments/assets/0892e6cb-2efe-48f0-b4f4-f364a19709f4)
+
+### 4.1. Prepare a365 CLI
+
+> [!Important]
+>
+> The setup is performed in Cloud Shell (bash) in Azure portal, which already has `az`, `dotnet`, `python` and `pwsh` (v7) tools.
+>
+> (it even has most bash utilities like `vi` and `envsubst`)
+>
+> This is convenient, but the session is **ephemeral**, so any files to be kept from the session must be download via `Manage files` from the Cloud Shell.
 
 Install a365 CLI in the Cloud Shell:
 
@@ -268,6 +288,8 @@ export PATH=$PATH:/home/system/.dotnet/tools/
 > Run `a365 setup requirements` to verify if the tenant has the necessary prerequisites (e.g. `Agent 365 CLI` app registration).
 >
 > Read more about the prerequisites: https://github.com/joetanx/mslab/blob/main/agent-365/a365-cli.md
+
+### 4.2. Provision the agent in Agent 365
 
 ```sh
 MESSAGING_ENDPOINT="https://$APP_NAME.$CAE_DOMAIN/api/messages"
@@ -310,7 +332,7 @@ az ad app federated-credential create \
   }'
 ```
 
-### 4.1. Configure tools
+### 4.3. Configure tools
 
 List availables tools in the [Agent 365 tools catalog](https://learn.microsoft.com/en-us/microsoft-agent-365/tooling-servers-overview#agent-365-tools-catalog):
 
@@ -321,24 +343,34 @@ a365 develop list-available
 Add desired tools to the agent, this generates the `ToolingManifest.json` file:
 
 ```sh
-for mcp in mcp_M365Copilot mcp_CalendarTools mcp_MailTools mcp_TeamsServer mcp_SharePointRemoteServer mcp_OneDriveRemoteServer mcp_WordServer mcp_MeServer; do
+for mcp in mcp_M365Copilot mcp_TeamsServer mcp_MailTools mcp_CalendarTools mcp_WordServer mcp_MeServer; do
   a365 develop add-mcp-servers $mcp
 done
 ```
 
 > [!Note]
 >
-> These tools are now consider legacy:
-> - mcp_ExcelServer
-> - mcp_ODSPRemoteServer
-> - mcp_WebSearchTools
-> - mcp_SharePointListsTools
+> 1. These tools are now consider legacy:
+>     - mcp_ExcelServer
+>     - mcp_ODSPRemoteServer
+>     - mcp_WebSearchTools
+>     - mcp_SharePointListsTools
 >
-> Below warning occurs when trying to add legacy tools (but still usable at the time of writing):
+>     Below warning occurs when trying to add legacy tools (but still usable at the time of writing):
 >
-> ```
-> uses a legacy ATG audience and may not work correctly. Consider re-running add-mcp-servers to pick up the latest catalog.
-> ```
+>     ```
+>     uses a legacy ATG audience and may not work correctly. Consider re-running add-mcp-servers to pick up the latest catalog.
+>     ```
+>
+> 2. `mcp_SharePointRemoteServer` and `mcp_OneDriveRemoteServer` have identically named tools:
+>     - `getFileOrFolderMetadataByUrl`
+>     - `getSensitivityLabels`
+>
+>     Adding both MCP server can cause error in MAF:
+>
+>     ```
+>     Duplicate tool name '<tool-name>'. Tools names must be unique. Consider setting `tool_name_prefix` on the MCPTool.
+>     ```
 
 Verify/view the tools configured in `ToolingManifest.json`
 
@@ -352,7 +384,7 @@ Run `setup all` again, or `setup permissions mcp` to grant the permissions requi
 a365 setup permissions mcp -n $APP_NAME
 ```
 
-### 4.2. Publish agent manifest in M365 Admin Center
+### 4.4. Publish agent manifest in M365 Admin Center
 
 ```sh
 a365 publish
