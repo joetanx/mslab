@@ -193,34 +193,15 @@ class GenericAgentHost:
                 tenant_id, agent_id = result
 
                 with BaggageBuilder().tenant_id(tenant_id).agent_id(agent_id).build():
-                    user_message = context.activity.text or ""
-                    if not user_message.strip() or user_message.strip() == "/help":
+                    user_message = context.activity.text.strip() or ""
+                    if not user_message or user_message == "/help":
                         return
+                    logger.info(f"📨 {getattr(context.activity, "channel_id")}: {user_message}")
 
-                    logger.info(f"📨 {user_message}")
-
-
-                    async def _typing_loop():
-                        """Send periodic typing indicators while work is in progress."""
-                        try:
-                            while True:
-                                await asyncio.sleep(30)
-                                await context.send_activity(Activity(type="typing"))
-                        except asyncio.CancelledError:
-                            pass
-
-                    typing_task = asyncio.create_task(_typing_loop())
-                    try:
-                        response = await self.agent_instance.process_user_message(
-                            user_message, self.agent_app.auth, self.auth_handler_name, context
-                        )
-                        await context.send_activity(response)
-                    finally:
-                        typing_task.cancel()
-                        try:
-                            await typing_task
-                        except asyncio.CancelledError:
-                            pass
+                    response = await self.agent_instance.process_user_message(
+                        user_message, self.agent_app.auth, self.auth_handler_name, context
+                    )
+                    await context.send_activity(response)
 
             except Exception as e:
                 logger.error(f"❌ Error: {e}")
