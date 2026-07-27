@@ -14,7 +14,7 @@ flowchart TD
     User[Message/Notification] -->|/api/messages| Host[host_agent_server.py]
     Host --> Auth[Microsoft Agents auth and token exchange]
     Host --> Obs[Microsoft OpenTelemetry]
-    Host --> Agent[LangChainAgent (agent.py)]
+    Host --> Agent["LangChainAgent (agent.py)"]
     Agent --> LC[_create_agent]
     LC --> Foundry[Foundry model]
     Agent --> MCP[McpToolRegistrationService]
@@ -28,12 +28,12 @@ flowchart TD
 flowchart TD
     A[start_with_generic_host.py] --> B[create_and_run_host]
     B --> C[use_microsoft_opentelemetry]
-    B --> D[GenericAgentHost(...)]
+    B --> D["GenericAgentHost(...)"]
     D --> E[create_auth_configuration]
-    D --> F[start_server(auth_config)]
+    D --> F["start_server(auth_config)"]
     F --> G[Register routes]
-    G --> H[/api/messages]
-    G --> I[/api/health]
+    G --> H["/api/messages"]
+    G --> I["/api/health"]
     H --> J[Dispatch to activity handlers]
 ```
 
@@ -77,8 +77,8 @@ flowchart TD
     F --> I[Route handling]
     G --> I
     H --> I
-    I --> J[/api/messages -> entry_point]
-    I --> K[/api/health -> health]
+    I --> J["/api/messages → entry_point"]
+    I --> K["/api/health → health"]
     J --> L[activity decorators]
     L --> M[message handler]
     L --> N[installationUpdate handler]
