@@ -183,10 +183,10 @@ In `production`, tooling discovers the deployed MCP configuration. In developmen
 | `UAMI_CLIENT_ID` | Yes | Client ID of the UAMI used by `ManagedIdentityCredential`. |
 | `PYTHON_ENVIRONMENT` | Yes | Set to `production` so Agent 365 tooling discovers deployed MCP tool configuration. |
 | `ENABLE_OBSERVABILITY` | Recommended | Enables observability support. |
-| `ENABLE_A365_OBSERVABILITY_EXPORTER` | Recommended | Enables the Agent 365 observability exporter. |
-| `AGENT_RUN_TIMEOUT_SECONDS` | Optional | Agent Framework runtime timeout. The manifest sets `150`. |
-| `AGENT_PROMPT` | Optional | System instructions for the assistant. Defaults to `You are a helpful assistant.` |
-| `TOKEN_REFRESH_BUFFER_SECONDS` | Optional | Number of seconds before expiry when cached tokens are treated as stale. Defaults to `300`. |
+| `ENABLE_A365_OBSERVABILITY_EXPORTER` | Recommended | Enables Agent 365 observability exporter. |
+| `AGENT_RUN_TIMEOUT_SECONDS` | Optional | Agent Framework runtime timeout. |
+| `AGENT_PROMPT` | Optional | System instructions for the assistant.<br>Defaults to `You are a helpful assistant.` |
+| `TOKEN_REFRESH_BUFFER_SECONDS` | Optional | Number of seconds before expiry when cached tokens are treated as stale.<br>Defaults to `300`. |
 | `AUTH_HANDLER_NAME` | Yes | Set to `AGENTIC` for agentic user authorization token exchange flow. |
 | `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__*` | Yes | Configures agent blueprint as client ID and UAMI as FIC. |
 | `CONNECTIONSMAP__0__*` | Yes | Maps all service URLs to `SERVICE_CONNECTION`. |
