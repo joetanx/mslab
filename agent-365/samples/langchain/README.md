@@ -11,7 +11,7 @@ This is a LangChain sample agent that:
 
 ```mermaid
 flowchart TD
-    User[Message/Notification] -->|/api/messages| Host[host_agent_server.py]
+    User[Message/Notification] -->|/api/messages| Host[server.py]
     Host --> Auth[Microsoft Agents auth and token exchange]
     Host --> Obs[Microsoft OpenTelemetry]
     Host --> Agent["LangChainAgent (agent.py)"]
@@ -26,7 +26,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[start_with_generic_host.py] --> B[create_and_run_host]
+    A[server.py] --> B[create_and_run_host]
     B --> C[use_microsoft_opentelemetry]
     B --> D["GenericAgentHost(...)"]
     D --> E[create_auth_configuration]
@@ -91,11 +91,9 @@ flowchart TD
 
 | Path | Purpose |
 | --- | --- |
-| `start_with_generic_host.py` | Process entrypoint. Imports `LangChainAgent` and starts the generic host. |
-| `host_agent_server.py` | Shared Microsoft Agents host.<br>Configures auth, activity handlers, notifications, typing indicators, health checks, and observability. |
-| `agent.py` | LangChain implementation.<br>Creates the Azure AI Foundry chat model, builds the LangChain agent, registers MCP tools, and processes messages and notifications. |
+| `server.py` | Consolidated entrypoint and host.<br>Imports `LangChainAgent`, configures auth, activity handlers, notifications, health checks, and observability, and starts the HTTP server. |
+| `agent.py` | LangChain implementation plus the shared `AgentInterface` contract.<br>Creates the Azure AI Foundry chat model, builds the LangChain agent, registers MCP tools, and processes messages and notifications. |
 | `mcp_tool_registration_service.py` | LangChain-specific MCP registration service that converts Agent 365 MCP server configuration into LangChain tools. |
-| `agent_interface.py` | Abstract contract that hosted agent implementations must satisfy. |
 | `token_manager.py` | In-memory agentic token cache and exchange helper used by observability and MCP setup. |
 
 ### 2.2. Container deployment
@@ -103,14 +101,14 @@ flowchart TD
 | Path | Purpose |
 | --- | --- |
 | `containerapp.yaml` | Azure Container Apps manifest template.<br>Values are substituted with `envsubst` before deployment. |
-| `Dockerfile` | Multi-stage image that installs dependencies into a virtual environment and starts `start_with_generic_host.py`. |
+| `Dockerfile` | Multi-stage image that installs dependencies into a virtual environment and starts `server.py`. |
 | `pyproject.toml` | Python package dependencies for this sample. |
 
 ## 3. Key concepts
 
 ### 3.1. Runtime flow
 
-1. Azure Container Apps starts `python start_with_generic_host.py`.
+1. Azure Container Apps starts `python server.py`.
 2. `create_and_run_host(LangChainAgent)` validates the implementation and initializes Microsoft OpenTelemetry with LangChain instrumentation enabled.
     - checks that the class really inherits from `AgentInterface`
     - initializes observability with Microsoft OpenTelemetry with LangChain instrumentation enabled

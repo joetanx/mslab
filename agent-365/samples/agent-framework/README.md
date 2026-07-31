@@ -11,7 +11,7 @@ This is a Microsoft Agent Framework sample agent that:
 
 ```mermaid
 flowchart TD
-    User[Message/Notification] -->|/api/messages| Host[host_agent_server.py]
+    User[Message/Notification] -->|/api/messages| Host[server.py]
     Host --> Auth[Microsoft Agents auth and token exchange]
     Host --> Obs[Microsoft OpenTelemetry]
     Host --> Agent["AgentFrameworkAgent (agent.py)"]
@@ -25,7 +25,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[start_with_generic_host.py] --> B[create_and_run_host]
+    A[server.py] --> B[create_and_run_host]
     B --> C[use_microsoft_opentelemetry]
     B --> D["GenericAgentHost(...)"]
     D --> E[create_auth_configuration]
@@ -101,14 +101,14 @@ flowchart TD
 | Path | Purpose |
 | --- | --- |
 | `containerapp.yaml` | Azure Container Apps manifest template.<br>Values are substituted with `envsubst` before deployment. |
-| `Dockerfile` | Multi-stage image that installs dependencies into a virtual environment and starts `start_with_generic_host.py`. |
+| `Dockerfile` | Multi-stage image that installs dependencies into a virtual environment and starts `server.py`. |
 | `pyproject.toml` | Python package dependencies for this sample. |
 
 ## 3. Key concepts
 
 ## 3.1. Runtime flow
 
-1. Azure Container Apps starts `python start_with_generic_host.py`.
+1. Azure Container Apps starts `python server.py`.
 2. `create_and_run_host(AgentFrameworkAgent)`
     - checks that the class really inherits from `AgentInterface`
     - initializes observability with Microsoft OpenTelemetry

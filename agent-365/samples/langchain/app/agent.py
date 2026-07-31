@@ -1,6 +1,7 @@
 """Implements a LangChain-backed assistant with MCP tool support."""
 
 import logging
+from abc import ABC, abstractmethod
 from os import environ
 from typing import Optional
 
@@ -11,13 +12,41 @@ from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import BaseMessage
 from langchain_core.tools import BaseTool
-from agent_interface import AgentInterface
 from azure.identity import ManagedIdentityCredential
 from mcp_tool_registration_service import McpToolRegistrationService
 from microsoft_agents.hosting.core import Authorization, TurnContext
 from microsoft_agents_a365.notifications.agent_notification import NotificationTypes
 from microsoft_agents_a365.tooling.utils.utility import get_mcp_platform_authentication_scope
 from token_manager import get_token, token_is_valid
+
+
+class AgentInterface(ABC):
+    """Declares the lifecycle and messaging contract for agent implementations."""
+
+    @abstractmethod
+    async def initialize(self) -> None:
+        """Prepare the agent before it starts handling turns."""
+        pass
+
+    @abstractmethod
+    async def process_user_message(
+        self, message: str, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
+    ) -> str:
+        """Process a user message and return the response text."""
+        pass
+
+    @abstractmethod
+    async def cleanup(self) -> None:
+        """Release resources owned by the agent implementation."""
+        pass
+
+
+def check_agent_inheritance(agent_class) -> bool:
+    """Return whether the supplied class implements AgentInterface."""
+    if not issubclass(agent_class, AgentInterface):
+        print(f"❌ Agent {agent_class.__name__} does not inherit from AgentInterface")
+        return False
+    return True
 
 
 class LangChainAgent(AgentInterface):

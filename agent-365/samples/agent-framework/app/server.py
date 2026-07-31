@@ -1,13 +1,12 @@
-"""Hosts AgentInterface implementations behind the Microsoft Agents HTTP server."""
+"""Hosts an Agent Framework agent behind the Microsoft Agents HTTP server."""
 
-import asyncio
 import logging
-import socket
+import sys
 from os import environ
 
 from aiohttp.web import Application, Request, Response, json_response, run_app
 from aiohttp.web_middlewares import middleware as web_middleware
-from agent_interface import AgentInterface, check_agent_inheritance
+from agent import AgentFrameworkAgent, AgentInterface, check_agent_inheritance
 from microsoft_agents.activity import load_configuration_from_env
 from microsoft_agents.authentication.msal import MsalConnectionManager
 from microsoft_agents.hosting.aiohttp import (
@@ -25,14 +24,13 @@ from microsoft_agents.hosting.core import (
     TurnContext,
     TurnState,
 )
+from microsoft_agents_a365.notifications import EmailResponse
 from microsoft_agents_a365.notifications.agent_notification import (
     AgentNotification,
-    NotificationTypes,
     AgentNotificationActivity,
     ChannelId,
+    NotificationTypes,
 )
-from microsoft_agents_a365.notifications import EmailResponse
-
 from microsoft.opentelemetry import use_microsoft_opentelemetry
 from microsoft.opentelemetry.a365.core import BaggageBuilder
 from microsoft.opentelemetry.a365.runtime import get_observability_authentication_scope
@@ -50,14 +48,10 @@ logger = logging.getLogger(__name__)
 agents_sdk_config = load_configuration_from_env(environ)
 
 
-def create_and_run_host(
-    agent_class: type[AgentInterface], *agent_args, **agent_kwargs
-):
+def create_and_run_host(agent_class: type[AgentInterface], *agent_args, **agent_kwargs):
     """Create the generic host and run it with the supplied agent class."""
     if not check_agent_inheritance(agent_class):
-        raise TypeError(
-            f"Agent class {agent_class.__name__} must inherit from AgentInterface"
-        )
+        raise TypeError(f"Agent class {agent_class.__name__} must inherit from AgentInterface")
 
     use_microsoft_opentelemetry(
         enable_a365=True,
@@ -66,13 +60,6 @@ def create_and_run_host(
             tenant_id=tenant_id,
             scopes=get_observability_authentication_scope(),
         ),
-        instrumentation_options={
-            "openai": {"enabled": False},
-            "openai_agents": {"enabled": False},
-            "langchain": {"enabled": True},
-            "semantic_kernel": {"enabled": False},
-            "agent_framework": {"enabled": False}
-        }
     )
 
     host = GenericAgentHost(agent_class, *agent_args, **agent_kwargs)
@@ -86,9 +73,7 @@ class GenericAgentHost:
     def __init__(self, agent_class: type[AgentInterface], *agent_args, **agent_kwargs):
         """Initialize host services and register activity handlers."""
         if not check_agent_inheritance(agent_class):
-            raise TypeError(
-                f"Agent class {agent_class.__name__} must inherit from AgentInterface"
-            )
+            raise TypeError(f"Agent class {agent_class.__name__} must inherit from AgentInterface")
 
         self.auth_handler_name = environ.get("AUTH_HANDLER_NAME", "") or None
         if self.auth_handler_name:
@@ -104,9 +89,7 @@ class GenericAgentHost:
         self.storage = MemoryStorage()
         self.connection_manager = MsalConnectionManager(**agents_sdk_config)
         self.adapter = CloudAdapter(connection_manager=self.connection_manager)
-        self.authorization = Authorization(
-            self.storage, self.connection_manager, **agents_sdk_config
-        )
+        self.authorization = Authorization(self.storage, self.connection_manager, **agents_sdk_config)
         self.agent_app = AgentApplication[TurnState](
             storage=self.storage,
             adapter=self.adapter,
@@ -117,9 +100,7 @@ class GenericAgentHost:
         self._setup_handlers()
         logger.info("✅ Notification handlers registered successfully")
 
-    async def _setup_observability_token(
-        self, context: TurnContext, tenant_id: str, agent_id: str
-    ):
+    async def _setup_observability_token(self, context: TurnContext, tenant_id: str, agent_id: str):
         """Prepare the observability token for the current turn."""
         try:
             token = await get_token(
@@ -131,10 +112,7 @@ class GenericAgentHost:
                 scopes=get_observability_authentication_scope(),
             )
             if token:
-                logger.info(
-                    f"✅ Observability token ready "
-                    f"(tenant_id={tenant_id}, agent_id={agent_id})"
-                )
+                logger.info(f"✅ Observability token ready (tenant_id={tenant_id}, agent_id={agent_id})")
         except Exception as e:
             logger.warning(f"⚠️ Failed to prepare observability token: {e}")
 
@@ -196,7 +174,7 @@ class GenericAgentHost:
                     user_message = context.activity.text.strip() or ""
                     if not user_message or user_message == "/help":
                         return
-                    logger.info(f"📨 {getattr(context.activity, "channel_id")}: {user_message}")
+                    logger.info(f"📨 {getattr(context.activity, 'channel_id')}: {user_message}")
 
                     response = await self.agent_instance.process_user_message(
                         user_message, self.agent_app.auth, self.auth_handler_name, context
@@ -226,19 +204,13 @@ class GenericAgentHost:
                 with BaggageBuilder().tenant_id(tenant_id).agent_id(agent_id).build():
                     logger.info(f"📬 {notification_activity.notification_type}")
 
-                    if not hasattr(
-                        self.agent_instance, "handle_agent_notification_activity"
-                    ):
+                    if not hasattr(self.agent_instance, "handle_agent_notification_activity"):
                         logger.warning("⚠️ Agent doesn't support notifications")
-                        await context.send_activity(
-                            "This agent doesn't support notification handling yet."
-                        )
+                        await context.send_activity("This agent doesn't support notification handling yet.")
                         return
 
-                    response = (
-                        await self.agent_instance.handle_agent_notification_activity(
-                            notification_activity, self.agent_app.auth, self.auth_handler_name, context
-                        )
+                    response = await self.agent_instance.handle_agent_notification_activity(
+                        notification_activity, self.agent_app.auth, self.auth_handler_name, context
                     )
 
                     if notification_activity.notification_type == NotificationTypes.EMAIL_NOTIFICATION:
@@ -250,9 +222,7 @@ class GenericAgentHost:
 
             except Exception as e:
                 logger.error(f"❌ Notification error: {e}")
-                await context.send_activity(
-                    f"Sorry, I encountered an error processing the notification: {str(e)}"
-                )
+                await context.send_activity(f"Sorry, I encountered an error processing the notification: {str(e)}")
 
     async def initialize_agent(self):
         """Create and initialize the agent instance on application startup."""
@@ -272,11 +242,10 @@ class GenericAgentHost:
 
     def start_server(self, auth_configuration: AgentAuthConfiguration | None = None):
         """Build and run the aiohttp server for agent traffic."""
+
         async def entry_point(req: Request) -> Response:
             """Forward message requests into the Microsoft Agents adapter."""
-            return await start_agent_process(
-                req, req.app["agent_app"], req.app["adapter"]
-            )
+            return await start_agent_process(req, req.app["agent_app"], req.app["adapter"])
 
         async def health(_req: Request) -> Response:
             """Return the health state of the hosted agent."""
@@ -351,3 +320,23 @@ class GenericAgentHost:
                 await self.agent_instance.cleanup()
             except Exception as e:
                 logger.error(f"Cleanup error: {e}")
+
+
+def main() -> int:
+    """Start the generic host and return the process exit code."""
+    try:
+        print("Starting Generic Agent Host with AgentFrameworkAgent...")
+        print()
+        create_and_run_host(AgentFrameworkAgent)
+    except Exception as e:
+        print(f"❌ Failed to start server: {e}")
+        import traceback
+
+        traceback.print_exc()
+        return 1
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
