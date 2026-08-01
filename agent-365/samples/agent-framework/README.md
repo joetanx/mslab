@@ -17,7 +17,7 @@ flowchart TD
     Host --> Agent["AgentFrameworkAgent (agent.py)"]
     Agent --> AF[_create_agent]
     AF --> Foundry[Foundry model]
-    Agent --> MCP[McpToolRegistrationService]
+    Agent --> MCP["McpToolRegistrationService (a365.tooling.extensions.agentframework)"]
     MCP --> Tools[Agent 365 MCP tool servers]
 ```
 
@@ -90,10 +90,8 @@ flowchart TD
 
 | Path | Purpose |
 | --- | --- |
-| `start_with_generic_host.py` | Process entrypoint. Imports `AgentFrameworkAgent` and starts the generic host. |
-| `host_agent_server.py` | Shared Microsoft Agents host.<br>Configures auth, activity handlers, notifications, typing indicators, health checks, and observability. |
-| `agent.py` | Agent Framework implementation.<br>Creates the Foundry chat client, wraps it in an Agent Framework agent, registers MCP tools, and processes messages and notifications. |
-| `agent_interface.py` | Abstract contract that hosted agent implementations must satisfy. |
+| `server.py` | Consolidated entrypoint and host.<br>Imports `LangChainAgent`, configures auth, activity handlers, notifications, health checks and observability, and starts the HTTP server. |
+| `agent.py` | Agent Framework implementation plus the `AgentInterface` contract that hosted agent implementations must satisfy.<br>Creates the Foundry chat client, wraps it in an Agent Framework agent, registers MCP tools, and processes messages and notifications. |
 | `token_manager.py` | In-memory agentic token cache and exchange helper used by observability and MCP setup. |
 
 ### 2.2. Container deployment

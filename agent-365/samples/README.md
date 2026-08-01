@@ -162,7 +162,7 @@ Get container app environment domain (for a365 CLI messaging endpoint):
 CAE_DOMAIN=$(az containerapp env show --name $CAE_NAME --resource-group $RG --query "properties.defaultDomain" --output tsv)
 ```
 
-## 4. Container Registry
+## 5. Container Registry
 
 Create ACR (ACR name cannot contain dashes):
 

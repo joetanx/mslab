@@ -17,7 +17,7 @@ flowchart TD
     Host --> Agent["LangChainAgent (agent.py)"]
     Agent --> LC[_create_agent]
     LC --> Foundry[Foundry model]
-    Agent --> MCP[McpToolRegistrationService]
+    Agent --> MCP["McpToolRegistrationService (mcp_tool_registration_service.py)"]
     MCP --> Adapter[langchain-mcp-adapters MultiServerMCPClient]
     Adapter --> Tools[Agent 365 MCP tool servers]
 ```
@@ -91,7 +91,7 @@ flowchart TD
 
 | Path | Purpose |
 | --- | --- |
-| `server.py` | Consolidated entrypoint and host.<br>Imports `LangChainAgent`, configures auth, activity handlers, notifications, health checks, and observability, and starts the HTTP server. |
+| `server.py` | Consolidated entrypoint and host.<br>Imports `LangChainAgent`, configures auth, activity handlers, notifications, health checks and observability, and starts the HTTP server. |
 | `agent.py` | LangChain implementation plus the shared `AgentInterface` contract.<br>Creates the Azure AI Foundry chat model, builds the LangChain agent, registers MCP tools, and processes messages and notifications. |
 | `mcp_tool_registration_service.py` | LangChain-specific MCP registration service that converts Agent 365 MCP server configuration into LangChain tools. |
 | `token_manager.py` | In-memory agentic token cache and exchange helper used by observability and MCP setup. |
