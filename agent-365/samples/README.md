@@ -91,7 +91,7 @@ Setup resource names based on project name:
 ```sh
 FOUNDRY_NAME='foundry-'$PROJECT
 FOUNDRY_PROJECT='proj-'$PROJECT
-export FOUNDRY_MODEL='gpt-5.4-mini'
+export FOUNDRY_MODEL='gpt-5.6-luna'
 ```
 
 Create Foundry resource:
