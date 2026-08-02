@@ -49,11 +49,11 @@ flowchart TD
 3. Create the resource group for the project
 
 ```sh
-az account set --subscription <subscription-id>
+az account set -s <subscription-id>
 export LOCATION='southeastasia'
 PROJECT='<desired-name>'$(uuidgen | head -c 8)
 export RG='rg-'$PROJECT
-az group create --name $RG --location $LOCATION
+az group create -n $RG -l $LOCATION
 ```
 
 > [!Note]
@@ -73,15 +73,15 @@ az group create --name $RG --location $LOCATION
 The subscription needs to be registered for `Microsoft.OperationalInsights` and `Microsoft.ContainerRegistry` resource provider for container apps environment and container registry creation.
 
 ```sh
-az provider register --namespace Microsoft.OperationalInsights
-az provider register --namespace Microsoft.ContainerRegistry
+az provider register -n Microsoft.OperationalInsights
+az provider register -n Microsoft.ContainerRegistry
 ```
 
 Check the registration state, it can take some time to change from `Registering` to `Registered`:
 
 ```sh
-az provider show --namespace Microsoft.OperationalInsights --query "registrationState"
-az provider show --namespace Microsoft.ContainerRegistry --query "registrationState"
+az provider show -n Microsoft.OperationalInsights --query "registrationState"
+az provider show -n Microsoft.ContainerRegistry --query "registrationState"
 ```
 
 ## 2. Foundry
@@ -97,39 +97,36 @@ export FOUNDRY_MODEL='gpt-5.6-luna'
 Create Foundry resource:
 
 ```sh
-az cognitiveservices account create \
-  --name $FOUNDRY_NAME --resource-group $RG --location $LOCATION --kind 'AIServices' \
-  --sku 'S0' --allow-project-management 'true' --custom-domain $FOUNDRY_NAME --yes
+az cognitiveservices account create -n $FOUNDRY_NAME -g $RG -l $LOCATION \
+  --kind 'AIServices' --sku 'S0' --custom-domain $FOUNDRY_NAME --yes
 ```
 
 > Delete and purge Foundry resource (if need to redo)
 > 
 > ```sh
-> az cognitiveservices account delete --name $FOUNDRY_NAME --resource-group $RG
-> az cognitiveservices account purge --name $FOUNDRY_NAME --resource-group $RG --location $LOCATION
+> az cognitiveservices account delete -n $FOUNDRY_NAME -g $RG
+> az cognitiveservices account purge -n $FOUNDRY_NAME -g $RG -l $LOCATION
 > ```
 
 Create Project under the Foundry resource:
 
 ```sh
-az cognitiveservices account project create \
-  --name $FOUNDRY_NAME --resource-group $RG --location $LOCATION \
+az cognitiveservices account project create -n $FOUNDRY_NAME -g $RG -l $LOCATION \
   --project-name $FOUNDRY_PROJECT --display-name $FOUNDRY_PROJECT
 ```
 
 Create model deployment:
 
 ```sh
-MODEL_VERSION=$(az cognitiveservices model list --location $LOCATION --query "[?model.name=='${FOUNDRY_MODEL}'&&kind=='AIServices'].model.version" -o tsv)
-az cognitiveservices account deployment create \
-  --name $FOUNDRY_NAME --resource-group $RG --deployment-name $FOUNDRY_MODEL --model-name $FOUNDRY_MODEL \
-  --model-version $MODEL_VERSION --model-format 'OpenAI' --sku-capacity 500 --sku 'GlobalStandard'
+MODEL_VERSION=$(az cognitiveservices model list -l $LOCATION --query "[?model.name=='${FOUNDRY_MODEL}'&&kind=='AIServices'].model.version" -o tsv)
+az cognitiveservices account deployment create -n $FOUNDRY_NAME -g $RG --deployment-name $FOUNDRY_MODEL \
+  --model-name $FOUNDRY_MODEL --model-version $MODEL_VERSION --model-format 'OpenAI' --capacity 500 --sku 'GlobalStandard'
 ```
 
 Export project endpoint and model environment variables:
 
 ```sh
-export FOUNDRY_PROJECT_ENDPOINT=$(az cognitiveservices account project show --name $FOUNDRY_NAME --resource-group $RG --project-name $FOUNDRY_PROJECT --query 'properties.endpoints' -o tsv)
+export FOUNDRY_PROJECT_ENDPOINT=$(az cognitiveservices account project show -n $FOUNDRY_NAME -g $RG --project-name $FOUNDRY_PROJECT --query 'properties.endpoints' -o tsv)
 ```
 
 ## 3. Azure Files
@@ -138,7 +135,7 @@ Create storage account (storage account name cannot contain dashes):
 
 ```sh
 SA_NAME='stor'$PROJECT
-az storage account create --name $SA_NAME --resource-group $RG --location $LOCATION --sku Standard_LRS --tags SecurityControl=Ignore
+az storage account create -n $SA_NAME -g $RG -l $LOCATION --sku Standard_LRS --tags SecurityControl=Ignore
 ```
 
 ## 4. Container Apps Environment
@@ -147,19 +144,19 @@ Create Container Apps environment:
 
 ```sh
 CAE_NAME='cae-'$PROJECT
-az containerapp env create --name $CAE_NAME --resource-group $RG --location $LOCATION
+az containerapp env create -n $CAE_NAME -g $RG -l $LOCATION
 ```
 
 Verify container app environment ID:
 
 ```sh
-export CAE_ID=$(az containerapp env show --name $CAE_NAME --resource-group $RG --query id -o tsv)
+export CAE_ID=$(az containerapp env show -n $CAE_NAME -g $RG --query id -o tsv)
 ```
 
 Get container app environment domain (for a365 CLI messaging endpoint):
 
 ```sh
-CAE_DOMAIN=$(az containerapp env show --name $CAE_NAME --resource-group $RG --query "properties.defaultDomain" --output tsv)
+CAE_DOMAIN=$(az containerapp env show -n $CAE_NAME -g $RG --query "properties.defaultDomain" -o tsv)
 ```
 
 ## 5. Container Registry
@@ -168,7 +165,7 @@ Create ACR (ACR name cannot contain dashes):
 
 ```sh
 export ACR_NAME='acr'$PROJECT
-az acr create --name $ACR_NAME --resource-group $RG --location $LOCATION --sku Basic --tags SecurityControl=Ignore
+az acr create -n $ACR_NAME -g $RG -l $LOCATION --sku Basic --tags SecurityControl=Ignore
 ```
 
 # Part II. Per-agent setup
@@ -190,41 +187,41 @@ export APP_NAME='<app-name>'
 
 ```sh
 UAMI_NAME='uami-'$APP_NAME
-az identity create --name $UAMI_NAME --resource-group $RG
+az identity create -n $UAMI_NAME -g $RG
 ```
 
 Get UAMI service principal ID:
 
 ```sh
-UAMI_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query principalId -o tsv)
+UAMI_ID=$(az identity show -n $UAMI_NAME -g $RG --query principalId -o tsv)
 ```
 
 Export UAMI client ID and resource ID as environment variable (for later container app deployment use):
 
 ```sh
-export UAMI_CLIENT_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query clientId -o tsv)
-export UAMI_RSC_ID=$(az identity show --name $UAMI_NAME --resource-group $RG --query id -o tsv)
+export UAMI_CLIENT_ID=$(az identity show -n $UAMI_NAME -g $RG --query clientId -o tsv)
+export UAMI_RSC_ID=$(az identity show -n $UAMI_NAME -g $RG --query id -o tsv)
 ```
 
 #### 1.1. Assign Foundry role to UAMI
 
 ```sh
-FOUNDRY_ID=$(az cognitiveservices account show --name $FOUNDRY_NAME --resource-group $RG --query id -o tsv)
+FOUNDRY_ID=$(az cognitiveservices account show -n $FOUNDRY_NAME -g $RG --query id -o tsv)
 az role assignment create --assignee $UAMI_ID --role 'Cognitive Services User' --scope $FOUNDRY_ID
 ```
 
 #### 1.2. Assign ACR role to UAMI
 
 ```sh
-ACR_ID=$(az acr show --name $ACR_NAME --query id -o tsv)
+ACR_ID=$(az acr show -n $ACR_NAME --query id -o tsv)
 az role assignment create --assignee $UAMI_ID --role AcrPull --scope $ACR_ID
 ```
 
 ## 2. Create file share
 
 ```sh
-CONN_STR=$(az storage account show-connection-string --name $SA_NAME --resource-group $RG --query connectionString -o tsv)
-az storage share create --name $APP_NAME --connection-string "$CONN_STR"
+CONN_STR=$(az storage account show-connection-string -n $SA_NAME -g $RG --query connectionString -o tsv)
+az storage share create -n $APP_NAME --connection-string "$CONN_STR"
 ```
 
 ### 2.1. Download app files from GitHub and upload to file share
@@ -233,25 +230,23 @@ az storage share create --name $APP_NAME --connection-string "$CONN_STR"
 FILES=$(curl -s https://api.github.com/repos/joetanx/mslab/contents/agent-365/samples/$SAMPLE/app | jq -r '.[] | .name')
 for FILE in $FILES; do
   curl -sLO https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/$SAMPLE/app/$FILE
-  az storage file upload --share-name $APP_NAME --source $FILE --connection-string $CONN_STR
+  az storage file upload -s $APP_NAME --source $FILE --connection-string $CONN_STR
 done
 ```
 
 ### 2.2. Register file share in container app environment
 
 ```sh
-SA_KEY=$(az storage account keys list --account-name $SA_NAME --resource-group $RG --query "[0].value" -o tsv)
-az containerapp env storage set \
-  --name $CAE_NAME --storage-name $APP_NAME --resource-group $RG \
-  --azure-file-account-name $SA_NAME --azure-file-account-key "$SA_KEY" \
-  --azure-file-share-name $APP_NAME --access-mode ReadOnly
+SA_KEY=$(az storage account keys list -n $SA_NAME -g $RG --query "[0].value" -o tsv)
+az containerapp env storage set -n $CAE_NAME -g $RG --storage-name $APP_NAME \
+  -a $SA_NAME -k "$SA_KEY" -f $APP_NAME --access-mode ReadOnly
 ```
 
 ## 3. Build agent image in ACR
 
 ```sh
 curl -sLO "https://github.com/joetanx/mslab/raw/refs/heads/main/agent-365/samples/$SAMPLE/{pyproject.toml,Dockerfile}"
-az acr build --registry $ACR_NAME --image $APP_NAME:latest --file Dockerfile .
+az acr build -r $ACR_NAME -t $APP_NAME:latest -f Dockerfile .
 ```
 
 ## 4. AI teammate setup in Agent 365
@@ -322,8 +317,7 @@ UAMI is used for Federated Identity Credential (FIC) for the blueprint, the `age
 > 2. The principal ID (not client ID) of the UAMI is used to assign FIC
 
 ```sh
-az ad app federated-credential create \
-  --id $BLUEPRINT_CLIENT_ID \
+az ad app federated-credential create --id $BLUEPRINT_CLIENT_ID \
   --parameters '{
     "name": "containerapp-uami-fic",
     "issuer": "https://login.microsoftonline.com/'"$TENANT_ID"'/v2.0",
@@ -430,5 +424,5 @@ envsubst < containerapp.yaml > containerapp-edited.yaml
 Deploy container app with edited manifest file:
 
 ```sh
-az containerapp create --name $APP_NAME --resource-group $RG --yaml containerapp-edited.yaml
+az containerapp create -n $APP_NAME -g $RG --yaml containerapp-edited.yaml
 ```
