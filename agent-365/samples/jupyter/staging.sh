@@ -1,0 +1,19 @@
+az account set -s 27b58ab1-f52c-498e-a03d-255b76c80a00
+export TENANT_ID='323626f5-1bfe-48cd-8902-ddfdfd44e1ce'
+export LOCATION='eastus2'
+export APP_NAME='jupyter'
+export RG='rg-'$APP_NAME
+FOUNDRY_NAME='foundry-'$APP_NAME
+FOUNDRY_PROJECT='proj-'$APP_NAME
+export FOUNDRY_MODEL='gpt-5.6-luna'
+export FOUNDRY_PROJECT_ENDPOINT=$(az cognitiveservices account project show -n $FOUNDRY_NAME -g $RG --project-name $FOUNDRY_PROJECT --query 'properties.endpoints' -o tsv)
+SA_NAME='stor'$APP_NAME
+CAE_NAME='cae-'$APP_NAME
+export CAE_ID=$(az containerapp env show -n $CAE_NAME -g $RG --query id -o tsv)
+CAE_DOMAIN=$(az containerapp env show -n $CAE_NAME -g $RG --query "properties.defaultDomain" -o tsv)
+export ACR_NAME='acr'$APP_NAME
+UAMI_NAME="uami-$APP_NAME"
+UAMI_ID=$(az identity show -n $UAMI_NAME -g $RG --query principalId -o tsv)
+export UAMI_CLIENT_ID=$(az identity show -n $UAMI_NAME -g $RG --query clientId -o tsv)
+export UAMI_RSC_ID=$(az identity show -n $UAMI_NAME -g $RG --query id -o tsv)
+export BLUEPRINT_CLIENT_ID=$(python3 -c "import json; print(json.load(open('a365.generated.config.json'))['agentBlueprintId'])")

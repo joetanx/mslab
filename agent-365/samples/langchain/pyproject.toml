@@ -9,10 +9,6 @@ dependencies = [
     "langchain-mcp-adapters",
     "langchain-azure-ai",
 
-    # mcp 2.0 breaks langchain-mcp-adapters, cap mcp below 2.0.0 until a fix is available
-    # https://github.com/langchain-ai/langchain-mcp-adapters/issues/589
-    "mcp>=1.24.0,<2.0.0",
-
     # Microsoft Agents SDK - Official packages for hosting and integration
     "microsoft-agents-hosting-aiohttp",
     "microsoft-agents-hosting-core",
