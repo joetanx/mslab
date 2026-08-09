@@ -10,4 +10,4 @@ COPY --chown=1000:100 pyproject.toml .
 RUN pip install --no-cache-dir . && rm pyproject.toml
 
 # Start Jupyter with password hash from env
-CMD ["/bin/bash", "-c", ": \"${JUPYTER_PASSWORD_HASH:?JUPYTER_PASSWORD_HASH is required}\"; exec start-notebook.py --PasswordIdentityProvider.hashed_password=\"$JUPYTER_PASSWORD_HASH\""]
+CMD ["/bin/bash", "-c", ": \"${JUPYTER_PASSWORD_HASH:?JUPYTER_PASSWORD_HASH is required}\"; exec start-notebook.py --notebook-dir=/home/jovyan/work --PasswordIdentityProvider.hashed_password=\"$JUPYTER_PASSWORD_HASH\""]

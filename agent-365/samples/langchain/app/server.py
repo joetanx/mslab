@@ -1,14 +1,11 @@
-"""Hosts a LangChain agent behind the Microsoft Agents HTTP server."""
+﻿"""Hosts a LangChain agent behind the Microsoft Agents HTTP server."""
 
-import asyncio
 import logging
-import socket
-import sys
 from os import environ
 
 from aiohttp.web import Application, Request, Response, json_response, run_app
 from aiohttp.web_middlewares import middleware as web_middleware
-from agent import AgentInterface, LangChainAgent, check_agent_inheritance
+from agent import LangChainAgent
 from microsoft_agents.activity import load_configuration_from_env
 from microsoft_agents.authentication.msal import MsalConnectionManager
 from microsoft_agents.hosting.aiohttp import (
@@ -36,7 +33,7 @@ from microsoft_agents_a365.notifications.agent_notification import (
 from microsoft.opentelemetry import use_microsoft_opentelemetry
 from microsoft.opentelemetry.a365.core import BaggageBuilder
 from microsoft.opentelemetry.a365.runtime import get_observability_authentication_scope
-from token_manager import get_token
+from token_manager import exchange_token, get_cached_token
 
 ms_agents_logger = logging.getLogger("microsoft_agents")
 ms_agents_logger.addHandler(logging.StreamHandler())
@@ -50,50 +47,18 @@ logger = logging.getLogger(__name__)
 agents_sdk_config = load_configuration_from_env(environ)
 
 
-def create_and_run_host(agent_class: type[AgentInterface], *agent_args, **agent_kwargs):
-    """Create the generic host and run it with the supplied agent class."""
-    if not check_agent_inheritance(agent_class):
-        raise TypeError(f"Agent class {agent_class.__name__} must inherit from AgentInterface")
-
-    use_microsoft_opentelemetry(
-        enable_a365=True,
-        a365_token_resolver=lambda agent_id, tenant_id: get_token(
-            agent_id=agent_id,
-            tenant_id=tenant_id,
-            scopes=get_observability_authentication_scope(),
-        ),
-        instrumentation_options={
-            "openai": {"enabled": False},
-            "openai_agents": {"enabled": False},
-            "langchain": {"enabled": True},
-            "semantic_kernel": {"enabled": False},
-            "agent_framework": {"enabled": False},
-        },
-    )
-
-    host = GenericAgentHost(agent_class, *agent_args, **agent_kwargs)
-    auth_config = host.create_auth_configuration()
-    host.start_server(auth_config)
-
-
-class GenericAgentHost:
+class AgentHost:
     """Configures authentication, handlers, notifications, and HTTP hosting."""
 
-    def __init__(self, agent_class: type[AgentInterface], *agent_args, **agent_kwargs):
+    def __init__(self):
         """Initialize host services and register activity handlers."""
-        if not check_agent_inheritance(agent_class):
-            raise TypeError(f"Agent class {agent_class.__name__} must inherit from AgentInterface")
-
         self.auth_handler_name = environ.get("AUTH_HANDLER_NAME", "") or None
         if self.auth_handler_name:
             logger.info(f"🔐 Using auth handler: {self.auth_handler_name}")
         else:
             logger.info("🔓 No auth handler configured (AUTH_HANDLER_NAME not set)")
 
-        self.agent_class = agent_class
-        self.agent_args = agent_args
-        self.agent_kwargs = agent_kwargs
-        self.agent_instance = None
+        self.agent: LangChainAgent | None = None
 
         self.storage = MemoryStorage()
         self.connection_manager = MsalConnectionManager(**agents_sdk_config)
@@ -116,7 +81,7 @@ class GenericAgentHost:
     ):
         """Prepare the observability token for the current turn."""
         try:
-            token = await get_token(
+            token = await exchange_token(
                 agent_id=agent_id,
                 tenant_id=tenant_id,
                 auth=self.agent_app.auth,
@@ -139,7 +104,7 @@ class GenericAgentHost:
         agent_id = context.activity.recipient.agentic_app_id
         logger.info(f"🔍 tenant_id={tenant_id}, agent_id={agent_id}")
 
-        if not self.agent_instance:
+        if not self.agent:
             logger.error("Agent not available")
             await context.send_activity("❌ Sorry, the agent is not available.")
             return None
@@ -154,7 +119,7 @@ class GenericAgentHost:
         async def help_handler(context: TurnContext, _: TurnState):
             """Send a short help message for welcome and help activities."""
             await context.send_activity(
-                f"👋 **Hi there!** I'm **{self.agent_class.__name__}**, your AI assistant.\n\n"
+                f"👋 **Hi there!** I'm **LangChainAgent**, your AI assistant.\n\n"
                 "How can I help you today?"
             )
 
@@ -191,12 +156,12 @@ class GenericAgentHost:
                 tenant_id, agent_id = result
 
                 with BaggageBuilder().tenant_id(tenant_id).agent_id(agent_id).build():
-                    user_message = context.activity.text.strip() or ""
+                    user_message = (context.activity.text or "").strip()
                     if not user_message or user_message == "/help":
                         return
                     logger.info(f"📨 {getattr(context.activity, 'channel_id')}: {user_message}")
 
-                    response = await self.agent_instance.process_user_message(
+                    response = await self.agent.process_user_message(
                         user_message, self.agent_app.auth, self.auth_handler_name, context
                     )
                     await context.send_activity(response)
@@ -224,14 +189,7 @@ class GenericAgentHost:
                 with BaggageBuilder().tenant_id(tenant_id).agent_id(agent_id).build():
                     logger.info(f"📬 {notification_activity.notification_type}")
 
-                    if not hasattr(self.agent_instance, "handle_agent_notification_activity"):
-                        logger.warning("⚠️ Agent doesn't support notifications")
-                        await context.send_activity(
-                            "This agent doesn't support notification handling yet."
-                        )
-                        return
-
-                    response = await self.agent_instance.handle_agent_notification_activity(
+                    response = await self.agent.handle_agent_notification_activity(
                         notification_activity, self.agent_app.auth, self.auth_handler_name, context
                     )
 
@@ -250,10 +208,10 @@ class GenericAgentHost:
 
     async def initialize_agent(self):
         """Create and initialize the agent instance on application startup."""
-        if self.agent_instance is None:
-            logger.info(f"🤖 Initializing {self.agent_class.__name__}...")
-            self.agent_instance = self.agent_class(*self.agent_args, **self.agent_kwargs)
-            await self.agent_instance.initialize()
+        if self.agent is None:
+            logger.info("Initializing LangChainAgent")
+            self.agent = LangChainAgent()
+            await self.agent.initialize()
 
     def create_auth_configuration(self) -> AgentAuthConfiguration | None:
         """Create the authentication configuration used by the host."""
@@ -276,8 +234,8 @@ class GenericAgentHost:
             return json_response(
                 {
                     "status": "ok",
-                    "agent_type": self.agent_class.__name__,
-                    "agent_initialized": self.agent_instance is not None,
+                    "agent_type": "LangChainAgent",
+                    "agent_initialized": self.agent is not None,
                 }
             )
 
@@ -324,9 +282,7 @@ class GenericAgentHost:
         host = environ.get("HOST", "localhost")
         port = int(environ.get("PORT", 3978))
 
-        print("=" * 80)
-        print(f"🏢 {self.agent_class.__name__}")
-        print("=" * 80)
+        print("✅ Agent host started")
         print(f"🔒 Auth: {'Enabled' if auth_configuration else 'Anonymous'}")
         print(f"🚀 Server: {host}:{port}")
         print(f"📚 Endpoint: http://{host}:{port}/api/messages")
@@ -339,28 +295,33 @@ class GenericAgentHost:
 
     async def cleanup(self):
         """Clean up the hosted agent instance during shutdown."""
-        if self.agent_instance:
+        if self.agent:
             try:
-                await self.agent_instance.cleanup()
+                await self.agent.cleanup()
             except Exception as e:
                 logger.error(f"Cleanup error: {e}")
 
 
-def main() -> int:
-    """Start the generic host and return the process exit code."""
-    try:
-        print("Starting Generic Agent Host with LangChainAgent...")
-        print()
-        create_and_run_host(LangChainAgent)
-    except Exception as e:
-        print(f"❌ Failed to start server: {e}")
-        import traceback
-
-        traceback.print_exc()
-        return 1
-
-    return 0
+def main() -> None:
+    """Configure observability and start the HTTP host."""
+    use_microsoft_opentelemetry(
+        enable_a365=True,
+        a365_token_resolver=lambda agent_id, tenant_id: get_cached_token(
+            agent_id=agent_id,
+            tenant_id=tenant_id,
+            scopes=get_observability_authentication_scope(),
+        ),
+        instrumentation_options={
+            "openai": {"enabled": False},
+            "openai_agents": {"enabled": False},
+            "langchain": {"enabled": True},
+            "semantic_kernel": {"enabled": False},
+            "agent_framework": {"enabled": False},
+        },
+    )
+    host = AgentHost()
+    host.start_server(host.create_auth_configuration())
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

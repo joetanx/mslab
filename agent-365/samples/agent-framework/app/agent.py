@@ -1,7 +1,6 @@
-"""Implements an Agent Framework-backed assistant with MCP tool support."""
+"""Implements a Agent Framework-backed assistant with MCP tool support."""
 
 import logging
-from abc import ABC, abstractmethod
 from os import environ
 from typing import Optional
 
@@ -17,46 +16,16 @@ from microsoft_agents_a365.tooling.extensions.agentframework.services.mcp_tool_r
     McpToolRegistrationService,
 )
 from microsoft_agents_a365.tooling.utils.utility import get_mcp_platform_authentication_scope
-from token_manager import get_token, token_is_valid
+from token_manager import exchange_token, get_cached_token
 
 
-class AgentInterface(ABC):
-    """Declares the lifecycle and messaging contract for agent implementations."""
-
-    @abstractmethod
-    async def initialize(self) -> None:
-        """Prepare the agent before it starts handling turns."""
-        pass
-
-    @abstractmethod
-    async def process_user_message(
-        self, message: str, auth, auth_handler_name: Optional[str], context
-    ) -> str:
-        """Process a user message and return the response text."""
-        pass
-
-    @abstractmethod
-    async def cleanup(self) -> None:
-        """Release resources owned by the agent implementation."""
-        pass
-
-
-def check_agent_inheritance(agent_class) -> bool:
-    """Return whether the supplied class implements AgentInterface."""
-    if not issubclass(agent_class, AgentInterface):
-        print(f"❌ Agent {agent_class.__name__} does not inherit from AgentInterface")
-        return False
-    return True
-
-
-class AgentFrameworkAgent(AgentInterface):
-    """Runs user messages and notifications through the Agent Framework runtime."""
+class AgentFrameworkAgent:
+    """Runs user messages and notifications through a Agent Framework agent."""
 
     AGENT_PROMPT = environ.get("AGENT_PROMPT", "You are a helpful assistant.")
 
     def __init__(self):
-        """Create the chat client, agent, and supporting services."""
-        self.logger = logging.getLogger(self.__class__.__name__)
+        """Create the chat model, agent, and supporting services."""
         self._create_chat_client()
         self._create_agent()
         self._initialize_services()
@@ -89,24 +58,19 @@ class AgentFrameworkAgent(AgentInterface):
             logger.warning(f"⚠️ MCP tool service failed: {e}")
             self.tool_service = None
 
-    async def setup_mcp_servers(self, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext):
+    async def _setup_mcp_servers(self, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext):
         """Attach configured MCP tool servers to the agent once per process."""
         tenant_id = getattr(context.activity.recipient, "tenant_id", None)
         agent_id = getattr(context.activity.recipient, "agentic_app_id", None)
         mcp_scopes = get_mcp_platform_authentication_scope()
-        if self.mcp_servers_initialized and token_is_valid(
-            agent_id=agent_id,
-            tenant_id=tenant_id,
-            scopes=mcp_scopes,
-        ):
+        if self.mcp_servers_initialized and get_cached_token(agent_id=agent_id, tenant_id=tenant_id, scopes=mcp_scopes):
             return
 
         try:
             if not self.tool_service:
                 logger.warning("⚠️ MCP tool service unavailable")
                 return
-
-            await get_token(
+            await exchange_token(
                 agent_id=agent_id,
                 tenant_id=tenant_id,
                 auth=auth,
@@ -114,7 +78,6 @@ class AgentFrameworkAgent(AgentInterface):
                 context=context,
                 scopes=mcp_scopes,
             )
-
             self.agent = await self.tool_service.add_tool_servers_to_agent(
                 chat_client=self.chat_client,
                 agent_instructions=self.AGENT_PROMPT,
@@ -123,15 +86,10 @@ class AgentFrameworkAgent(AgentInterface):
                 auth_handler_name=auth_handler_name,
                 turn_context=context,
             )
-
-            if self.agent:
-                logger.info("✅ MCP setup completed")
-                self.mcp_servers_initialized = True
-            else:
-                logger.warning("⚠️ MCP setup failed")
-
-        except Exception as e:
-            logger.error(f"MCP setup error: {e}")
+            self.mcp_servers_initialized = True
+            logger.info("✅ MCP setup completed")
+        except Exception:
+            logger.exception("⚠️ MCP setup failed")
 
     async def initialize(self):
         """Log that the agent has completed startup initialization."""
@@ -150,7 +108,7 @@ class AgentFrameworkAgent(AgentInterface):
         )
 
         try:
-            await self.setup_mcp_servers(auth, auth_handler_name, context)
+            await self._setup_mcp_servers(auth, auth_handler_name, context)
             result = await self.agent.run(message)
             return self._extract_result(result) or "I couldn't process your request at this time."
         except Exception as e:
@@ -165,7 +123,7 @@ class AgentFrameworkAgent(AgentInterface):
             notification_type = notification_activity.notification_type
             logger.info(f"📬 Processing notification: {notification_type}")
 
-            await self.setup_mcp_servers(auth, auth_handler_name, context)
+            await self._setup_mcp_servers(auth, auth_handler_name, context)
 
             if notification_type == NotificationTypes.EMAIL_NOTIFICATION:
                 if not hasattr(notification_activity, "email") or not notification_activity.email:

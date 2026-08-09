@@ -33,7 +33,7 @@ class McpToolRegistrationService:
         )
         self._mcp_client: MultiServerMCPClient | None = None
 
-    async def add_tool_servers_to_agent(
+    async def get_tools_from_mcp_servers(
         self,
         initial_tools: list[BaseTool],
         auth: Authorization,

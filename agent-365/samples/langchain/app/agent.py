@@ -1,7 +1,6 @@
 """Implements a LangChain-backed assistant with MCP tool support."""
 
 import logging
-from abc import ABC, abstractmethod
 from os import environ
 from typing import Optional
 
@@ -13,68 +12,32 @@ from langchain.chat_models import init_chat_model
 from langchain_core.messages import BaseMessage
 from langchain_core.tools import BaseTool
 from azure.identity import ManagedIdentityCredential
-from mcp_tool_registration_service import McpToolRegistrationService
 from microsoft_agents.hosting.core import Authorization, TurnContext
 from microsoft_agents_a365.notifications.agent_notification import NotificationTypes
 from microsoft_agents_a365.tooling.utils.utility import get_mcp_platform_authentication_scope
-from token_manager import get_token, token_is_valid
+from mcp_tool_registration_service import McpToolRegistrationService
+from token_manager import exchange_token, get_cached_token
 
 
-class AgentInterface(ABC):
-    """Declares the lifecycle and messaging contract for agent implementations."""
-
-    @abstractmethod
-    async def initialize(self) -> None:
-        """Prepare the agent before it starts handling turns."""
-        pass
-
-    @abstractmethod
-    async def process_user_message(
-        self, message: str, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
-    ) -> str:
-        """Process a user message and return the response text."""
-        pass
-
-    @abstractmethod
-    async def cleanup(self) -> None:
-        """Release resources owned by the agent implementation."""
-        pass
-
-
-def check_agent_inheritance(agent_class) -> bool:
-    """Return whether the supplied class implements AgentInterface."""
-    if not issubclass(agent_class, AgentInterface):
-        print(f"❌ Agent {agent_class.__name__} does not inherit from AgentInterface")
-        return False
-    return True
-
-
-class LangChainAgent(AgentInterface):
+class LangChainAgent:
     """Runs user messages and notifications through a LangChain agent."""
 
     AGENT_PROMPT = environ.get("AGENT_PROMPT", "You are a helpful assistant.")
 
     def __init__(self):
         """Create the chat model, agent, and supporting services."""
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.model = self._create_model()
-        self.tools: list[BaseTool] = []
-        self.agent = self._create_agent(self.tools)
+        self.agent = self._create_agent([])
         self._initialize_services()
         self.mcp_servers_initialized = False
-
-    def _create_model(self):
-        """Create the LangChain chat model instance."""
-        return init_chat_model(
-            f"azure_ai:{environ['FOUNDRY_MODEL']}",
-            project_endpoint=environ['FOUNDRY_PROJECT_ENDPOINT'],
-            credential=ManagedIdentityCredential(client_id=environ['UAMI_CLIENT_ID']),
-        )
 
     def _create_agent(self, tools: list[BaseTool]):
         """Create the LangChain agent instance."""
         agent = create_agent(
-            model=self.model,
+            model=init_chat_model(
+                f"azure_ai:{environ['FOUNDRY_MODEL']}",
+                project_endpoint=environ['FOUNDRY_PROJECT_ENDPOINT'],
+                credential=ManagedIdentityCredential(client_id=environ['UAMI_CLIENT_ID']),
+            ),
             tools=tools,
             system_prompt=self.AGENT_PROMPT,
         )
@@ -90,24 +53,19 @@ class LangChainAgent(AgentInterface):
             logger.warning(f"⚠️ MCP tool service failed: {e}")
             self.tool_service = None
 
-    async def setup_mcp_servers(self, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext):
+    async def _setup_mcp_servers(self, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext):
         """Attach configured MCP tool servers to the agent once per process."""
         tenant_id = getattr(context.activity.recipient, "tenant_id", None)
         agent_id = getattr(context.activity.recipient, "agentic_app_id", None)
         mcp_scopes = get_mcp_platform_authentication_scope()
-        if self.mcp_servers_initialized and token_is_valid(
-            agent_id=agent_id,
-            tenant_id=tenant_id,
-            scopes=mcp_scopes,
-        ):
+        if self.mcp_servers_initialized and get_cached_token(agent_id=agent_id, tenant_id=tenant_id, scopes=mcp_scopes):
             return
 
         try:
             if not self.tool_service:
                 logger.warning("⚠️ MCP tool service unavailable")
                 return
-
-            mcp_token = await get_token(
+            mcp_token = await exchange_token(
                 agent_id=agent_id,
                 tenant_id=tenant_id,
                 auth=auth,
@@ -115,8 +73,7 @@ class LangChainAgent(AgentInterface):
                 context=context,
                 scopes=mcp_scopes,
             )
-
-            self.tools = await self.tool_service.add_tool_servers_to_agent(
+            self.tools = await self.tool_service.get_tools_from_mcp_servers(
                 initial_tools=[],
                 auth=auth,
                 auth_handler_name=auth_handler_name,
@@ -124,15 +81,10 @@ class LangChainAgent(AgentInterface):
                 auth_token=mcp_token,
             )
             self.agent = self._create_agent(self.tools)
-
-            if self.agent:
-                logger.info("✅ MCP setup completed")
-                self.mcp_servers_initialized = True
-            else:
-                logger.warning("⚠️ MCP setup failed")
-
-        except Exception as e:
-            logger.error(f"MCP setup error: {e}")
+            self.mcp_servers_initialized = True
+            logger.info("✅ MCP setup completed")
+        except Exception:
+            logger.exception("⚠️ MCP setup failed")
 
     async def initialize(self):
         """Log that the agent has completed startup initialization."""
@@ -151,7 +103,7 @@ class LangChainAgent(AgentInterface):
         )
 
         try:
-            await self.setup_mcp_servers(auth, auth_handler_name, context)
+            await self._setup_mcp_servers(auth, auth_handler_name, context)
             result = await self.agent.ainvoke({"messages": [{"role": "user", "content": message}]})
             return self._extract_result(result) or "I couldn't process your request at this time."
         except Exception as e:
@@ -166,7 +118,7 @@ class LangChainAgent(AgentInterface):
             notification_type = notification_activity.notification_type
             logger.info(f"📬 Processing notification: {notification_type}")
 
-            await self.setup_mcp_servers(auth, auth_handler_name, context)
+            await self._setup_mcp_servers(auth, auth_handler_name, context)
 
             if notification_type == NotificationTypes.EMAIL_NOTIFICATION:
                 if not hasattr(notification_activity, "email") or not notification_activity.email:
@@ -188,28 +140,34 @@ class LangChainAgent(AgentInterface):
                 drive_id = "default"
 
                 doc_message = f"You have a new comment on the Word document with id '{doc_id}', comment id '{comment_id}', drive id '{drive_id}'. Please retrieve the Word document as well as the comments and return it in text format."
-                doc_result = await self.agent.ainvoke(
-                    {"messages": [{"role": "user", "content": doc_message}]}
-                )
+                doc_result = await self.agent.ainvoke({"messages": [{"role": "user", "content": doc_message}]})
                 word_content = self._extract_result(doc_result)
 
                 comment_text = notification_activity.text or ""
                 response_message = f"You have received the following Word document content and comments. Please refer to these when responding to comment '{comment_text}'. {word_content}"
-                result = await self.agent.ainvoke(
-                    {"messages": [{"role": "user", "content": response_message}]}
-                )
+                result = await self.agent.ainvoke({"messages": [{"role": "user", "content": response_message}]})
                 return self._extract_result(result) or "Word notification processed."
 
             else:
                 notification_message = notification_activity.text or f"Notification received: {notification_type}"
-                result = await self.agent.ainvoke(
-                    {"messages": [{"role": "user", "content": notification_message}]}
-                )
+                result = await self.agent.ainvoke({"messages": [{"role": "user", "content": notification_message}]})
                 return self._extract_result(result) or "Notification processed successfully."
 
         except Exception as e:
             logger.error(f"Error processing notification: {e}")
             return f"Sorry, I encountered an error processing the notification: {str(e)}"
+
+    def _get_thread_id(self, context: TurnContext) -> str:
+        """Return a stable checkpoint namespace for the current conversation."""
+        activity = context.activity
+        conversation = getattr(activity, "conversation", None)
+        conversation_id = getattr(conversation, "id", None) or getattr(activity, "conversation_id", None)
+        if conversation_id:
+            return str(conversation_id)
+
+        sender = getattr(activity, "from_property", None)
+        sender_id = getattr(sender, "id", None)
+        return str(sender_id or getattr(activity, "id", "default"))
 
     def _extract_result(self, result) -> str:
         """Convert an agent run result object into response text."""

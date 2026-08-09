@@ -1,7 +1,6 @@
 """Implements a LangChain-backed assistant with MCP tool support."""
 
 import logging
-from abc import ABC, abstractmethod
 from os import environ
 from typing import Optional
 
@@ -18,36 +17,19 @@ from langgraph.checkpoint.memory import InMemorySaver
 from azure.identity import ManagedIdentityCredential
 from microsoft_agents.hosting.core import Authorization, TurnContext
 from microsoft_agents_a365.notifications.agent_notification import NotificationTypes
-from token_manager import get_token, token_is_valid
+from token_manager import exchange_token, get_cached_token
 
 
-class AgentInterface(ABC):
-    """Declares the lifecycle and messaging contract for agent implementations."""
-
-    @abstractmethod
-    async def initialize(self) -> None:
-        """Prepare the agent before it starts handling turns."""
-        pass
-
-    @abstractmethod
-    async def process_user_message(
-        self, message: str, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
-    ) -> str:
-        """Process a user message and return the response text."""
-        pass
-
-    @abstractmethod
-    async def cleanup(self) -> None:
-        """Release resources owned by the agent implementation."""
-        pass
-
-
-def check_agent_inheritance(agent_class) -> bool:
-    """Return whether the supplied class implements AgentInterface."""
-    if not issubclass(agent_class, AgentInterface):
-        print(f"❌ Agent {agent_class.__name__} does not inherit from AgentInterface")
-        return False
-    return True
+SENTINEL_SERVERS = {
+    "sentinel-mcp-data-exploration": (
+        "https://sentinel.microsoft.com/mcp/data-exploration",
+        "4500ebfb-89b6-4b14-a480-7f749797bfcd/SentinelPlatform.DelegatedAccess",
+    ),
+    "sentinel-mcp-defender-triage": (
+        "https://sentinel.microsoft.com/mcp/triage",
+        "7b7b3966-1961-47b5-b080-43ca5482e21c/MCP.Read.All",
+    ),
+}
 
 
 @before_model
@@ -65,18 +47,17 @@ def trim_conversation_history(state: AgentState, runtime) -> dict:
     }
 
 
-class LangChainAgent(AgentInterface):
+class LangChainAgent:
     """Runs user messages and notifications through a LangChain agent."""
 
     AGENT_PROMPT = environ.get("AGENT_PROMPT", "You are a helpful assistant.")
 
     def __init__(self):
         """Create the chat model, agent, and supporting services."""
-        self.logger = logging.getLogger(self.__class__.__name__)
         self.model = self._create_model()
-        self.tools: list[BaseTool] = []
         self.checkpointer = InMemorySaver()
-        self.agent = self._create_agent(self.tools)
+        self.agent = self._create_agent([])
+        self.mcp_servers_initialized = False
 
     def _create_model(self):
         """Create the LangChain chat model instance."""
@@ -102,53 +83,37 @@ class LangChainAgent(AgentInterface):
         """Attach configured MCP tool servers to the agent once per process."""
         tenant_id = getattr(context.activity.recipient, "tenant_id", None)
         agent_id = getattr(context.activity.recipient, "agentic_app_id", None)
+        tokens_are_valid = all(
+            get_cached_token(agent_id=agent_id, tenant_id=tenant_id, scopes=scope)
+            for _, scope in SENTINEL_SERVERS.values()
+        )
+        if self.mcp_servers_initialized and tokens_are_valid:
+            return
 
         try:
-            client = MultiServerMCPClient(
-                {
-                    "sentinel-mcp-data-exploration": {
-                        "transport": "streamable_http",
-                        "url": "https://sentinel.microsoft.com/mcp/data-exploration",
-                        "headers": {
-                            "Authorization": f"Bearer {await get_token(
-                                    tenant_id=tenant_id,
-                                    agent_id=agent_id,
-                                    auth=auth,
-                                    auth_handler_name=auth_handler_name,
-                                    context=context,
-                                    scopes="4500ebfb-89b6-4b14-a480-7f749797bfcd/.default",
-                                )
-                            }"
-                        }
-                    },
-                    "sentinel-mcp-defender-triage": {
-                        "transport": "streamable_http",
-                        "url": "https://sentinel.microsoft.com/mcp/triage",
-                        "headers": {
-                            "Authorization": f"Bearer {await get_token(
-                                    tenant_id=tenant_id,
-                                    agent_id=agent_id,
-                                    auth=auth,
-                                    auth_handler_name=auth_handler_name,
-                                    context=context,
-                                    scopes="https://mcp.securitycenter.microsoft.com/MCP.Read.All",
-                                )
-                            }"
-                        }
-                    }
+            servers = {}
+            for name, (url, scope) in SENTINEL_SERVERS.items():
+                token = await exchange_token(
+                    tenant_id=tenant_id,
+                    agent_id=agent_id,
+                    auth=auth,
+                    auth_handler_name=auth_handler_name,
+                    context=context,
+                    scopes=scope,
+                )
+                servers[name] = {
+                    "transport": "streamable_http",
+                    "url": url,
+                    "headers": {"Authorization": f"Bearer {token}"},
                 }
-            )
-            self.tools = await client.get_tools()
-            self.agent = self._create_agent(self.tools)
 
-            if self.agent:
-                logger.info("✅ MCP setup completed")
-                self.mcp_servers_initialized = True
-            else:
-                logger.warning("⚠️ MCP setup failed")
-
-        except Exception as e:
-            logger.error(f"MCP setup error: {e}")
+            client = MultiServerMCPClient(servers)
+            tools = await client.get_tools()
+            self.agent = self._create_agent(tools)
+            self.mcp_servers_initialized = True
+            logger.info("✅ MCP setup completed")
+        except Exception:
+            logger.exception("⚠️ MCP setup failed")
 
     async def initialize(self):
         """Log that the agent has completed startup initialization."""
@@ -276,14 +241,4 @@ class LangChainAgent(AgentInterface):
         return str(content)
 
     async def cleanup(self) -> None:
-        """
-        Used if agent uses McpToolRegistrationService from mcp_tool_registration_service.
-        So now it's just a placeholder to fulfill AgentInterface contract since tools are managed by the MCP client and don't require explicit cleanup in this agent.
-        try:
-            if hasattr(self, "tool_service") and self.tool_service:
-                await self.tool_service.cleanup()
-            logger.info("Agent cleanup completed")
-        except Exception as e:
-            logger.error(f"Cleanup error: {e}")
-        """
-        return
+        """MCP connections are managed by the adapter."""
