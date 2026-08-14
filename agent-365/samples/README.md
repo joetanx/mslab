@@ -1,5 +1,16 @@
 > Microsoft Agent 365 python samples: https://github.com/microsoft/Agent365-Samples/tree/main/python/
 
+## Samples
+
+| Sample | Purpose |
+| --- | --- |
+| [Agent Framework](agent-framework) | Deployable Microsoft Agent Framework agent with Agent 365 MCP tooling. |
+| [LangChain](langchain) | Deployable LangChain agent with Agent 365 MCP tooling through `langchain-mcp-adapters`. |
+| [Jupyter](jupyter) | Jupyter-based LangChain development sandbox with Microsoft Graph security tools. |
+| [Sentinel MCP](sentinel-mcp) | Reference LangChain host that connects directly to Microsoft Sentinel data exploration and Defender triage MCP servers. |
+
+The shared deployment procedure below applies to samples that include `containerapp.yaml`, `Dockerfile`, `pyproject.toml`, and an `app` directory. The Jupyter sample has its own deployment guide, while Sentinel MCP is currently a source-only reference.
+
 # Part I. Reusable resources setup
 
 ## 1. Reusable resources
@@ -176,6 +187,7 @@ Set `SAMPLE` to the agent runtime (different path from the `samples` path):
 |---|---|
 | [Agent Framework](agent-framework) | `SAMPLE='agent-framework'` |
 | [LangChain](langchain) | `SAMPLE='langchain'` |
+| [Jupyter](jupyter) | `SAMPLE='jupyter'` |
 
 Export desired agent name:
 

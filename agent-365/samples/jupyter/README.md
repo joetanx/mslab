@@ -1,5 +1,31 @@
 # LangChain sandbox using Jupyter
 
+This sample provides a Jupyter environment for developing and testing a Microsoft Agent 365 LangChain agent. The container starts Jupyter on port `8888`; run `python server.py` from the mounted workspace when you also want to expose the agent host on port `3978`.
+
+The agent uses Azure AI Foundry for model inference, keeps conversation history in memory, trims history before model calls, and adds these tools for each turn:
+
+- current system time
+- list recent Microsoft Graph security incidents
+- list alerts associated with an incident
+- run a KQL threat-hunting query
+- add an incident comment
+- update incident status, assignment, classification, determination, tags, or resolution comment
+
+The Graph tools use an agentic user token for `https://graph.microsoft.com/.default`. The signed-in user and agent registration must have the Microsoft Graph permissions required by the security operations being invoked.
+
+## Files
+
+| Path | Purpose |
+| --- | --- |
+| `app/server.py` | Microsoft Agents SDK HTTP host, authentication, notifications, health endpoint, and Agent 365 observability setup. |
+| `app/agent.py` | LangChain agent, conversation checkpointing and trimming, notification handling, and per-turn Graph tool registration. |
+| `app/graph_tools.py` | Microsoft Graph security tools for incidents, alerts, hunting queries, comments, and incident updates. |
+| `app/token_manager.py` | Agentic token acquisition used by the Graph tools and observability. |
+| `test_graph.ipynb` | Interactive Microsoft Graph security API experiments. |
+| `test_token.ipynb` | Interactive agentic token and MCP experiments. |
+| `containerapp.yaml` | Azure Container Apps manifest exposing the agent and Jupyter ports. |
+| `Dockerfile` | Jupyter image with the Python dependencies from `pyproject.toml`. |
+
 ```sh
 az account set -s 27b58ab1-f52c-498e-a03d-255b76c80a00
 export TENANT_ID='323626f5-1bfe-48cd-8902-ddfdfd44e1ce'
@@ -35,9 +61,9 @@ SA_NAME='stor'$APP_NAME
 az storage account create --name $SA_NAME --resource-group $RG --location $LOCATION --sku Standard_LRS --tags SecurityControl=Ignore
 CONN_STR=$(az storage account show-connection-string -n $SA_NAME -g $RG --query connectionString -o tsv)
 az storage share create -n $APP_NAME --connection-string "$CONN_STR"
-az storage file upload -s $APP_NAME --source token_manager.py --connection-string $CONN_STR
-az storage file upload -s $APP_NAME --source agent.py --connection-string $CONN_STR
-az storage file upload -s $APP_NAME --source server.py --connection-string $CONN_STR
+for FILE in token_manager.py graph_tools.py agent.py server.py; do
+  az storage file upload -s $APP_NAME --source app/$FILE --path $FILE --connection-string "$CONN_STR"
+done
 ```
 
 ## 3. Virtual network
@@ -105,11 +131,18 @@ export JUPYTER_PASSWORD_HASH='argon2:$argon2id$v=19$m=10240,t=10,p=8$OZ7KfLGUQwC
 envsubst < containerapp.yaml > containerapp-edited.yaml
 az containerapp create -n $APP_NAME -g $RG --yaml containerapp-edited.yaml
 echo https://$APP_NAME.$CAE_DOMAIN/api/messages
+echo https://$APP_NAME.$CAE_DOMAIN:8888
+```
+
+After Jupyter starts, open a terminal in the mounted workspace and run the agent host when needed:
+
+```sh
+python server.py
 ```
 
 ## 8. Local testing
 
 ```sh
 podman build -t jupyter:langchain .
-podman run -d -p 80:8888 -v /opt/jupyter:/home/jovyan/work -e 'JUPYTER_PASSWORD_HASH=argon2:$argon2id$v=19$m=10240,t=10,p=8$OZ7KfLGUQwCLKZCmcNdp5g$nlYY6a3JTo1nuEM7ixchARxFb/gjMv58QfbkqrXME4c' --name jupyter localhost/jupyter:langchain
+podman run -d -p 80:8888 -p 3978:3978 -v /opt/jupyter:/home/jovyan/work -e 'JUPYTER_PASSWORD_HASH=argon2:$argon2id$v=19$m=10240,t=10,p=8$OZ7KfLGUQwCLKZCmcNdp5g$nlYY6a3JTo1nuEM7ixchARxFb/gjMv58QfbkqrXME4c' --name jupyter localhost/jupyter:langchain
 ```

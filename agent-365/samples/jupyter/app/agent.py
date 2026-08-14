@@ -86,38 +86,6 @@ class LangChainAgent:
         except Exception:
             logger.exception("⚠️ Microsoft Graph security tools setup failed")
 
-        SENTINEL_SERVERS = {
-            "sentinel-mcp-data-exploration": (
-                "https://sentinel.microsoft.com/mcp/data-exploration",
-                ["4500ebfb-89b6-4b14-a480-7f749797bfcd/SentinelPlatform.DelegatedAccess"],
-            ),
-            "sentinel-mcp-defender-triage": (
-                "https://sentinel.microsoft.com/mcp/triage",
-                ["7b7b3966-1961-47b5-b080-43ca5482e21c/MCP.Read.All"],
-            ),
-        }
-
-        try:
-            """Sentinel MCP server tools"""
-            servers = {}
-            for name, (url, scopes) in SENTINEL_SERVERS.items():
-                token = await get_token(
-                    tenant_id = getattr(context.activity.recipient, "tenant_id"),
-                    agent_id = getattr(context.activity.recipient, "agentic_app_id"),
-                    agent_user = getattr(context.activity.recipient, "agentic_user_id"),
-                    scopes=scopes,
-                )
-                servers[name] = {
-                    "transport": "streamable_http",
-                    "url": url,
-                    "headers": {"Authorization": f"Bearer {token}"},
-                }
-            client = MultiServerMCPClient(servers)
-            tools.extend(await client.get_tools())
-            logger.info("✅ Sentinel MCP server tools setup completed")
-        except Exception:
-            logger.exception("⚠️ Sentinel MCP server tools setup failed")
-
         self.agent = self._create_agent(tools)
 
     async def process_user_message(

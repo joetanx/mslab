@@ -26,9 +26,8 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[server.py] --> B[create_and_run_host]
-    B --> C[use_microsoft_opentelemetry]
-    B --> D["GenericAgentHost(...)"]
+    A[server.py] --> C[use_microsoft_opentelemetry]
+    A --> D["AgentHost(...)"]
     D --> E[create_auth_configuration]
     D --> F["start_server(auth_config)"]
     F --> G[Register routes]
@@ -45,7 +44,7 @@ sequenceDiagram
     participant HTTP as aiohttp app
     participant Middleware
     participant SDK as Microsoft Agents SDK
-    participant Host as GenericAgentHost
+    participant Host as AgentHost
     participant Agent as LangChainAgent
 
     Client->>HTTP: POST /api/messages
@@ -92,9 +91,8 @@ flowchart TD
 | Path | Purpose |
 | --- | --- |
 | `server.py` | Consolidated entrypoint and host.<br>Imports `LangChainAgent`, configures auth, activity handlers, notifications, health checks and observability, and starts the HTTP server. |
-| `agent.py` | LangChain implementation plus the shared `AgentInterface` contract.<br>Creates the Azure AI Foundry chat model, builds the LangChain agent, registers MCP tools, and processes messages and notifications. |
+| `agent.py` | LangChain implementation.<br>Creates the Azure AI Foundry chat model, builds the LangChain agent, registers MCP tools, and processes messages and notifications. |
 | `mcp_tool_registration_service.py` | LangChain-specific MCP registration service that converts Agent 365 MCP server configuration into LangChain tools. |
-| `token_manager.py` | In-memory agentic token cache and exchange helper used by observability and MCP setup. |
 
 ### 2.2. Container deployment
 
@@ -109,32 +107,16 @@ flowchart TD
 ### 3.1. Runtime flow
 
 1. Azure Container Apps starts `python server.py`.
-2. `create_and_run_host(LangChainAgent)` validates the implementation and initializes Microsoft OpenTelemetry with LangChain instrumentation enabled.
-    - checks that the class really inherits from `AgentInterface`
-    - initializes observability with Microsoft OpenTelemetry with LangChain instrumentation enabled
-    - creates a `GenericAgentHost`
-    - asks it for auth config via `create_auth_configuration()`
-    - starts the HTTP server with `start_server(auth_config)`
-3. `GenericAgentHost` loads Microsoft Agents SDK configuration from environment variables, configures MSAL service connection authentication, registers message and notification handlers, and exposes `/api/messages` and `/api/health`.
-4. On startup, the host constructs `LangChainAgent`.
+2. `main()` initializes Microsoft OpenTelemetry with LangChain instrumentation, constructs `AgentHost`, creates its authentication configuration, and starts the HTTP server.
+3. `AgentHost` loads Microsoft Agents SDK configuration from environment variables, configures MSAL service connection authentication, registers message and notification handlers, and exposes `/api/messages` and `/api/health`.
+4. On application startup, the host constructs `LangChainAgent`.
 5. `LangChainAgent` creates an Azure AI Foundry chat model with `init_chat_model`, using the deployment named by `FOUNDRY_MODEL` and the project endpoint in `FOUNDRY_PROJECT_ENDPOINT`.
 6. The agent initially starts with no tools so the host can become healthy before the first authenticated turn.
-7. On the first user message or notification, `setup_mcp_servers` exchanges an agentic token, discovers configured Agent 365 MCP tool servers, converts them to LangChain tools, and recreates the LangChain agent with those tools attached.
+7. On each user message or notification, `_setup_mcp_servers` exchanges an agentic token, discovers configured Agent 365 MCP tool servers, converts them to LangChain tools, and recreates the LangChain agent with those tools attached.
 8. User messages are processed with `self.agent.ainvoke({"messages": [{"role": "user", "content": message}]})`.
 9. Responses are converted to text by `_extract_result` and sent back through Microsoft Agents SDK.
 
-### 3.2. AgentInterface (Contract)
-
-AgentInterface inherits from ABC (abstract base class), methods marked with `@abstractmethod` are required methods for any implementing class:
-- `initialize()`
-- `process_user_message(...)`
-- `cleanup()`
-
-This is the _contract_: any agent hosted by this system must expose those behaviors.
-
-> Python doesn't enforce it as strictly as Java/C#, but instantiating a subclass that forgets one of these methods would fail.
-
-### 3.3. Observability
+### 3.2. Observability
 
 Agent 365 observability is provided by Microsoft OpenTelemetry: https://github.com/microsoft/opentelemetry-distro-python/tree/main/src/microsoft/opentelemetry/a365
 
@@ -145,18 +127,20 @@ from microsoft.opentelemetry import use_microsoft_opentelemetry
 
 use_microsoft_opentelemetry(
     enable_a365=True,
-    a365_token_resolver=get_token,
+    a365_token_resolver=_observability_token_resolver,
     instrumentation_options={
         "langchain": {"enabled": True},
     },
 )
 ```
 
+The host exchanges an observability token for each message or notification and exposes it through the resolver while processing that turn.
+
 The [documentation](https://github.com/microsoft/opentelemetry-distro-python/blob/main/A365_DOCUMENTATION.md) provides details on auto-instrumented libraries, baggage configuration, token resolver, etc
 
 Microsoft OpenTelemetry replaces A365 observability and observability-extensions packages; the [migration documentation](https://github.com/microsoft/opentelemetry-distro-python/blob/main/MIGRATION_A365.md) provides more details.
 
-### 3.4. `@web_middleware` paths
+### 3.3. `@web_middleware` paths
 
 - If auth_configuration is present, the app uses `jwt_with_health_bypass`:
     - `/api/health` is allowed through
@@ -164,19 +148,19 @@ Microsoft OpenTelemetry replaces A365 observability and observability-extensions
 - If auth_configuration is absent, the app uses anonymous_claims:
     - it injects fake/anonymous claims so the request can still flow without JWT
 
-### 3.5. MCP tool behavior
+### 3.4. MCP tool behavior
 
 The LangChain sample includes a custom `McpToolRegistrationService` because Agent 365 tooling does not directly return LangChain tools.
 
-During the first turn:
+During each message or notification:
 
-1. `setup_mcp_servers` prepares an observability token and calls the registration service.
-2. In production mode, the registration service exchanges an MCP platform token using `auth.exchange_token`.
+1. `_setup_mcp_servers` calls the registration service with the current turn context.
+2. The registration service exchanges an MCP platform token using `auth.exchange_token`.
 3. `McpToolServerConfigurationService.list_tool_servers` discovers configured Agent 365 MCP servers for this agent.
 4. Each server configuration is converted to a `MultiServerMCPClient` connection with HTTP transport, URL, user-agent header, optional server headers, and bearer authorization.
 5. `MultiServerMCPClient.get_tools()` loads LangChain `BaseTool` instances.
 6. `LangChainAgent` recreates the LangChain agent with the discovered tool list.
-7. `mcp_servers_initialized` prevents re-registering the same tools on every turn.
+7. The registration service closes the MCP client during agent shutdown when the adapter supports `aclose()`.
 
 If no server configurations are returned, the agent continues with its initial tool list.
 
@@ -193,7 +177,6 @@ If no server configurations are returned, the agent continues with its initial t
 | `ENABLE_OBSERVABILITY` | Recommended | Enables observability support. |
 | `ENABLE_A365_OBSERVABILITY_EXPORTER` | Recommended | Enables Agent 365 observability exporter. |
 | `AGENT_PROMPT` | Optional | System instructions for the assistant.<br>Defaults to `You are a helpful assistant.` |
-| `TOKEN_REFRESH_BUFFER_SECONDS` | Optional | Number of seconds before expiry when cached tokens are treated as stale.<br>Defaults to `300`. |
 | `AUTH_HANDLER_NAME` | Yes | Set to `AGENTIC` for agentic user authorization token exchange flow. |
 | `CONNECTIONS__SERVICE_CONNECTION__SETTINGS__*` | Yes | Configures agent blueprint as client ID and UAMI as FIC. |
 | `CONNECTIONSMAP__0__*` | Yes | Maps all service URLs to `SERVICE_CONNECTION`. |
@@ -212,7 +195,7 @@ The UAMI is used for:
 | Agent blueprint federated credentials | Create a federated credential on the blueprint app that trusts the UAMI principal ID. |
 | Runtime model calls | Set `UAMI_CLIENT_ID` so `ManagedIdentityCredential` can authenticate the LangChain Azure AI model. |
 
-Agentic user authorization is enabled by setting `AUTH_HANDLER_NAME=AGENTIC`. If this value is not set outside development mode, MCP registration raises an error because it cannot exchange the MCP platform token required to discover deployed tool servers.
+Agentic user authorization is enabled by setting `AUTH_HANDLER_NAME=AGENTIC`. MCP registration and observability require this handler to exchange their platform tokens.
 
 
 ## 5. Deployment summary
