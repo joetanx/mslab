@@ -1,35 +1,31 @@
 """Implements a LangChain-backed assistant with MCP tool support."""
 
 import logging
+from datetime import datetime
 from os import environ
 from typing import Optional
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 from langchain.agents import create_agent
 from langchain.agents.middleware import AgentState, before_model
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import BaseMessage, HumanMessage, trim_messages
-from langchain_core.tools import BaseTool
+from langchain_core.messages import HumanMessage, trim_messages
+from langchain_core.tools import BaseTool, tool
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.checkpoint.memory import InMemorySaver
 from azure.identity import ManagedIdentityCredential
 from microsoft_agents.hosting.core import Authorization, TurnContext
 from microsoft_agents_a365.notifications.agent_notification import NotificationTypes
-from token_manager import exchange_token, get_cached_token
+
+from token_manager import get_token
+from graph_tools import create_graph_security_tools
+
+logger = logging.getLogger(__name__)
 
 
-SENTINEL_SERVERS = {
-    "sentinel-mcp-data-exploration": (
-        "https://sentinel.microsoft.com/mcp/data-exploration",
-        "4500ebfb-89b6-4b14-a480-7f749797bfcd/SentinelPlatform.DelegatedAccess",
-    ),
-    "sentinel-mcp-defender-triage": (
-        "https://sentinel.microsoft.com/mcp/triage",
-        "7b7b3966-1961-47b5-b080-43ca5482e21c/MCP.Read.All",
-    ),
-}
+@tool
+def get_current_system_time() -> str:
+    """Return the current system date and time, including the local time zone."""
+    return datetime.now().astimezone().isoformat()
 
 
 @before_model
@@ -56,8 +52,8 @@ class LangChainAgent:
         """Create the chat model, agent, and supporting services."""
         self.model = self._create_model()
         self.checkpointer = InMemorySaver()
-        self.agent = self._create_agent([])
-        self.mcp_servers_initialized = False
+        self.initial_tools = [get_current_system_time]
+        self.agent = self._create_agent(self.initial_tools)
 
     def _create_model(self):
         """Create the LangChain chat model instance."""
@@ -79,45 +75,50 @@ class LangChainAgent:
         logger.info("✅ LangChain agent created with %d tools", len(tools))
         return agent
 
-    async def _setup_mcp_servers(self, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext):
-        """Attach configured MCP tool servers to the agent once per process."""
-        tenant_id = getattr(context.activity.recipient, "tenant_id", None)
-        agent_id = getattr(context.activity.recipient, "agentic_app_id", None)
-        tokens_are_valid = all(
-            get_cached_token(agent_id=agent_id, tenant_id=tenant_id, scopes=scope)
-            for _, scope in SENTINEL_SERVERS.values()
-        )
-        if self.mcp_servers_initialized and tokens_are_valid:
-            return
+    async def _setup_tools(self, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext):
+        """Attach Graph and configured MCP tools."""
+        tools = list(self.initial_tools)
 
         try:
+            """Graph tools"""
+            tools.extend(await create_graph_security_tools())
+            logger.info("✅ Microsoft Graph security tools setup completed")
+        except Exception:
+            logger.exception("⚠️ Microsoft Graph security tools setup failed")
+
+        SENTINEL_SERVERS = {
+            "sentinel-mcp-data-exploration": (
+                "https://sentinel.microsoft.com/mcp/data-exploration",
+                ["4500ebfb-89b6-4b14-a480-7f749797bfcd/SentinelPlatform.DelegatedAccess"],
+            ),
+            "sentinel-mcp-defender-triage": (
+                "https://sentinel.microsoft.com/mcp/triage",
+                ["7b7b3966-1961-47b5-b080-43ca5482e21c/MCP.Read.All"],
+            ),
+        }
+
+        try:
+            """Sentinel MCP server tools"""
             servers = {}
-            for name, (url, scope) in SENTINEL_SERVERS.items():
-                token = await exchange_token(
-                    tenant_id=tenant_id,
-                    agent_id=agent_id,
-                    auth=auth,
-                    auth_handler_name=auth_handler_name,
-                    context=context,
-                    scopes=scope,
+            for name, (url, scopes) in SENTINEL_SERVERS.items():
+                token = await get_token(
+                    tenant_id = getattr(context.activity.recipient, "tenant_id"),
+                    agent_id = getattr(context.activity.recipient, "agentic_app_id"),
+                    agent_user = getattr(context.activity.recipient, "agentic_user_id"),
+                    scopes=scopes,
                 )
                 servers[name] = {
                     "transport": "streamable_http",
                     "url": url,
                     "headers": {"Authorization": f"Bearer {token}"},
                 }
-
             client = MultiServerMCPClient(servers)
-            tools = await client.get_tools()
-            self.agent = self._create_agent(tools)
-            self.mcp_servers_initialized = True
-            logger.info("✅ MCP setup completed")
+            tools.extend(await client.get_tools())
+            logger.info("✅ Sentinel MCP server tools setup completed")
         except Exception:
-            logger.exception("⚠️ MCP setup failed")
+            logger.exception("⚠️ Sentinel MCP server tools setup failed")
 
-    async def initialize(self):
-        """Log that the agent has completed startup initialization."""
-        logger.info("Agent initialized")
+        self.agent = self._create_agent(tools)
 
     async def process_user_message(
         self, message: str, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
@@ -132,7 +133,7 @@ class LangChainAgent:
         )
 
         try:
-            await self._setup_mcp_servers(auth, auth_handler_name, context)
+            await self._setup_tools(auth, auth_handler_name, context)
             result = await self._invoke(message, context)
             return self._extract_result(result) or "I couldn't process your request at this time."
         except Exception as e:
@@ -147,7 +148,7 @@ class LangChainAgent:
             notification_type = notification_activity.notification_type
             logger.info(f"📬 Processing notification: {notification_type}")
 
-            await self._setup_mcp_servers(auth, auth_handler_name, context)
+            await self._setup_tools(auth, auth_handler_name, context)
 
             if notification_type == NotificationTypes.EMAIL_NOTIFICATION:
                 if not hasattr(notification_activity, "email") or not notification_activity.email:
@@ -225,7 +226,7 @@ class LangChainAgent:
         else:
             return str(result)
 
-    def _extract_message_text(self, message: BaseMessage | object) -> str:
+    def _extract_message_text(self, message) -> str:
         """Extract text from a LangChain message."""
         content = getattr(message, "content", message)
         if isinstance(content, str):

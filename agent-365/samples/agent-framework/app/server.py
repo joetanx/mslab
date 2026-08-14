@@ -1,6 +1,6 @@
 """Hosts a Agent Framework agent behind the Microsoft Agents HTTP server."""
 
-import logging
+import sys, logging
 from os import environ
 
 from aiohttp.web import Application, Request, Response, json_response, run_app
@@ -33,18 +33,18 @@ from microsoft_agents_a365.notifications.agent_notification import (
 from microsoft.opentelemetry import use_microsoft_opentelemetry
 from microsoft.opentelemetry.a365.core import BaggageBuilder
 from microsoft.opentelemetry.a365.runtime import get_observability_authentication_scope
-from token_manager import exchange_token, get_cached_token
 
-ms_agents_logger = logging.getLogger("microsoft_agents")
-ms_agents_logger.addHandler(logging.StreamHandler())
-ms_agents_logger.setLevel(logging.INFO)
-
-observability_logger = logging.getLogger("microsoft_agents_a365.observability")
-observability_logger.setLevel(logging.ERROR)
-
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
 logger = logging.getLogger(__name__)
 
 agents_sdk_config = load_configuration_from_env(environ)
+
+_observability_token: str | None = None
+def _observability_token_resolver(agent_id: str, tenant_id: str) -> str | None:
+    return _observability_token
 
 
 class AgentHost:
@@ -57,8 +57,6 @@ class AgentHost:
             logger.info(f"🔐 Using auth handler: {self.auth_handler_name}")
         else:
             logger.info("🔓 No auth handler configured (AUTH_HANDLER_NAME not set)")
-
-        self.agent: AgentFrameworkAgent | None = None
 
         self.storage = MemoryStorage()
         self.connection_manager = MsalConnectionManager(**agents_sdk_config)
@@ -75,42 +73,6 @@ class AgentHost:
         self.agent_notification = AgentNotification(self.agent_app)
         self._setup_handlers()
         logger.info("✅ Notification handlers registered successfully")
-
-    async def _setup_observability_token(
-        self, context: TurnContext, tenant_id: str, agent_id: str
-    ):
-        """Prepare the observability token for the current turn."""
-        try:
-            token = await exchange_token(
-                agent_id=agent_id,
-                tenant_id=tenant_id,
-                auth=self.agent_app.auth,
-                auth_handler_name=self.auth_handler_name,
-                context=context,
-                scopes=get_observability_authentication_scope(),
-            )
-            if token:
-                logger.info(
-                    f"✅ Observability token ready "
-                    f"(tenant_id={tenant_id}, agent_id={agent_id})"
-                )
-        except Exception as e:
-            logger.warning(f"⚠️ Failed to prepare observability token: {e}")
-
-    async def _validate_agent_and_setup_context(self, context: TurnContext):
-        """Validate that an agent is ready and return tenant and agent identifiers."""
-        logger.info("🔍 Validating agent and setting up context...")
-        tenant_id = context.activity.recipient.tenant_id
-        agent_id = context.activity.recipient.agentic_app_id
-        logger.info(f"🔍 tenant_id={tenant_id}, agent_id={agent_id}")
-
-        if not self.agent:
-            logger.error("Agent not available")
-            await context.send_activity("❌ Sorry, the agent is not available.")
-            return None
-
-        await self._setup_observability_token(context, tenant_id, agent_id)
-        return tenant_id, agent_id
 
     def _setup_handlers(self):
         """Register conversation, message, installation, and notification handlers."""
@@ -149,11 +111,14 @@ class AgentHost:
         async def on_message(context: TurnContext, _: TurnState):
             """Handle incoming chat messages from users."""
             try:
-                result = await self._validate_agent_and_setup_context(context)
-                if result is None:
-                    return
-                tenant_id, agent_id = result
-
+                tenant_id = getattr(context.activity.recipient, "tenant_id", None)
+                agent_id = getattr(context.activity.recipient, "agentic_app_id", None)
+                global _observability_token
+                _observability_token = (await self.agent_app.auth.exchange_token(
+                    context,
+                    get_observability_authentication_scope(),
+                    self.auth_handler_name,
+                )).token
                 with BaggageBuilder().tenant_id(tenant_id).agent_id(agent_id).build():
                     user_message = (context.activity.text or "").strip()
                     if not user_message or user_message == "/help":
@@ -164,7 +129,6 @@ class AgentHost:
                         user_message, self.agent_app.auth, self.auth_handler_name, context
                     )
                     await context.send_activity(response)
-
             except Exception as e:
                 logger.error(f"❌ Error: {e}")
                 await context.send_activity(f"Sorry, I encountered an error: {str(e)}")
@@ -180,25 +144,24 @@ class AgentHost:
         ):
             """Handle incoming Microsoft 365 notification activities."""
             try:
-                result = await self._validate_agent_and_setup_context(context)
-                if result is None:
-                    return
-                tenant_id, agent_id = result
-
+                tenant_id = getattr(context.activity.recipient, "tenant_id", None)
+                agent_id = getattr(context.activity.recipient, "agentic_app_id", None)
+                global _observability_token
+                _observability_token = (await self.agent_app.auth.exchange_token(
+                    context,
+                    get_observability_authentication_scope(),
+                    self.auth_handler_name,
+                )).token
                 with BaggageBuilder().tenant_id(tenant_id).agent_id(agent_id).build():
                     logger.info(f"📬 {notification_activity.notification_type}")
-
                     response = await self.agent.handle_agent_notification_activity(
                         notification_activity, self.agent_app.auth, self.auth_handler_name, context
                     )
-
                     if notification_activity.notification_type == NotificationTypes.EMAIL_NOTIFICATION:
                         response_activity = EmailResponse.create_email_response_activity(response)
                         await context.send_activity(response_activity)
                         return
-
                     await context.send_activity(response)
-
             except Exception as e:
                 logger.error(f"❌ Notification error: {e}")
                 await context.send_activity(
@@ -207,10 +170,7 @@ class AgentHost:
 
     async def initialize_agent(self):
         """Create and initialize the agent instance on application startup."""
-        if self.agent is None:
-            logger.info("Initializing AgentFrameworkAgent")
-            self.agent = AgentFrameworkAgent()
-            await self.agent.initialize()
+        self.agent = AgentFrameworkAgent()
 
     def create_auth_configuration(self) -> AgentAuthConfiguration | None:
         """Create the authentication configuration used by the host."""
@@ -233,7 +193,7 @@ class AgentHost:
             return json_response(
                 {
                     "status": "ok",
-                    "agent_type": "AgentFrameworkAgent",
+                    "agent_type": self.agent.__class__.__name__,
                     "agent_initialized": self.agent is not None,
                 }
             )
@@ -278,38 +238,25 @@ class AgentHost:
         app.on_startup.append(lambda app: self.initialize_agent())
         app.on_shutdown.append(lambda app: self.cleanup())
 
-        host = environ.get("HOST", "localhost")
-        port = int(environ.get("PORT", 3978))
-
-        print("✅ Agent host started")
-        print(f"🔒 Auth: {'Enabled' if auth_configuration else 'Anonymous'}")
-        print(f"🚀 Server: {host}:{port}")
-        print(f"📚 Endpoint: http://{host}:{port}/api/messages")
-        print(f"❤️  Health: http://{host}:{port}/api/health\n")
-
-        try:
-            run_app(app, host=host, port=port, handle_signals=True)
-        except KeyboardInterrupt:
-            print("\n👋 Server stopped")
+        print("▶️ Starting agent server...")
+        run_app(
+            app,
+            host=environ.get("HOST", "localhost"),
+            port=int(environ.get("PORT", 3978)),
+            handle_signals=True,
+        )
+        print("👋 Agent server stopped") # run_app is blocking, so this prints after server is stopped
 
     async def cleanup(self):
         """Clean up the hosted agent instance during shutdown."""
-        if self.agent:
-            try:
-                await self.agent.cleanup()
-            except Exception as e:
-                logger.error(f"Cleanup error: {e}")
+        await self.agent.cleanup()
 
 
 def main() -> None:
     """Configure observability and start the HTTP host."""
     use_microsoft_opentelemetry(
         enable_a365=True,
-        a365_token_resolver=lambda agent_id, tenant_id: get_cached_token(
-            agent_id=agent_id,
-            tenant_id=tenant_id,
-            scopes=get_observability_authentication_scope(),
-        ),
+        a365_token_resolver=_observability_token_resolver,
     )
     host = AgentHost()
     host.start_server(host.create_auth_configuration())

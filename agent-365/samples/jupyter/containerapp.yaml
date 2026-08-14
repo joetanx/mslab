@@ -95,6 +95,11 @@ properties:
             value: "ea9ffc3e-8a23-4a7d-836d-234d7c7565c1/.default"
           - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__ALT_BLUEPRINT_NAME
             value: "SERVICE_CONNECTION"
+          # Agent identity and user IDs
+          - name: AGENTIC_INSTANCE_ID
+            value: "${AGENTIC_INSTANCE_ID}"
+          - name: AGENTIC_USER_ID
+            value: "${AGENTIC_USER_ID}"
         probes:
           - type: Startup
             tcpSocket:

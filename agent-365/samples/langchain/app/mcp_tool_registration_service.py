@@ -9,14 +9,9 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from microsoft_agents.hosting.core import Authorization, TurnContext
 from microsoft_agents_a365.runtime.utility import Utility
 from microsoft_agents_a365.tooling.models import ToolOptions
-from microsoft_agents_a365.tooling.services.mcp_tool_server_configuration_service import (
-    McpToolServerConfigurationService,
-)
+from microsoft_agents_a365.tooling.services.mcp_tool_server_configuration_service import McpToolServerConfigurationService
 from microsoft_agents_a365.tooling.utils.constants import Constants
-from microsoft_agents_a365.tooling.utils.utility import (
-    get_mcp_platform_authentication_scope,
-    is_development_environment,
-)
+from microsoft_agents_a365.tooling.utils.utility import get_mcp_platform_authentication_scope
 
 
 class McpToolRegistrationService:
@@ -29,30 +24,18 @@ class McpToolRegistrationService:
 
     async def get_tools_from_mcp_servers(
         self,
-        initial_tools: list[BaseTool],
         auth: Authorization,
         auth_handler_name: str | None,
         turn_context: TurnContext,
-        auth_token: str | None = None,
     ) -> list[BaseTool]:
         """Return the existing tools plus tools discovered from Agent 365."""
-        is_dev = is_development_environment()
-
-        if not auth_token and not is_dev:
-            if not auth_handler_name:
-                raise ValueError("auth_handler_name is required outside development mode")
-            token = await auth.exchange_token(
-                turn_context,
-                get_mcp_platform_authentication_scope(),
-                auth_handler_name,
-            )
-            if not token or not token.token:
-                raise ValueError("Token exchange did not return an MCP platform token")
-            auth_token = token.token
-
-        app_id = "" if is_dev else Utility.resolve_agent_identity(turn_context, auth_token)
+        auth_token = (await auth.exchange_token(
+            turn_context,
+            get_mcp_platform_authentication_scope(),
+            auth_handler_name,
+        )).token
         server_configs = await self.config_service.list_tool_servers(
-            agentic_app_id=app_id,
+            agentic_app_id=Utility.resolve_agent_identity(turn_context, auth_token),
             auth_token=auth_token,
             options=ToolOptions(orchestrator_name="LangChain"),
             authorization=auth,
@@ -70,12 +53,12 @@ class McpToolRegistrationService:
             }
 
         if not connections:
-            return list(initial_tools)
+            return []
 
         self.client = MultiServerMCPClient(connections)
         mcp_tools = await self.client.get_tools()
         self.logger.info("Loaded %d LangChain MCP tools", len(mcp_tools))
-        return [*initial_tools, *mcp_tools]
+        return mcp_tools
 
     def _build_headers(
         self,

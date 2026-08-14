@@ -4,19 +4,15 @@ import logging
 from os import environ
 from typing import Optional
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 from agent_framework import Agent
 from agent_framework.foundry import FoundryChatClient
 from azure.identity import ManagedIdentityCredential
 from microsoft_agents.hosting.core import Authorization, TurnContext
 from microsoft_agents_a365.notifications.agent_notification import NotificationTypes
-from microsoft_agents_a365.tooling.extensions.agentframework.services.mcp_tool_registration_service import (
-    McpToolRegistrationService,
-)
+from microsoft_agents_a365.tooling.extensions.agentframework.services.mcp_tool_registration_service import McpToolRegistrationService
 from microsoft_agents_a365.tooling.utils.utility import get_mcp_platform_authentication_scope
-from token_manager import exchange_token, get_cached_token
+
+logger = logging.getLogger(__name__)
 
 
 class AgentFrameworkAgent:
@@ -29,7 +25,6 @@ class AgentFrameworkAgent:
         self._create_chat_client()
         self._create_agent()
         self._initialize_services()
-        self.mcp_servers_initialized = False
 
     def _create_chat_client(self):
         """Create the Foundry chat client used by the agent."""
@@ -60,24 +55,10 @@ class AgentFrameworkAgent:
 
     async def _setup_mcp_servers(self, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext):
         """Attach configured MCP tool servers to the agent once per process."""
-        tenant_id = getattr(context.activity.recipient, "tenant_id", None)
-        agent_id = getattr(context.activity.recipient, "agentic_app_id", None)
-        mcp_scopes = get_mcp_platform_authentication_scope()
-        if self.mcp_servers_initialized and get_cached_token(agent_id=agent_id, tenant_id=tenant_id, scopes=mcp_scopes):
-            return
-
         try:
             if not self.tool_service:
                 logger.warning("⚠️ MCP tool service unavailable")
                 return
-            await exchange_token(
-                agent_id=agent_id,
-                tenant_id=tenant_id,
-                auth=auth,
-                auth_handler_name=auth_handler_name,
-                context=context,
-                scopes=mcp_scopes,
-            )
             self.agent = await self.tool_service.add_tool_servers_to_agent(
                 chat_client=self.chat_client,
                 agent_instructions=self.AGENT_PROMPT,
@@ -86,14 +67,9 @@ class AgentFrameworkAgent:
                 auth_handler_name=auth_handler_name,
                 turn_context=context,
             )
-            self.mcp_servers_initialized = True
             logger.info("✅ MCP setup completed")
         except Exception:
             logger.exception("⚠️ MCP setup failed")
-
-    async def initialize(self):
-        """Log that the agent has completed startup initialization."""
-        logger.info("Agent initialized")
 
     async def process_user_message(
         self, message: str, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext

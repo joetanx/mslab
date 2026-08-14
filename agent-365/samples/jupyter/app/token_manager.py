@@ -1,117 +1,85 @@
-"""Exchange and cache agentic access tokens."""
-
-import asyncio
-import base64
-import binascii
-import json
-import time
-from collections.abc import Sequence
-from dataclasses import dataclass
+import logging, jwt
 from os import environ
-from typing import Any
+from datetime import date, datetime, timedelta, timezone
+import time
+from typing import Any, Sequence
+from enum import Enum
+from microsoft_agents.activity import load_configuration_from_env
+from microsoft_agents.authentication.msal import MsalConnectionManager
+
+logger = logging.getLogger(__name__)
 
 
+agents_sdk_config = load_configuration_from_env(environ)
+connection_manager = MsalConnectionManager(**agents_sdk_config)
+token_provider = connection_manager.get_connection("SERVICE_CONNECTION")
+
+_token_cache: dict[tuple[str | None, str | None, str | None, tuple[str] | None], str] = {}
 REFRESH_BUFFER_SECONDS = int(environ.get("TOKEN_REFRESH_BUFFER_SECONDS", "300"))
 
 
-@dataclass(frozen=True)
-class CachedToken:
-    value: str
-    expires_at: float
-
-
-_cache: dict[tuple[str | None, str, tuple[str, ...]], CachedToken] = {}
-_locks: dict[tuple[str | None, str, tuple[str, ...]], asyncio.Lock] = {}
-
-
-def get_cached_token(
-    *,
-    agent_id: str | None,
+async def _get_new_token(
     tenant_id: str | None = None,
+    agent_id: str | None = None,
+    agent_user: str | None = None,
     scopes: Sequence[str] | str | None = None,
 ) -> str:
-    """Return a usable cached token, or an empty string."""
-    if not agent_id:
-        return ""
-
-    key = (tenant_id, agent_id, _normalize_scopes(scopes))
-    cached = _cache.get(key)
-    if not cached or cached.expires_at - time.time() <= REFRESH_BUFFER_SECONDS:
-        return ""
-    return cached.value
-
-
-async def exchange_token(
-    *,
-    agent_id: str | None,
-    tenant_id: str | None,
-    auth: Any,
-    auth_handler_name: str | None,
-    context: Any,
-    scopes: Sequence[str] | str | None,
-) -> str:
-    """Return a cached token or exchange and cache a new one."""
-    normalized_scopes = _normalize_scopes(scopes)
-    cached = get_cached_token(
-        agent_id=agent_id, tenant_id=tenant_id, scopes=normalized_scopes
+    """Exchange agent user token for the specified scope and cache it."""
+    token = await token_provider.get_agentic_user_token(
+        tenant_id = tenant_id,
+        agent_app_instance_id = agent_id,
+        agentic_user_id = agent_user,
+        scopes = scopes,
     )
-    if cached:
-        return cached
-    if not agent_id or not auth_handler_name:
-        return ""
-
-    key = (tenant_id, agent_id, normalized_scopes)
-    async with _locks.setdefault(key, asyncio.Lock()):
-        cached = get_cached_token(
-            agent_id=agent_id, tenant_id=tenant_id, scopes=normalized_scopes
-        )
-        if cached:
-            return cached
-
-        result = await auth.exchange_token(
-            context,
-            scopes=list(normalized_scopes),
-            auth_handler_id=auth_handler_name,
-        )
-        value = result if isinstance(result, str) else getattr(result, "token", "")
-        if not value:
-            raise ValueError("Token exchange did not return a token")
-
-        _cache[key] = CachedToken(value=value, expires_at=_expires_at(result, value))
-        return value
+    _cache_token(
+        token=token,
+        tenant_id=tenant_id,
+        agent_id=agent_id,
+        agent_user=agent_user,
+        scopes=scopes,
+    )
+    return token
 
 
-def _normalize_scopes(scopes: Sequence[str] | str | None) -> tuple[str, ...]:
-    if scopes is None:
-        return ()
-    if isinstance(scopes, str):
-        return (scopes,)
-    return tuple(scopes)
+def _get_token_remaining_time(token: str) -> int:
+    """Get the remaining time (in seconds) for the token to expire."""
+    decoded_payload = jwt.decode(token, options={"verify_signature": False})
+    exp_claim = decoded_payload.get("exp")
+    if exp_claim:
+        remaining_time = exp_claim - int(time.time())
+        return max(remaining_time, 0)
+    # if no expiry field in token, return 3600 seconds
+    return 3600
 
 
-def _expires_at(result: Any, token: str) -> float:
-    for name in ("expires_on", "expires_at"):
-        value = getattr(result, name, None)
-        if isinstance(value, int | float):
-            return float(value)
+def _cache_token(
+    token: str,
+    tenant_id: str | None = None,
+    agent_id: str | None = None,
+    agent_user: str | None = None,
+    scopes: Sequence[str] | str | None = None,
+) -> None:
+    """Cache the token in memory for future use."""
+    cache_key = (tenant_id, agent_id, agent_user, tuple(scopes) if scopes else None)
+    _token_cache[cache_key] = token
 
-    for name in ("expires_in", "expires_in_seconds"):
-        value = getattr(result, name, None)
-        if isinstance(value, int | float):
-            return time.time() + float(value)
 
-    try:
-        payload = token.split(".")[1]
-        payload += "=" * (-len(payload) % 4)
-        expiry = json.loads(base64.urlsafe_b64decode(payload))["exp"]
-        return float(expiry)
-    except (
-        binascii.Error,
-        IndexError,
-        KeyError,
-        TypeError,
-        UnicodeDecodeError,
-        ValueError,
-        json.JSONDecodeError,
-    ):
-        return time.time() + 3600
+async def get_token(
+    tenant_id: str | None = None,
+    agent_id: str | None = None,
+    agent_user: str | None = None,
+    scopes: Sequence[str] | str | None = None,
+) -> str:
+    """Retrieve a token, handling caching and refreshing transparently."""
+    cache_key = (tenant_id, agent_id, agent_user, tuple(scopes) if scopes else None)
+    cached_token = _token_cache.get(cache_key)
+    if cached_token and _get_token_remaining_time(cached_token) > REFRESH_BUFFER_SECONDS:
+        # Return the cached token if it exists and is not close to expiration
+        return cached_token
+    return await _get_new_token(
+        # Otherwise, get a new token, the _get_new_token function will cache it for future use
+        tenant_id=tenant_id,
+        agent_id=agent_id,
+        agent_user=agent_user,
+        scopes=scopes,
+    )

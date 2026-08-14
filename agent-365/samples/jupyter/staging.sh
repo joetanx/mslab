@@ -16,4 +16,6 @@ UAMI_NAME="uami-$APP_NAME"
 UAMI_ID=$(az identity show -n $UAMI_NAME -g $RG --query principalId -o tsv)
 export UAMI_CLIENT_ID=$(az identity show -n $UAMI_NAME -g $RG --query clientId -o tsv)
 export UAMI_RSC_ID=$(az identity show -n $UAMI_NAME -g $RG --query id -o tsv)
-export BLUEPRINT_CLIENT_ID=$(python3 -c "import json; print(json.load(open('a365.generated.config.json'))['agentBlueprintId'])")
+export BLUEPRINT_CLIENT_ID='4d33bbd0-5160-449a-8974-6f4cd9b5ceeb'
+export AGENTIC_INSTANCE_ID='ad86a79f-2051-4caf-b11c-ab59e81ddd75'
+export AGENTIC_USER_ID='4a1529b5-58a5-4cb3-82f4-29f3cc3012c7'
