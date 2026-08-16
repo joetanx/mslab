@@ -1,0 +1,104 @@
+location: ${LOCATION}
+resourceGroup: ${RG}
+name: ${APP_NAME}
+identity:
+  type: UserAssigned
+  userAssignedIdentities:
+    ${UAMI_RSC_ID}: {}
+properties:
+  managedEnvironmentId: ${CAE_ID}
+  configuration:
+    registries:
+      - server: ${ACR_NAME}.azurecr.io
+        identity: ${UAMI_RSC_ID}
+    ingress:
+      external: true
+      allowInsecure: false
+      targetPort: 3978
+      transport: auto
+  template:
+    terminationGracePeriodSeconds: 60
+    volumes:
+      - name: ${APP_NAME}-vol
+        storageType: AzureFile
+        storageName: ${APP_NAME}
+    containers:
+      - name: ${APP_NAME}
+        image: ${ACR_NAME}.azurecr.io/${APP_NAME}:latest
+        volumeMounts:
+          - volumeName: ${APP_NAME}-vol
+            mountPath: /app
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+        env:
+          # Listener for aiohttp.web run_app
+          - name: HOST
+            value: "0.0.0.0"
+          - name: PORT
+            value: "3978"
+          # LangChain model connection
+          - name: FOUNDRY_PROJECT_ENDPOINT
+            value: "${FOUNDRY_PROJECT_ENDPOINT}"
+          - name: FOUNDRY_MODEL
+            value: "${FOUNDRY_MODEL}"
+          - name: UAMI_CLIENT_ID
+            value: "${UAMI_CLIENT_ID}"
+          # Incoming Logic App bearer-token validation
+          - name: ENTRA_TENANT_ID
+            value: "${TENANT_ID}"
+          - name: AUTOSOC_API_AUDIENCE
+            value: "${AUTOSOC_API_AUDIENCE}"
+          # Agentic user token exchange for Microsoft Graph
+          - name: AUTH_HANDLER_NAME
+            value: "AGENTIC"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHORITY
+            value: "https://login.microsoftonline.com/${TENANT_ID}"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHTYPE
+            value: FederatedCredentials
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID
+            value: "${BLUEPRINT_CLIENT_ID}"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID
+            value: "${UAMI_CLIENT_ID}"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__SCOPES
+            value: "https://graph.microsoft.com/.default"
+          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID
+            value: "${TENANT_ID}"
+          - name: CONNECTIONSMAP__0__SERVICEURL
+            value: "*"
+          - name: CONNECTIONSMAP__0__CONNECTION
+            value: "SERVICE_CONNECTION"
+          - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__TYPE
+            value: "AgenticUserAuthorization"
+          - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__SCOPES
+            value: "ea9ffc3e-8a23-4a7d-836d-234d7c7565c1/.default"
+          - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__ALT_BLUEPRINT_NAME
+            value: "SERVICE_CONNECTION"
+          - name: AGENTIC_INSTANCE_ID
+            value: "${AGENTIC_INSTANCE_ID}"
+          - name: AGENTIC_USER_ID
+            value: "${AGENTIC_USER_ID}"
+          # Assessment write-back
+          - name: ASSIGNEE_IN_PROGRESS
+            value: "${ASSIGNEE_IN_PROGRESS}"
+          - name: ASSIGNEE_RESOLVED
+            value: "${ASSIGNEE_RESOLVED}"
+          # Process-local execution bounds
+          - name: MAX_CONCURRENT_TRIAGE
+            value: "2"
+          - name: MAX_HUNTS_PER_INCIDENT
+            value: "5"
+          - name: TRIAGE_TIMEOUT_SECONDS
+            value: "300"
+          - name: TRIAGE_SHUTDOWN_TIMEOUT_SECONDS
+            value: "60"
+          - name: GRAPH_REQUEST_TIMEOUT_SECONDS
+            value: "60"
+          - name: GRAPH_MAX_ATTEMPTS
+            value: "4"
+          - name: TOKEN_REFRESH_BUFFER_SECONDS
+            value: "300"
+    scale:
+      # Work and checkpoints are intentionally process-local.
+      minReplicas: 1
+      maxReplicas: 1

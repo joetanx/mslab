@@ -28,6 +28,10 @@ dependencies = [
 
     # Observability using Microsoft Opentelemetry
     "microsoft-opentelemetry"
+
+    # Microsoft Graph SDK
+    "azure-core",
+    "msgraph-sdk",
 ]
 
 [build-system]

@@ -23,13 +23,6 @@ from microsoft_agents.hosting.core import (
     TurnContext,
     TurnState,
 )
-from microsoft_agents_a365.notifications import EmailResponse
-from microsoft_agents_a365.notifications.agent_notification import (
-    AgentNotification,
-    AgentNotificationActivity,
-    ChannelId,
-    NotificationTypes,
-)
 from microsoft.opentelemetry import use_microsoft_opentelemetry
 from microsoft.opentelemetry.a365.core import BaggageBuilder
 from microsoft.opentelemetry.a365.runtime import get_observability_authentication_scope
@@ -42,24 +35,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 agents_sdk_config = load_configuration_from_env(environ)
-_observability_token: str | None = None
-
-
-async def _setup_observability_token(context: TurnContext):
-    """Set the global observability token for Microsoft OpenTelemetry."""
-    global _observability_token
-    _observability_token = await get_token(
-        tenant_id = getattr(context.activity.recipient, "tenant_id"),
-        agent_id = getattr(context.activity.recipient, "agentic_app_id"),
-        agent_user = getattr(context.activity.recipient, "agentic_user_id"),
-        scopes=  get_observability_authentication_scope(),
-    )
-
-
-def _observability_token_resolver(agent_id: str, tenant_id: str) -> str | None:
-    return _observability_token
 
 
 class AgentHost:
@@ -67,12 +43,7 @@ class AgentHost:
 
     def __init__(self):
         """Initialize host services and register activity handlers."""
-        self.auth_handler_name = environ.get("AUTH_HANDLER_NAME", "") or None
-        if self.auth_handler_name:
-            logger.info(f"🔐 Using auth handler: {self.auth_handler_name}")
-        else:
-            logger.info("🔓 No auth handler configured (AUTH_HANDLER_NAME not set)")
-
+        self.auth_handler_name = environ.get("AUTH_HANDLER_NAME")
         self.storage = MemoryStorage()
         self.connection_manager = MsalConnectionManager(**agents_sdk_config)
         self.adapter = CloudAdapter(connection_manager=self.connection_manager)
@@ -85,43 +56,19 @@ class AgentHost:
             authorization=self.authorization,
             **agents_sdk_config,
         )
-        self.agent_notification = AgentNotification(self.agent_app)
-        self._setup_handlers()
+        self.setup_handlers()
         logger.info("✅ Notification handlers registered successfully")
+        self.observability_token: str | None = None
+        self.auth_configuration = AgentAuthConfiguration(
+            **agents_sdk_config["CONNECTIONS"]["SERVICE_CONNECTION"]["SETTINGS"],
+            scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
+        ) or None
+        logger.info("🔒 AgentAuthConfiguration initialized with FIC")
+        self.agent = LangChainAgent()
 
-    def _setup_handlers(self):
-        """Register conversation, message, installation, and notification handlers."""
+    def setup_handlers(self):
+        """Register handler for Teams messages."""
         handler_config = {"auth_handlers": [self.auth_handler_name]} if self.auth_handler_name else {}
-
-        async def help_handler(context: TurnContext, _: TurnState):
-            """Send a short help message for welcome and help activities."""
-            await context.send_activity(
-                f"👋 **Hi there!** I'm **{self.agent.__class__.__name__}**, your AI assistant.\n\n"
-                "How can I help you today?"
-            )
-
-        self.agent_app.conversation_update("membersAdded", **handler_config)(help_handler)
-        self.agent_app.message("/help", **handler_config)(help_handler)
-
-        @self.agent_app.activity("installationUpdate")
-        async def on_installation_update(context: TurnContext, _: TurnState):
-            """Handle agent installation and removal updates."""
-            action = context.activity.action
-            from_prop = context.activity.from_property
-            logger.info(
-                "InstallationUpdate received — Action: '%s', DisplayName: '%s', UserId: '%s'",
-                action or "(none)",
-                getattr(from_prop, "name", "(unknown)") if from_prop else "(unknown)",
-                getattr(from_prop, "id", "(unknown)") if from_prop else "(unknown)",
-            )
-            if action == "add":
-                await context.send_activity(
-                    "Thank you for hiring me! Looking forward to assisting you in your professional journey!"
-                )
-            elif action == "remove":
-                await context.send_activity(
-                    "Thank you for your time, I enjoyed working with you."
-                )
 
         @self.agent_app.activity("message", **handler_config)
         async def on_message(context: TurnContext, _: TurnState):
@@ -129,71 +76,28 @@ class AgentHost:
             try:
                 tenant_id = getattr(context.activity.recipient, "tenant_id")
                 agent_id = getattr(context.activity.recipient, "agentic_app_id")
-                await _setup_observability_token(context)
+                self.observability_token = await get_token(
+                    tenant_id=getattr(context.activity.recipient, "tenant_id"),
+                    agent_id=getattr(context.activity.recipient, "agentic_app_id"),
+                    agent_user=getattr(context.activity.recipient, "agentic_user_id"),
+                    scopes=get_observability_authentication_scope(),
+                )
                 with BaggageBuilder().tenant_id(tenant_id).agent_id(agent_id).build():
-                    user_message = (context.activity.text or "").strip()
-                    if not user_message or user_message == "/help":
-                        return
-                    logger.info(f"📨 {getattr(context.activity, 'channel_id')}: {user_message}")
-                    response = await self.agent.process_user_message(
-                        user_message, self.agent_app.auth, self.auth_handler_name, context
-                    )
+                    logger.info(f"📨 {getattr(context.activity, 'channel_id')}: {context.activity.text}")
+                    response = await self.agent.process_user_message(context.activity.text, context)
                     await context.send_activity(response)
             except Exception as e:
                 logger.error(f"❌ Error: {e}")
                 await context.send_activity(f"Sorry, I encountered an error: {str(e)}")
 
-        @self.agent_notification.on_agent_notification(
-            channel_id=ChannelId(channel="agents", sub_channel="*"),
-            **handler_config,
-        )
-        async def on_notification(
-            context: TurnContext,
-            state: TurnState,
-            notification_activity: AgentNotificationActivity,
-        ):
-            """Handle incoming Microsoft 365 notification activities."""
-            try:
-                tenant_id = getattr(context.activity.recipient, "tenant_id")
-                agent_id = getattr(context.activity.recipient, "agentic_app_id")
-                await _setup_observability_token(context)
-                with BaggageBuilder().tenant_id(tenant_id).agent_id(agent_id).build():
-                    logger.info(f"📬 {notification_activity.notification_type}")
-                    response = await self.agent.handle_agent_notification_activity(
-                        notification_activity, self.agent_app.auth, self.auth_handler_name, context
-                    )
-                    if notification_activity.notification_type == NotificationTypes.EMAIL_NOTIFICATION:
-                        response_activity = EmailResponse.create_email_response_activity(response)
-                        await context.send_activity(response_activity)
-                        return
-                    await context.send_activity(response)
-            except Exception as e:
-                logger.error(f"❌ Notification error: {e}")
-                await context.send_activity(
-                    f"Sorry, I encountered an error processing the notification: {str(e)}"
-                )
-
-    async def initialize_agent(self):
-        """Create and initialize the agent instance on application startup."""
-        self.agent = LangChainAgent()
-
-    def create_auth_configuration(self) -> AgentAuthConfiguration | None:
-        """Create the authentication configuration used by the host."""
-        service_settings = agents_sdk_config["CONNECTIONS"]["SERVICE_CONNECTION"]["SETTINGS"]
-        logger.info("🔒 AgentAuthConfiguration initialized with FIC")
-        return AgentAuthConfiguration(
-            **service_settings,
-            scopes=["5a807f24-c9de-44ee-a3a7-329e88a00ffc/.default"],
-        )
-
-    def start_server(self, auth_configuration: AgentAuthConfiguration | None = None):
+    def start_server(self):
         """Build and run the aiohttp server for agent traffic."""
 
         async def entry_point(req: Request) -> Response:
             """Forward message requests into the Microsoft Agents adapter."""
             return await start_agent_process(req, req.app["agent_app"], req.app["adapter"])
 
-        async def health(_req: Request) -> Response:
+        async def health(req: Request) -> Response:
             """Return the health state of the hosted agent."""
             return json_response(
                 {
@@ -204,7 +108,7 @@ class AgentHost:
             )
 
         middlewares = []
-        if auth_configuration:
+        if self.auth_configuration:
 
             @web_middleware
             async def jwt_with_health_bypass(request, handler):
@@ -218,7 +122,7 @@ class AgentHost:
         @web_middleware
         async def anonymous_claims(request, handler):
             """Inject anonymous claims when authentication is disabled."""
-            if not auth_configuration:
+            if not self.auth_configuration:
                 request["claims_identity"] = ClaimsIdentity(
                     {
                         AuthenticationConstants.AUDIENCE_CLAIM: "anonymous",
@@ -236,12 +140,21 @@ class AgentHost:
         app.router.add_get("/api/messages", lambda _: Response(status=200))
         app.router.add_get("/api/health", health)
 
-        app["agent_configuration"] = auth_configuration
+        app["agent_configuration"] = self.auth_configuration
         app["agent_app"] = self.agent_app
         app["adapter"] = self.agent_app.adapter
 
-        app.on_startup.append(lambda app: self.initialize_agent())
-        app.on_shutdown.append(lambda app: self.cleanup())
+        use_microsoft_opentelemetry(
+            enable_a365=True,
+            a365_token_resolver=lambda agent_id, tenant_id: self.observability_token,
+            instrumentation_options={
+                "openai": {"enabled": False},
+                "openai_agents": {"enabled": False},
+                "langchain": {"enabled": True},
+                "semantic_kernel": {"enabled": False},
+                "agent_framework": {"enabled": False},
+            },
+        )
 
         print("▶️ Starting agent server...")
         run_app(
@@ -252,26 +165,11 @@ class AgentHost:
         )
         print("👋 Agent server stopped") # run_app is blocking, so this prints after server is stopped
 
-    async def cleanup(self):
-        """Clean up the hosted agent instance during shutdown."""
-        await self.agent.cleanup()
-
 
 def main() -> None:
     """Configure observability and start the HTTP host."""
-    use_microsoft_opentelemetry(
-        enable_a365=True,
-        a365_token_resolver=_observability_token_resolver,
-        instrumentation_options={
-            "openai": {"enabled": False},
-            "openai_agents": {"enabled": False},
-            "langchain": {"enabled": True},
-            "semantic_kernel": {"enabled": False},
-            "agent_framework": {"enabled": False},
-        },
-    )
     host = AgentHost()
-    host.start_server(host.create_auth_configuration())
+    host.start_server()
 
 
 if __name__ == "__main__":

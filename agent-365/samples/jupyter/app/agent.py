@@ -3,20 +3,16 @@
 import logging
 from datetime import datetime
 from os import environ
-from typing import Optional
 
 from langchain.agents import create_agent
 from langchain.agents.middleware import AgentState, before_model
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, trim_messages
 from langchain_core.tools import BaseTool, tool
-from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.checkpoint.memory import InMemorySaver
 from azure.identity import ManagedIdentityCredential
-from microsoft_agents.hosting.core import Authorization, TurnContext
-from microsoft_agents_a365.notifications.agent_notification import NotificationTypes
+from microsoft_agents.hosting.core import TurnContext
 
-from token_manager import get_token
 from graph_tools import create_graph_security_tools
 
 logger = logging.getLogger(__name__)
@@ -75,7 +71,7 @@ class LangChainAgent:
         logger.info("✅ LangChain agent created with %d tools", len(tools))
         return agent
 
-    async def _setup_tools(self, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext):
+    async def _setup_tools(self):
         """Attach Graph and configured MCP tools."""
         tools = list(self.initial_tools)
 
@@ -88,9 +84,7 @@ class LangChainAgent:
 
         self.agent = self._create_agent(tools)
 
-    async def process_user_message(
-        self, message: str, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
-    ) -> str:
+    async def process_user_message(self, message: str, context: TurnContext) -> str:
         """Run a user message through the agent and return its response."""
         from_prop = context.activity.from_property
         logger.info(
@@ -101,66 +95,15 @@ class LangChainAgent:
         )
 
         try:
-            await self._setup_tools(auth, auth_handler_name, context)
-            result = await self._invoke(message, context)
+            await self._setup_tools()
+            result = await self.agent.ainvoke(
+                {"messages": [HumanMessage(content=message)]},
+                config={"configurable": {"thread_id": self._get_thread_id(context)}},
+            )
             return self._extract_result(result) or "I couldn't process your request at this time."
         except Exception as e:
             logger.error(f"Error processing message: {e}")
             return f"Sorry, I encountered an error: {str(e)}"
-
-    async def handle_agent_notification_activity(
-        self, notification_activity, auth: Authorization, auth_handler_name: Optional[str], context: TurnContext
-    ) -> str:
-        """Process a Microsoft 365 notification activity through the agent."""
-        try:
-            notification_type = notification_activity.notification_type
-            logger.info(f"📬 Processing notification: {notification_type}")
-
-            await self._setup_tools(auth, auth_handler_name, context)
-
-            if notification_type == NotificationTypes.EMAIL_NOTIFICATION:
-                if not hasattr(notification_activity, "email") or not notification_activity.email:
-                    return "I could not find the email notification details."
-
-                email = notification_activity.email
-                email_body = getattr(email, "html_body", "") or getattr(email, "body", "")
-
-                result = await self._invoke(email_body, context)
-                return self._extract_result(result) or "Email notification processed."
-
-            elif notification_type == NotificationTypes.WPX_COMMENT:
-                if not hasattr(notification_activity, "wpx_comment") or not notification_activity.wpx_comment:
-                    return "I could not find the Word notification details."
-
-                wpx = notification_activity.wpx_comment
-                doc_id = getattr(wpx, "document_id", "")
-                comment_id = getattr(wpx, "initiating_comment_id", "")
-                drive_id = "default"
-
-                doc_message = f"You have a new comment on the Word document with id '{doc_id}', comment id '{comment_id}', drive id '{drive_id}'. Please retrieve the Word document as well as the comments and return it in text format."
-                doc_result = await self._invoke(doc_message, context)
-                word_content = self._extract_result(doc_result)
-
-                comment_text = notification_activity.text or ""
-                response_message = f"You have received the following Word document content and comments. Please refer to these when responding to comment '{comment_text}'. {word_content}"
-                result = await self._invoke(response_message, context)
-                return self._extract_result(result) or "Word notification processed."
-
-            else:
-                notification_message = notification_activity.text or f"Notification received: {notification_type}"
-                result = await self._invoke(notification_message, context)
-                return self._extract_result(result) or "Notification processed successfully."
-
-        except Exception as e:
-            logger.error(f"Error processing notification: {e}")
-            return f"Sorry, I encountered an error processing the notification: {str(e)}"
-
-    async def _invoke(self, message: str, context: TurnContext):
-        """Invoke the agent within the checkpointed conversation thread."""
-        return await self.agent.ainvoke(
-            {"messages": [HumanMessage(content=message)]},
-            config={"configurable": {"thread_id": self._get_thread_id(context)}},
-        )
 
     def _get_thread_id(self, context: TurnContext) -> str:
         """Return a stable checkpoint namespace for the current conversation."""
@@ -208,6 +151,3 @@ class LangChainAgent:
                     text_parts.append(part["text"])
             return "\n".join(text_parts)
         return str(content)
-
-    async def cleanup(self) -> None:
-        """MCP connections are managed by the adapter."""

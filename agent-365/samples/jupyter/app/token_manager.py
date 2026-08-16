@@ -1,9 +1,7 @@
 import logging, jwt
 from os import environ
-from datetime import date, datetime, timedelta, timezone
 import time
-from typing import Any, Sequence
-from enum import Enum
+from typing import Sequence
 from microsoft_agents.activity import load_configuration_from_env
 from microsoft_agents.authentication.msal import MsalConnectionManager
 
