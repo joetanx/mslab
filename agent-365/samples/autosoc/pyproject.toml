@@ -1,24 +1,30 @@
 [project]
-name = "autosoc"
+name = "autosoc-langgraph-sample"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-    "aiohttp>=3.11,<4",
-    "azure-identity>=1.19,<2",
-    "langchain>=1.2,<2",
-    "langchain-azure-ai>=1.0,<2",
-    "langgraph>=1.0,<2",
-    "microsoft-agents-activity",
-    "microsoft-agents-authentication-msal",
-    "msgraph-sdk>=1.38,<2",
-    "pydantic>=2.10,<3",
-    "pyjwt[crypto]>=2.10,<3",
-]
+    # LangChain and LangGraph
+    "langchain",
+    "langchain-core",
+    "langgraph",
+    "langchain-azure-ai",
 
-[project.optional-dependencies]
-test = [
-    "pytest>=8.3,<10",
-    "pytest-asyncio>=0.25,<2",
+    # Microsoft Agents SDK - Official packages for hosting and integration
+    "microsoft-agents-hosting-aiohttp",
+    "microsoft-agents-hosting-core",
+    "microsoft-agents-authentication-msal",
+    "microsoft-agents-activity",
+
+    # Azure SDK components
+    "azure-identity",
+
+    # Core dependencies
+    "aiohttp",
+    "PyJWT",
+
+    # Microsoft Graph SDK
+    "azure-core",
+    "msgraph-sdk",
 ]
 
 [build-system]
@@ -27,8 +33,3 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
-
-[tool.pytest.ini_options]
-asyncio_mode = "auto"
-pythonpath = ["app"]
-testpaths = ["tests"]

@@ -7,6 +7,7 @@
 | [Agent Framework](agent-framework) | Deployable Microsoft Agent Framework agent with Agent 365 MCP tooling. |
 | [LangChain](langchain) | Deployable LangChain agent with Agent 365 MCP tooling through `langchain-mcp-adapters`. |
 | [Jupyter](jupyter) | Jupyter-based LangChain development sandbox with Microsoft Graph security tools. |
+| [AutoSOC](autosoc) | Autonomous Defender incident triage with a checkpointed LangGraph workflow. |
 | [Sentinel MCP](sentinel-mcp) | Reference LangChain host that connects directly to Microsoft Sentinel data exploration and Defender triage MCP servers. |
 
 The shared deployment procedure below applies to samples that include `containerapp.yaml`, `Dockerfile`, `pyproject.toml`, and an `app` directory. The Jupyter sample has its own deployment guide, while Sentinel MCP is currently a source-only reference.

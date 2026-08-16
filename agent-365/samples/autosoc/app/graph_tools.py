@@ -1,269 +1,64 @@
-"""Bounded Microsoft Graph Security operations used by the triage graph."""
-
 import asyncio
-import logging
-import random
-from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
-from datetime import date, datetime
-from enum import Enum
+import logging, json
 from os import environ
-from typing import Any, TypeVar
+from datetime import date, datetime, timedelta, timezone
+from typing import Annotated, Optional, Any
+from pydantic import Field
+from enum import Enum
+from token_manager import get_token
+from langchain_core.tools import BaseTool, tool
 
-import jwt
+# base graph client dependencies
 from azure.core.credentials import AccessToken
-from kiota_abstractions.api_error import APIError
-from kiota_abstractions.base_request_configuration import RequestConfiguration
 from msgraph import GraphServiceClient
-from msgraph.generated.models.security.alert_classification import AlertClassification
+
+# to synthesize query parameters for list incidents and list alerts
+from kiota_abstractions.base_request_configuration import RequestConfiguration
+from msgraph.generated.security.incidents.incidents_request_builder import IncidentsRequestBuilder
+from msgraph.generated.security.alerts_v2.alerts_v2_request_builder import Alerts_v2RequestBuilder
+
+# to synthesize request body for run hunting query
+from msgraph.generated.security.microsoft_graph_security_run_hunting_query.run_hunting_query_post_request_body import RunHuntingQueryPostRequestBody
+
+# comments for incident are actually of AlertComment type
 from msgraph.generated.models.security.alert_comment import AlertComment
-from msgraph.generated.models.security.alert_determination import AlertDetermination
+
+# use for updating incident
 from msgraph.generated.models.security.incident import Incident
 from msgraph.generated.models.security.incident_status import IncidentStatus
-from msgraph.generated.security.microsoft_graph_security_run_hunting_query.run_hunting_query_post_request_body import (
-    RunHuntingQueryPostRequestBody,
-)
-
-from token_manager import get_token
-
+from msgraph.generated.models.security.alert_classification import AlertClassification
+from msgraph.generated.models.security.alert_determination import AlertDetermination
 
 logger = logging.getLogger(__name__)
-ResultT = TypeVar("ResultT")
-INCIDENT_COMMENT_MAX_LENGTH = 1_000
-
-
-class GraphSecurityError(Exception):
-    """Raised when a bounded Graph operation cannot be completed."""
-
-
-@dataclass
-class AlertsQueryParameters:
-    """OData parameters needed when listing incident alerts."""
-
-    filter: str | None = None
-    top: int | None = None
-
-    def get_query_parameter(self, original_name: str) -> str:
-        return {"filter": "%24filter", "top": "%24top"}.get(
-            original_name, original_name
-        )
 
 
 class RawAccessTokenProvider:
-    """Expose an exchanged agent-user token through the Azure credential contract."""
+    """A credential provider that returns a raw access token for the SDK."""
+    def __init__(self, token: str):
+        self.token = token
 
-    def __init__(self, token: str) -> None:
-        self._token = token
-
+    # The SDK calls get_token to retrieve the active Bearer token
     def get_token(self, *scopes, **kwargs) -> AccessToken:
-        payload = jwt.decode(
-            self._token,
-            options={"verify_signature": False},
-        )
-        return AccessToken(self._token, expires_on=int(payload["exp"]))
+        # Provide token string and an arbitrary future expiration timestamp (in seconds)
+        return AccessToken(self.token, expires_on=int((datetime.now().astimezone() + timedelta(hours=1)).timestamp()))
 
 
-class GraphSecurityClient:
-    """Narrow Graph client owned by the AutoSOC process."""
+async def _get_graph_client() -> GraphServiceClient:
+    """Get a token for Microsoft Graph API using MSAL, and return a GraphServiceClient instance."""
 
-    def __init__(
-        self,
-        *,
-        request_timeout_seconds: float | None = None,
-        max_attempts: int | None = None,
-        graph_client: GraphServiceClient | None = None,
-    ) -> None:
-        self._client = graph_client
-        self._injected_client = graph_client is not None
-        self._client_token: str | None = None
-        self._tenant_id = environ.get(
-            "CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID"
-        )
-        self._agent_id = environ.get("AGENTIC_INSTANCE_ID")
-        self._agent_user = environ.get("AGENTIC_USER_ID")
-        self._request_timeout_seconds = request_timeout_seconds or float(
-            environ.get("GRAPH_REQUEST_TIMEOUT_SECONDS", "60")
-        )
-        self._max_attempts = max_attempts or int(environ.get("GRAPH_MAX_ATTEMPTS", "4"))
-
-    async def get_incident(self, incident_id: str) -> dict[str, Any]:
-        """Fetch one incident and return a JSON-compatible bounded representation."""
-        client = await self._get_client()
-        response = await self._execute(
-            "get_incident",
-            lambda: client.security.incidents.by_incident_id(incident_id).get(),
-        )
-        if response is None:
-            raise GraphSecurityError(f"Incident {incident_id} was not found")
-        return _json_value(response)
-
-    async def list_incident_alerts(
-        self,
-        incident_id: str,
-        *,
-        limit: int = 100,
-    ) -> list[dict[str, Any]]:
-        """Fetch alerts associated with an incident, bounded before graph state."""
-        if not 1 <= limit <= 200:
-            raise ValueError("limit must be between 1 and 200")
-        query_params = AlertsQueryParameters(
-            filter=f"incidentId eq '{_odata_literal(incident_id)}'",
-            top=limit,
-        )
-        client = await self._get_client()
-        response = await self._execute(
-            "list_incident_alerts",
-            lambda: client.security.alerts_v2.get(
-                request_configuration=RequestConfiguration(query_parameters=query_params)
-            ),
-        )
-        return [_json_value(alert) for alert in (response.value or [])[:limit]]
-
-    async def run_hunting_query(
-        self,
-        query: str,
-        timespan: str,
-        *,
-        result_limit: int = 100,
-    ) -> list[dict[str, Any]]:
-        """Run one catalog query and bound rows returned to a hunt worker."""
-        if not query.strip() or len(query) > 50_000:
-            raise ValueError("query must contain between 1 and 50000 characters")
-        if not 1 <= result_limit <= 200:
-            raise ValueError("result_limit must be between 1 and 200")
-        client = await self._get_client()
-        request_body = RunHuntingQueryPostRequestBody(query=query, timespan=timespan)
-        response = await self._execute(
-            "run_hunting_query",
-            lambda: client.security.microsoft_graph_security_run_hunting_query.post(
-                request_body
-            ),
-        )
-        rows = response.results or []
-        return [_json_value(row) for row in rows[:result_limit]]
-
-    async def add_incident_comment(self, incident_id: str, comment: str) -> None:
-        """Add one bounded triage report to an incident."""
-        comment = comment.strip()
-        if not comment:
-            raise ValueError("comment is required")
-        client = await self._get_client()
-        request_body = AlertComment(
-            odata_type=None,
-            comment=comment[:INCIDENT_COMMENT_MAX_LENGTH],
-        )
-        url = f"https://graph.microsoft.com/v1.0/security/incidents/{incident_id}/comments"
-        await self._execute(
-            "add_incident_comment",
-            lambda: client.security.incidents.with_url(url).post(request_body),
-        )
-
-    async def update_incident(
-        self,
-        incident_id: str,
-        *,
-        status: str,
-        classification: str,
-        determination: str,
-        assigned_to: str | None,
-        resolving_comment: str | None = None,
-    ) -> None:
-        """Apply a validated assessment decision to an incident."""
-        body = Incident(
-            status=_parse_enum(IncidentStatus, status),
-            classification=_parse_enum(AlertClassification, classification),
-            determination=_parse_enum(AlertDetermination, determination),
-            assigned_to=assigned_to,
-            resolving_comment=resolving_comment[:4_000] if resolving_comment else None,
-        )
-        client = await self._get_client()
-        await self._execute(
-            "update_incident",
-            lambda: client.security.incidents.by_incident_id(incident_id).patch(body),
-        )
-
-    async def close(self) -> None:
-        """Release resources owned by this wrapper."""
-
-    async def _get_client(self) -> GraphServiceClient:
-        if self._injected_client:
-            return self._client
-        token = await get_token(
-            tenant_id=self._tenant_id,
-            agent_id=self._agent_id,
-            agent_user=self._agent_user,
-            scopes=["https://graph.microsoft.com/.default"],
-        )
-        if self._client is None or token != self._client_token:
-            self._client = GraphServiceClient(credentials=RawAccessTokenProvider(token))
-            self._client_token = token
-        return self._client
-
-    async def _execute(
-        self,
-        operation_name: str,
-        operation: Callable[[], Awaitable[ResultT]],
-    ) -> ResultT:
-        last_error: Exception | None = None
-        for attempt in range(1, self._max_attempts + 1):
-            try:
-                return await asyncio.wait_for(
-                    operation(),
-                    timeout=self._request_timeout_seconds,
-                )
-            except APIError as exc:
-                last_error = exc
-                if not _is_transient(exc) or attempt == self._max_attempts:
-                    break
-                delay = _retry_delay(exc, attempt)
-            except TimeoutError as exc:
-                last_error = exc
-                if attempt == self._max_attempts:
-                    break
-                delay = min(2 ** (attempt - 1), 8) + random.random()
-
-            logger.warning(
-                "Transient Graph failure operation=%s attempt=%d/%d retry_seconds=%.2f",
-                operation_name,
-                attempt,
-                self._max_attempts,
-                delay,
-            )
-            await asyncio.sleep(delay)
-
-        raise GraphSecurityError(f"Graph operation {operation_name} failed") from last_error
-
-
-def _is_transient(error: APIError) -> bool:
-    status = error.response_status_code
-    return status == 429 or (status is not None and 500 <= status < 600)
-
-
-def _retry_delay(error: APIError, attempt: int) -> float:
-    headers = error.response_headers or {}
-    retry_after = headers.get("Retry-After") or headers.get("retry-after")
-    if retry_after:
-        try:
-            return min(float(retry_after), 30.0)
-        except ValueError:
-            pass
-    return min(2 ** (attempt - 1), 8) + random.random()
-
-
-def _odata_literal(value: str) -> str:
-    return value.replace("'", "''")
-
-
-def _parse_enum(enum_type: type[Enum], value: str) -> Enum:
-    normalized = value.strip().lower()
-    for member in enum_type:
-        if member.name.lower() == normalized or str(member.value).lower() == normalized:
-            return member
-    choices = ", ".join(str(member.value) for member in enum_type)
-    raise ValueError(f"Invalid {enum_type.__name__} '{value}'. Expected one of: {choices}")
+    graph_token = await get_token(
+        tenant_id=environ.get("CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID"),
+        agent_id=environ.get("AGENTIC_INSTANCE_ID"),
+        agent_user=environ.get("AGENTIC_USER_ID"),
+        scopes=["https://graph.microsoft.com/.default"],
+    )
+    return GraphServiceClient(
+        RawAccessTokenProvider(graph_token)
+    )
 
 
 def _json_value(value: Any) -> Any:
+    """Convert Graph SDK response values to JSON-compatible data."""
     if value is None or isinstance(value, (str, int, float, bool)):
         return value
     if isinstance(value, Enum):
@@ -275,6 +70,10 @@ def _json_value(value: Any) -> Any:
     if isinstance(value, (list, tuple, set)):
         return [_json_value(item) for item in value]
 
+    additional_data = getattr(value, "additional_data", None)
+    if additional_data:
+        return _json_value(additional_data)
+
     backing_store = getattr(value, "backing_store", None)
     if backing_store and hasattr(backing_store, "enumerate_"):
         return {
@@ -282,9 +81,151 @@ def _json_value(value: Any) -> Any:
             for key, item in backing_store.enumerate_()
             if item is not None and key != "additional_data"
         }
-    data = getattr(value, "additional_data", None)
-    if data:
-        return _json_value(data)
+
     return str(value)
 
 
+def _response_json(value: Any) -> str:
+    return json.dumps(_json_value(value), indent=2, ensure_ascii=True)
+
+
+def _parse_enum(enum_type: type[Enum], value: str) -> Enum:
+    normalized = value.strip().lower()
+    for member in enum_type:
+        if member.name.lower() == normalized or str(member.value).lower() == normalized:
+            return member
+    choices = ", ".join(str(member.value) for member in enum_type)
+    raise ValueError(f"Invalid {enum_type.__name__} '{value}'. Expected one of: {choices}")
+
+
+async def create_graph_security_tools() -> list[BaseTool]:
+    """Create Graph security tools bound to a user's delegated access token."""
+
+    graph_client = await _get_graph_client()
+
+    @tool
+    async def get_incident_with_alerts(
+        incident_id: Annotated[str, Field(description='Incident ID')]
+    ) -> str:
+        """Get one Microsoft security incident and its associated alerts."""
+        attempts = int(environ.get("INCIDENT_FETCH_ATTEMPTS", "5"))
+        delay = int(environ.get("INCIDENT_FETCH_DELAY_SECONDS", "15"))
+        for attempt in range(1, attempts + 1):
+            try:
+                incident = await graph_client.security.incidents.by_incident_id(incident_id).get()
+                query_params = Alerts_v2RequestBuilder.Alerts_v2RequestBuilderGetQueryParameters(
+                    filter=f"incidentId eq '{incident_id}'",
+                )
+                alerts = await graph_client.security.alerts_v2.get(
+                    request_configuration=RequestConfiguration(query_parameters=query_params)
+                )
+                return _response_json({
+                    "incident": incident,
+                    "alerts": alerts.value or [],
+                })
+            except Exception:
+                if attempt == attempts:
+                    raise
+                wait_seconds = min(delay * (2 ** (attempt - 1)), 60)
+                logger.warning(
+                    "Incident fetch failed incident_id=%s attempt=%d/%d; retrying in %ds",
+                    incident_id,
+                    attempt,
+                    attempts,
+                    wait_seconds,
+                )
+                await asyncio.sleep(wait_seconds)
+
+    @tool
+    async def list_incidents(
+        hours: Annotated[Optional[int], Field(description='Number of hours to look back from now')] = 24,
+        limit: Annotated[Optional[int], Field(description='Maximum number of incidents to return')] = 10
+    ) -> str:
+        """List Microsoft security incidents created within the last number of hours."""
+        if hours < 1:
+            raise ValueError("hours must be at least 1")
+        if not 1 <= limit <= 100:
+            raise ValueError("limit must be between 1 and 100")
+
+        created_after = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+        query_params = IncidentsRequestBuilder.IncidentsRequestBuilderGetQueryParameters(
+            filter=f"createdDateTime ge {created_after}",
+            top=limit,
+        )
+        response = await graph_client.security.incidents.get(
+            request_configuration=RequestConfiguration(query_parameters=query_params)
+        )
+        return _response_json(response.value or [])
+
+    @tool
+    async def list_alerts_associated_with_incident(
+        incident_id: Annotated[str, Field(description='Incident ID')]
+    ) -> str:
+        """List Microsoft security alerts associated with a security incident ID."""
+        query_params = Alerts_v2RequestBuilder.Alerts_v2RequestBuilderGetQueryParameters(
+            filter=f"incidentId eq '{incident_id}'",
+        )
+        response = await graph_client.security.alerts_v2.get(
+            request_configuration=RequestConfiguration(query_parameters=query_params)
+        )
+        return _response_json(response.value or [])
+
+    @tool
+    async def run_hunting_query(
+        query: Annotated[str, Field(description='KQL threat-hunting query')],
+        timespan: Annotated[Optional[str], Field(description='ISO 8601 duration (e.g., P30D, PT48H, PT30M)')] = 'P7D'
+    ) -> str:
+        """Run a KQL threat-hunting query."""
+        request_body = RunHuntingQueryPostRequestBody(query=query, timespan=timespan)
+        response = await graph_client.security.microsoft_graph_security_run_hunting_query.post(request_body)
+        return _response_json(response.results or [])
+
+    @tool
+    async def add_incident_comment(
+        incident_id: Annotated[str, Field(description='Incident ID')],
+        comment: Annotated[str, Field(description='Comment to be added')]
+    ) -> str:
+        """Add a comment to a Microsoft security incident."""
+        request_body = AlertComment(odata_type=None, comment=comment)
+        url = f"https://graph.microsoft.com/v1.0/security/incidents/{incident_id}/comments"
+        await graph_client.security.incidents.with_url(url).post(request_body)
+        return f"Comment added to incident {incident_id}."
+
+    @tool
+    async def update_incident(
+        incident_id: Annotated[str, Field(description='Incident ID')],
+        status: Annotated[Optional[str], Field(description='Incident status; options: active, inProgress, resolved, redirected')] = None,
+        assigned_to: Annotated[Optional[str], Field(description='User/group to be assigned to')] = None,
+        classification: Annotated[Optional[str], Field(description='Classification of the incident; options: falsePositive, truePositive, informationalExpectedActivity')] = None,
+        determination: Annotated[Optional[str], Field(description='Details to incident classification; options: unknown, apt, malware, securityPersonnel, securityTesting, unwantedSoftware, other, multiStagedAttack, compromisedAccount, phishing, maliciousUserActivity, notMalicious, notEnoughDataToValidate, confirmedUserActivity, lineOfBusinessApplication')] = None,
+        custom_tags: Annotated[Optional[list[str]], Field(description='Custom tags for the incident')] = None,
+        resolving_comment: Annotated[Optional[str], Field(description='Comment to explain the resolution of the incident and the classification choice')] = None,
+    ) -> str:
+        """Update fields on a Microsoft security incident, omitted fields remain unchanged."""
+        updates: dict[str, Any] = {}
+        if status is not None:
+            updates["status"] = _parse_enum(IncidentStatus, status)
+        if assigned_to is not None:
+            updates["assigned_to"] = assigned_to
+        if classification is not None:
+            updates["classification"] = _parse_enum(AlertClassification, classification)
+        if determination is not None:
+            updates["determination"] = _parse_enum(AlertDetermination, determination)
+        if custom_tags is not None:
+            updates["custom_tags"] = custom_tags
+        if resolving_comment is not None:
+            updates["resolving_comment"] = resolving_comment
+        if not updates:
+            raise ValueError("Provide at least one incident field to update.")
+
+        response = await graph_client.security.incidents.by_incident_id(incident_id).patch(Incident(**updates))
+        return _response_json(response) if response else f"Incident {incident_id} updated."
+
+    return [
+        get_incident_with_alerts,
+        list_incidents,
+        list_alerts_associated_with_incident,
+        run_hunting_query,
+        add_incident_comment,
+        update_incident,
+    ]

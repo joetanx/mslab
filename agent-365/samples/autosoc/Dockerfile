@@ -34,9 +34,12 @@ RUN groupadd --system app && useradd --system --gid app --home /app app
 
 WORKDIR /app
 
+# 1. Copy the virtual environment from the builder stage
+# 2. Automatically change ownership to the non-root user
 COPY --from=builder --chown=app:app /opt/venv /opt/venv
 
-# Application files are supplied by the Azure Files volume mounted at /app.
+# Copy application code (keep commented if mounting from volume)
+# COPY --chown=app:app . .
 
 # Switch away from root to the non-root application user
 USER app
@@ -47,5 +50,5 @@ EXPOSE 3978
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD python -c "import urllib.request; from os import environ; urllib.request.urlopen('http://localhost:'+environ.get('PORT', '3978')+'/api/health', timeout=5)"
 
-# Entrypoint serves the mounted application files.
+# Entrypoint binds 0.0.0.0:$PORT and serves /api/messages + /api/health.
 CMD ["python", "server.py"]
