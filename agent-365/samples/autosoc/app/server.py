@@ -12,7 +12,11 @@ from aiohttp.web_middlewares import middleware as web_middleware
 from microsoft_agents.activity import load_configuration_from_env
 from microsoft_agents.hosting.aiohttp import jwt_authorization_middleware
 from microsoft_agents.hosting.core import AgentAuthConfiguration
+from microsoft.opentelemetry import use_microsoft_opentelemetry
+from microsoft.opentelemetry.a365.core import BaggageBuilder
+from microsoft.opentelemetry.a365.runtime import get_observability_authentication_scope
 
+from token_manager import get_token
 from agent import AutoSOCAgent
 
 logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler(sys.stdout)])
@@ -39,6 +43,7 @@ class AutoSOCHost:
         }
         if not self.allowed_callers:
             raise ValueError("TRIAGE_ALLOWED_CALLER_APP_IDS must contain the Logic App identity client ID")
+        self.observability_token: str | None = None
         self.agent = AutoSOCAgent()
         self.tasks: dict[str, asyncio.Task] = {}
         logger.info("AutoSOC bearer validation configured scope=%s", token_scope)
@@ -94,7 +99,17 @@ class AutoSOCHost:
 
     async def _run_triage(self, incident_id: str, thread_id: str) -> None:
         try:
-            await self.agent.triage(incident_id, thread_id)
+            tenant_id=environ.get("CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID")
+            agent_id=environ.get("AGENTIC_INSTANCE_ID")
+            agent_user=environ.get("AGENTIC_USER_ID")
+            self.observability_token = await get_token(
+                tenant_id=tenant_id,
+                agent_id=agent_id,
+                agent_user=agent_user,
+                scopes=get_observability_authentication_scope(),
+            )
+            with BaggageBuilder().tenant_id(tenant_id).agent_id(agent_id).build():
+                await self.agent.triage(incident_id, thread_id)
         except asyncio.CancelledError:
             logger.warning("Triage cancelled incident_id=%s", incident_id)
             raise
@@ -151,6 +166,17 @@ class AutoSOCHost:
 
     def run(self) -> None:
         """Run the AutoSOC web service."""
+        use_microsoft_opentelemetry(
+            enable_a365=True,
+            a365_token_resolver=lambda agent_id, tenant_id: self.observability_token,
+            instrumentation_options={
+                "openai": {"enabled": False},
+                "openai_agents": {"enabled": False},
+                "langchain": {"enabled": True},
+                "semantic_kernel": {"enabled": False},
+                "agent_framework": {"enabled": False},
+            },
+        )
         run_app(
             self.create_app(),
             host=environ.get("HOST", "0.0.0.0"),
