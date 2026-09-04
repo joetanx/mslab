@@ -10,6 +10,7 @@ from langchain.agents.middleware import AgentState, before_model
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, trim_messages
 from langchain_core.tools import BaseTool, tool
+from langchain_azure_ai.tools.builtin import WebSearchTool
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.checkpoint.memory import InMemorySaver
 from azure.identity import ManagedIdentityCredential
@@ -60,7 +61,10 @@ class LangChainAgent:
         """Create the chat model, agent, and supporting services."""
         self.model = self._create_model()
         self.checkpointer = InMemorySaver()
-        self.initial_tools = [get_current_system_time]
+        self.initial_tools = [
+            get_current_system_time,
+            WebSearchTool(search_context_size="high"),
+        ]
         self.agent = self._create_agent(self.initial_tools)
 
     def _create_model(self):

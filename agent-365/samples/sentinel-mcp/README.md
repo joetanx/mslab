@@ -1,13 +1,21 @@
 # Sentinel MCP sample agent
 
-This source-only reference hosts a LangChain agent through Microsoft Agents SDK and connects directly to two Microsoft Sentinel MCP servers:
+This source-only reference hosts a LangChain agent through Microsoft Agents SDK, provides Microsoft Foundry web search, and connects directly to two Microsoft Sentinel MCP servers:
 
 | Server | Endpoint | Delegated scope |
 | --- | --- | --- |
 | Data exploration | `https://sentinel.microsoft.com/mcp/data-exploration` | `4500ebfb-89b6-4b14-a480-7f749797bfcd/SentinelPlatform.DelegatedAccess` |
 | Defender triage | `https://sentinel.microsoft.com/mcp/triage` | `7b7b3966-1961-47b5-b080-43ca5482e21c/MCP.Read.All` |
 
-For each message or notification, the agent exchanges a user token for each server, loads its tools through `MultiServerMCPClient`, and recreates the LangChain agent with those tools. It also provides a current-time tool, trims persisted conversation history to approximately 12,000 tokens, and keeps conversation checkpoints in memory.
+For each message or notification, the agent exchanges a user token for each server, loads its tools through `MultiServerMCPClient`, and recreates the LangChain agent with those tools. It also provides current-time and Foundry web-search tools, trims persisted conversation history to approximately 12,000 tokens, and keeps conversation checkpoints in memory.
+
+Install the Foundry tools integration with the `tools` extra when packaging this source-only sample:
+
+```sh
+pip install -U "langchain-azure-ai[tools]"
+```
+
+`WebSearchTool` is a server-side built-in and requires `FOUNDRY_MODEL` to identify an OpenAI model deployed in the configured Microsoft Foundry project.
 
 ## Files
 
@@ -20,7 +28,7 @@ For each message or notification, the agent exchanges a user token for each serv
 
 1. `server.py` initializes Agent 365 observability and starts `AgentHost`.
 2. The host loads Microsoft Agents SDK connection configuration from environment variables and exposes `/api/messages` and `/api/health` on port `3978` by default.
-3. On application startup, the host creates `LangChainAgent` with the Foundry model and current-time tool.
+3. On application startup, the host creates `LangChainAgent` with the Foundry model, current-time tool, and Foundry web-search tool.
 4. For each authenticated turn, the host exchanges an observability token.
 5. The agent exchanges delegated tokens for both Sentinel MCP servers and loads their tools.
 6. The message or notification runs in a conversation-specific in-memory checkpoint thread.

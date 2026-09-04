@@ -55,9 +55,6 @@ properties:
             value: "${FOUNDRY_MODEL}"
           - name: UAMI_CLIENT_ID
             value: "${UAMI_CLIENT_ID}"
-          # Set to AGENTIC to enable token exchange for Graph, MCP, and observability (Unset for playground mode)
-          - name: AUTH_HANDLER_NAME
-            value: "AGENTIC"
           # Use agentic authentication for MCP (optional, defaults to true)
           # - name: USE_AGENTIC_AUTH
           #   value: "true"
@@ -79,22 +76,8 @@ properties:
             value: "${BLUEPRINT_CLIENT_ID}"
           - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__FEDERATEDCLIENTID
             value: "${UAMI_CLIENT_ID}"
-          - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__SCOPES
-            value: "https://graph.microsoft.com/.default"
           - name: CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID
             value: "${TENANT_ID}"
-          # Connections map configuration to set SERVICE_CONNECTION as default
-          - name: CONNECTIONSMAP__0__SERVICEURL
-            value: "*"
-          - name: CONNECTIONSMAP__0__CONNECTION
-            value: "SERVICE_CONNECTION"
-          # Agent application user authorization settings
-          - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__TYPE
-            value: "AgenticUserAuthorization"
-          - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__SCOPES
-            value: "ea9ffc3e-8a23-4a7d-836d-234d7c7565c1/.default"
-          - name: AGENTAPPLICATION__USERAUTHORIZATION__HANDLERS__AGENTIC__SETTINGS__ALT_BLUEPRINT_NAME
-            value: "SERVICE_CONNECTION"
           # Agent identity and user IDs
           - name: AGENTIC_INSTANCE_ID
             value: "${AGENTIC_INSTANCE_ID}"
