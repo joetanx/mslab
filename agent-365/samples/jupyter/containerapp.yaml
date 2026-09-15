@@ -55,13 +55,6 @@ properties:
             value: "${FOUNDRY_MODEL}"
           - name: UAMI_CLIENT_ID
             value: "${UAMI_CLIENT_ID}"
-          # Use agentic authentication for MCP (optional, defaults to true)
-          # - name: USE_AGENTIC_AUTH
-          #   value: "true"
-          # Set to production for a365 tooling to discovery mcp tools
-          # If unset or "development", a365 tooling attempts to read from ToolingManifest.json
-          - name: PYTHON_ENVIRONMENT
-            value: "production"
           # Required for observability SDK
           - name: ENABLE_OBSERVABILITY
             value: "true"
