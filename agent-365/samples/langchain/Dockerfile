@@ -32,8 +32,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     HOST=0.0.0.0 \
     PORT=3978
 
-# Create a non-root system user for security
-RUN groupadd --system app && useradd --system --gid app --home /app app
+# Create a non-root system user and its writable home directory
+RUN groupadd --system app \
+    && useradd --system --gid app --home /app app \
+    && install --directory --owner=app --group=app /app
 
 WORKDIR /app
 
@@ -41,8 +43,8 @@ WORKDIR /app
 # 2. Automatically change ownership to the non-root user
 COPY --from=builder --chown=app:app /opt/venv /opt/venv
 
-# Copy application code (keep commented if mounting from volume)
-# COPY --chown=app:app . .
+# Copy application code
+COPY --chown=app:app app/ /app/
 
 # Switch away from root to the non-root application user
 USER app

@@ -17,16 +17,9 @@ properties:
       targetPort: 3978
       transport: auto
   template:
-    volumes:
-      - name: ${APP_NAME}-vol
-        storageType: AzureFile
-        storageName: ${APP_NAME}
     containers:
       - name: ${APP_NAME}
         image: ${ACR_NAME}.azurecr.io/${APP_NAME}:latest
-        volumeMounts:
-          - volumeName: ${APP_NAME}-vol
-            mountPath: /app
         resources:
           cpu: 0.5
           memory: 1Gi

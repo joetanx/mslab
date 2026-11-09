@@ -26,7 +26,7 @@ properties:
   template:
     volumes:
       - name: ${APP_NAME}-vol
-        storageType: AzureFile
+        storageType: NfsAzureFile
         storageName: ${APP_NAME}
     containers:
       - name: ${APP_NAME}
