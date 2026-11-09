@@ -27,7 +27,7 @@ dependencies = [
     "microsoft_agents_a365_notifications",
 
     # Observability using Microsoft Opentelemetry
-    "microsoft-opentelemetry"
+    "microsoft-opentelemetry",
 
     # Microsoft Graph SDK
     "azure-core",
