@@ -10,6 +10,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /build
 
+# Install build dependencies for compiling Python packages
+RUN apt update && apt install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
+
 # Create a clean virtual environment
 RUN python -m venv /opt/venv
 # Update PATH so subsequent pip commands automatically use the virtual environment
